@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ludum Dare 59</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Three.js render target -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- ===================== LOADING SCREEN ===================== -->
+  <div id="screen-loading" class="screen active">
+    <div class="loading-content">
+      <div class="title-lockup">
+        <p class="game-eyebrow">Ludum Dare 59</p>
+        <h1 class="game-title">GAME TITLE</h1>
+      </div>
+      <div class="loading-bar-track">
+        <div class="loading-bar-fill" id="loading-bar-fill"></div>
+      </div>
+      <p class="loading-label" id="loading-label">Initializing...</p>
+    </div>
+  </div>
+
+  <!-- ===================== MENU SCREEN ===================== -->
+  <div id="screen-menu" class="screen">
+    <div class="menu-content">
+      <div class="title-lockup">
+        <p class="game-eyebrow">Ludum Dare 59</p>
+        <h1 class="game-title">GAME TITLE</h1>
+        <p class="game-tagline">A short tagline goes here</p>
+      </div>
+      <nav class="menu-nav">
+        <button class="btn btn-primary" id="btn-start">Start Game</button>
+        <button class="btn btn-secondary" id="btn-menu-settings">Settings</button>
+      </nav>
+      <footer class="menu-footer">
+        <p>Made in 72 hours for Ludum Dare 59</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== GAME SCREEN ===================== -->
+  <div id="screen-game" class="screen">
+    <div id="game-hud">
+      <div class="hud-top-right">
+        <button class="btn btn-hud" id="btn-game-settings">Settings</button>
+        <button class="btn btn-hud" id="btn-main-menu">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SETTINGS MODAL ===================== -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-labelledby="settings-title">
+      <div class="modal-header">
+        <h2 id="settings-title">Settings</h2>
+        <button class="btn btn-close" id="btn-close-settings" aria-label="Close settings">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="setting-section-label">Audio</div>
+
+        <div class="setting-row">
+          <label for="slider-master">Master Volume</label>
+          <div class="slider-group">
+            <input type="range" id="slider-master" class="volume-slider" data-channel="master" min="0" max="100" value="80">
+            <span class="slider-readout" id="readout-master">80%</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="slider-sfx">SFX Volume</label>
+          <div class="slider-group">
+            <input type="range" id="slider-sfx" class="volume-slider" data-channel="sfx" min="0" max="100" value="100">
+            <span class="slider-readout" id="readout-sfx">100%</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="slider-music">Music Volume</label>
+          <div class="slider-group">
+            <input type="range" id="slider-music" class="volume-slider" data-channel="music" min="0" max="100" value="70">
+            <span class="slider-readout" id="readout-music">70%</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="slider-ambient">Ambient Volume</label>
+          <div class="slider-group">
+            <input type="range" id="slider-ambient" class="volume-slider" data-channel="ambient" min="0" max="100" value="60">
+            <span class="slider-readout" id="readout-ambient">60%</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btn-save-settings">Save</button>
+        <button class="btn btn-ghost" id="btn-cancel-settings">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
