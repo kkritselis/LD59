@@ -39,6 +39,7 @@ async function main() {
 
   await loading.run();
   await screens.show('menu');
+  menu.start();
 
   // ------------------------------------------------------------------
   // Menu wiring
@@ -47,6 +48,7 @@ async function main() {
   menu.onStartGame = async () => {
     // Initialize audio on first user gesture
     audio.init();
+    menu.stop();
 
     if (!game) {
       game = new GameScreen(audio);
@@ -55,6 +57,7 @@ async function main() {
 
       game.onMainMenu = async () => {
         await screens.show('menu');
+        menu.start();
       };
     }
 

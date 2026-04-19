@@ -232,6 +232,7 @@ export class GameScreen {
     this._shipBank     = 0;     // current roll angle for banking visual
     this._shipY        = 1.0;   // smoothed world-Y, lerped toward terrain + hover
     this._shipPitch    = 0;     // nose-up/down tilt in radians, driven by climb rate
+    this._landFactor   = 1.0;   // 1 = fully landed on platform, 0 = fully airborne
 
     // Base structures
     this._hangar       = null;
@@ -329,34 +330,50 @@ export class GameScreen {
       this._prevOffsetY = off.y;
     }
 
+    // ── Landing / takeoff autopilot ───────────────────────────────────────
+    // The hangar sits at UV (0.5, 0.5) which is world-centre (0,0) when offset=(0,0).
+    // The ship is always at world XZ (0,0), so distance to platform = offset magnitude.
+    const HANGAR_RAISE  = 0.05;
+    const DOCK_RADIUS   = 0.25;   // fully landed inside this offset distance
+    const LAUNCH_RADIUS = 0.70;   // fully airborne beyond this distance
+    const platformY     = sampleHeight(0.5, 0.5) * this._HEIGHT_SCALE + HANGAR_RAISE;
+    const offsetDist    = off.length();
+    const landTarget    = 1.0 - THREE.MathUtils.clamp(
+      (offsetDist - DOCK_RADIUS) / (LAUNCH_RADIUS - DOCK_RADIUS), 0, 1
+    );
+    // Landing is faster than takeoff so the descent feels responsive.
+    const landRate = landTarget > this._landFactor ? 5.0 : 3.0;
+    this._landFactor = THREE.MathUtils.lerp(this._landFactor, landTarget, Math.min(1, delta * landRate));
+    const airborne = 1.0 - this._landFactor;  // convenience: 0 = landed, 1 = flying
+
     // ── Ship model: heading rotation + banking roll ────────────────────────
     if (this._ship) {
       // Math.PI - angle so that D (increasing angle) rotates the nose clockwise (right first).
       this._ship.rotation.y = Math.PI - this._shipAngle;
 
-      // Smoothly bank into turns; lerp factor tuned so the roll settles in ~0.25 s
-      const targetBank = turning * 0.4;
+      // Suppress bank and pitch while on the platform.
+      const targetBank = turning * 0.4 * airborne;
       this._shipBank = THREE.MathUtils.lerp(this._shipBank, targetBank, Math.min(1, delta * 6));
       this._ship.rotation.z = this._shipBank;
 
-      // Keep ship floating above the terrain at the world-centre UV.
-      // Lerp the Y position so the ship rises and falls smoothly over ridges.
-      const uScale   = this._uniforms.uScale.value;
-      const groundY  = sampleHeight(
+      // Y: blend between platform surface (landed) and terrain-hover (airborne).
+      const uScale  = this._uniforms.uScale.value;
+      const groundY = sampleHeight(
         0.5 + off.x / uScale,
         0.5 + off.y / uScale
       ) * this._HEIGHT_SCALE;
-      const targetY  = groundY + this.SHIP_HOVER;
-      // Rise quickly so the ship never clips into a peak; settle slowly for a floaty feel.
-      const lerpRate = targetY > this._shipY ? 6.0 : 3.0;
-      // Capture the gap before lerping — this is the instantaneous climb/sink demand.
+      const flyingTargetY = groundY + this.SHIP_HOVER;
+      const targetY       = THREE.MathUtils.lerp(platformY, flyingTargetY, airborne);
+
+      // Rise quickly to avoid clipping peaks; settle slowly for a floaty feel.
+      // While landing (landFactor rising), use the fast rate so the descent is visible.
+      const lerpRate = (targetY > this._shipY || this._landFactor > 0.15) ? 6.0 : 3.0;
       const climbErr = targetY - this._shipY;
       this._shipY    = THREE.MathUtils.lerp(this._shipY, targetY, Math.min(1, delta * lerpRate));
       this._ship.position.y = this._shipY;
 
-      // Pitch nose up when climbing, down when sinking.
-      // climbErr is in world units; scale to ±~0.45 rad (±25°) max.
-      const targetPitch = THREE.MathUtils.clamp(climbErr * -2.5, -0.45, 0.45);
+      // Pitch: nose up/down with climb rate, but level on the ground.
+      const targetPitch = THREE.MathUtils.clamp(climbErr * -2.5, -0.45, 0.45) * airborne;
       this._shipPitch   = THREE.MathUtils.lerp(this._shipPitch, targetPitch, Math.min(1, delta * 4));
       this._ship.rotation.x = this._shipPitch;
     }
@@ -364,9 +381,7 @@ export class GameScreen {
     // Hangar is pinned to heightmap UV (0.5, 0.5) — its world XZ slides
     // opposite to the offset so it stays locked to the landscape.
     if (this._hangar) {
-      const HANGAR_RAISE = 0.05;
-      const groundY = sampleHeight(0.5, 0.5) * this._HEIGHT_SCALE;
-      this._hangar.position.set(-off.x, groundY + HANGAR_RAISE, off.y);
+      this._hangar.position.set(-off.x, platformY, off.y);
 
       // Hide the hangar once it scrolls beyond the terrain tile boundary (half-size = 2).
       const TERRAIN_HALF = 1.9;
@@ -475,8 +490,8 @@ export class GameScreen {
     atlas.colorSpace = THREE.SRGBColorSpace;
     const mat = new THREE.MeshPhongMaterial({
       map:       atlas,
-      specular:  0x223344,
-      shininess: 40,
+      specular:  0x111122,
+      shininess: 25,
     });
 
     const fbxLoader = new FBXLoader();
@@ -484,9 +499,15 @@ export class GameScreen {
     fbxLoader.load(
       'assets/obj/SM_Bld_HangarPlatform_01.fbx',
       (obj) => {
+        // Strip any lights baked into the FBX — they toggle with visibility
+        // and cause the whole scene to flicker when the hangar scrolls off-screen.
+        const embedded = [];
         obj.traverse(child => {
-          if (child.isMesh) child.material = mat;
+          if (child.isLight) embedded.push(child);
+          if (child.isMesh)  child.material = mat;
         });
+        embedded.forEach(l => l.parent?.remove(l));
+
         const groundY = sampleHeight(0.5, 0.5) * this._HEIGHT_SCALE;
         obj.position.set(0, groundY + 0.05, 0);
         obj.scale.setScalar(OBJ_SCALE);
@@ -499,10 +520,11 @@ export class GameScreen {
   }
 
   _loadShip() {
-    // Ambient + directional lights for all OBJ models
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    // Ambient + directional lights for all OBJ/FBX models.
+    // Combined intensity kept at ~1.0 so fully-lit surfaces don't saturate to white.
+    const ambient = new THREE.AmbientLight(0xffeedd, 0.35);
     this.scene.add(ambient);
-    const sun = new THREE.DirectionalLight(0xfff4e0, 1.2);
+    const sun = new THREE.DirectionalLight(0xfff4e0, 0.65);
     sun.position.set(-4, 8, 4);
     this.scene.add(sun);
 
@@ -510,8 +532,8 @@ export class GameScreen {
     atlas.colorSpace = THREE.SRGBColorSpace;
     const shipMat = new THREE.MeshPhongMaterial({
       map:       atlas,
-      specular:  0x223344,
-      shininess: 40,
+      specular:  0x111122,
+      shininess: 25,
     });
 
     const fbxLoader = new FBXLoader();
@@ -519,9 +541,14 @@ export class GameScreen {
     fbxLoader.load(
       'assets/obj/SM_Ship_Fighter_01.fbx',
       (obj) => {
+        // Strip any lights baked into the FBX (same reason as hangar).
+        const embedded = [];
         obj.traverse(child => {
-          if (child.isMesh) child.material = shipMat;
+          if (child.isLight) embedded.push(child);
+          if (child.isMesh)  child.material = shipMat;
         });
+        embedded.forEach(l => l.parent?.remove(l));
+
         const groundY = sampleHeight(0.5, 0.5) * this._HEIGHT_SCALE;
         obj.position.set(0, groundY + this.SHIP_HOVER, 0);
         obj.scale.setScalar(OBJ_SCALE);
