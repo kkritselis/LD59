@@ -164,9 +164,6 @@ html, body {
   width: 240px;
 }
 
-.menu-nav .btn {
-  width: 100%;
-}
 
 .menu-footer {
   position: fixed;
@@ -194,6 +191,25 @@ html, body {
   pointer-events: none;
 }
 
+.hud-top-left {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.hud-stat {
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 13px;
+  color: #e8d0b0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
 .hud-top-right {
   position: absolute;
   top: 16px;
@@ -201,6 +217,19 @@ html, body {
   display: flex;
   gap: 8px;
   pointer-events: all;
+}
+
+#flow-canvas {
+  display: block;
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 288px;
+  height: 288px;
+  border: 1px solid rgba(255, 220, 150, 0.35);
+  border-radius: 4px;
+  image-rendering: pixelated;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -234,10 +263,9 @@ html, body {
 }
 
 .game-tagline {
-  font-size: 14px;
+  font-size: 20px;
   color: var(--color-text-muted);
   font-style: italic;
-  margin-top: 4px;
 }
 
 /* ============================================================
@@ -405,6 +433,171 @@ html, body {
   gap: 12px;
   padding: 16px 24px 20px;
   border-top: 1px solid var(--color-border);
+}
+
+/* Dock shop — top center, no full-screen dim/blur so the flow radar stays readable */
+/* Must win over `display: flex` below when `.hidden` is present (otherwise the shop
+   stays on-screen and "Close" appears broken). */
+#dock-shop-modal.dock-shop-overlay.hidden {
+  display: none !important;
+}
+
+#dock-shop-modal.dock-shop-overlay {
+  position: fixed;
+  inset: auto;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, 96vw);
+  max-height: min(48vh, 400px);
+  z-index: var(--z-modal);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  /* Panel is narrow — capture clicks on the card only; rest of viewport stays live. */
+  pointer-events: auto;
+  animation: none;
+}
+
+#dock-shop-modal.dock-shop-overlay .modal {
+  width: 100%;
+  max-height: inherit;
+  overflow: auto;
+}
+
+.dock-shop-modal {
+  width: 100%;
+}
+
+.dock-shop-body {
+  gap: 12px;
+}
+
+.dock-shop-hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.dock-shop-resources {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.dock-shop-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+button.dock-action {
+  display: block;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+}
+
+.dock-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+button.dock-action:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.dock-transmission-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 4px;
+}
+
+.dock-transmission-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.dock-transmission-count {
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+#btn-dock-transmission-add {
+  margin-left: auto;
+}
+
+/* Win state — full-screen over game after distress call */
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 7, 15, 0.72);
+  pointer-events: auto;
+}
+
+.win-overlay.hidden {
+  display: none !important;
+}
+
+.win-card {
+  width: min(400px, 90vw);
+  padding: 28px 28px 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+
+.win-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  margin-bottom: 10px;
+}
+
+.win-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.win-body {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+#btn-dock-distress {
+  margin-top: 6px;
 }
 
 /* ============================================================

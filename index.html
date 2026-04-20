@@ -25,7 +25,7 @@
     <div class="loading-content">
       <div class="title-lockup">
         <p class="game-eyebrow">Ludum Dare 59</p>
-        <h1 class="game-title">Signal's Edge</h1>
+        <img src="assets/textures/logo.png" alt="Signal's Edge" class="game-title">
       </div>
       <div class="loading-bar-track">
         <div class="loading-bar-fill" id="loading-bar-fill"></div>
@@ -40,7 +40,7 @@
     <div class="menu-content">
       <div class="title-lockup">
         <p class="game-eyebrow">Ludum Dare 59</p>
-        <h1 class="game-title">Signal's Edge</h1>
+        <img src="assets/textures/logo.png" alt="Signal's Edge" class="game-title">
         <p class="game-tagline">They came from every direction. You came from somewhere worse.</p>
       </div>
       <nav class="menu-nav">
@@ -56,9 +56,51 @@
   <!-- ===================== GAME SCREEN ===================== -->
   <div id="screen-game" class="screen">
     <div id="game-hud">
+      <div class="hud-top-left">
+        <div class="hud-stat" id="hud-hp">Base: 25 / 25</div>
+        <div class="hud-stat" id="hud-wave">Wave: 0</div>
+        <div class="hud-stat" id="hud-resources">Resources: 0</div>
+      </div>
       <div class="hud-top-right">
         <button class="btn btn-hud" id="btn-game-settings">Settings</button>
         <button class="btn btn-hud" id="btn-main-menu">Menu</button>
+      </div>
+      <canvas id="flow-canvas" width="288" height="288"></canvas>
+    </div>
+
+    <!-- Dock shop — opens when landed on base; game keeps running -->
+    <div id="dock-shop-modal" class="modal-overlay dock-shop-overlay hidden" aria-hidden="true">
+      <div class="modal dock-shop-modal" role="dialog" aria-labelledby="dock-shop-title">
+        <div class="modal-header">
+          <h2 id="dock-shop-title">Base services</h2>
+          <button type="button" class="btn btn-close" id="btn-dock-close" aria-label="Close">&#x2715;</button>
+        </div>
+        <div class="modal-body dock-shop-body">
+          <p class="dock-shop-hint">Spend resources while docked. Close to resume flight.</p>
+          <p class="dock-shop-resources" id="dock-shop-resources-readout">Resources: 0</p>
+          <div class="dock-shop-actions">
+            <button type="button" class="btn btn-secondary dock-action" id="btn-dock-repair">Repair base (+1 HP) — 1 <span id="dock-repair-hp">(25/25)</span></button>
+            <button type="button" class="btn btn-secondary dock-action" id="btn-dock-tower">Defense tower — 25 <span class="dock-sub">(then press T in flight to place)</span></button>
+            <div class="dock-transmission-row">
+              <span class="dock-transmission-label">Transmission array</span>
+              <span id="dock-transmission-readout" class="dock-transmission-count">(0/100)</span>
+              <button type="button" class="btn btn-secondary dock-action" id="btn-dock-transmission-add">+1 (1 resource)</button>
+            </div>
+            <button type="button" class="btn btn-secondary dock-action" id="btn-dock-weapon">
+              Upgrade weapons (+10% range &amp; fire rate) — <span id="dock-weapon-cost">15</span>
+            </button>
+            <button type="button" class="btn btn-primary dock-action hidden" id="btn-dock-distress">Send Distress Call</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="win-overlay" class="win-overlay hidden" aria-hidden="true">
+      <div class="win-card">
+        <p class="win-eyebrow">Transmission online</p>
+        <h2 class="win-title">Distress call sent</h2>
+        <p class="win-body">Your beacon reached the fleet. Help is inbound.</p>
+        <button type="button" class="btn btn-primary" id="btn-win-main-menu">Main menu</button>
       </div>
     </div>
   </div>

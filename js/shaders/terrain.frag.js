@@ -17,10 +17,10 @@ export const terrainFragGLSL = /* glsl */`
 #define SHORE_COLOR   vec3(0.38, 0.12, 0.10)
 
 #define SUN_DIR       normalize(vec3(-0.6, 0.5, 0.3))
-#define SUN_COLOR     (vec3(1.0, 0.85, 0.70) * 2.2)
-#define AMBIENT_COLOR (vec3(0.4,  0.15, 0.10) * 0.15)
-#define FOG_COLOR     vec3(0.52, 0.28, 0.20)
-#define FOG_DENSITY   0.18
+#define SUN_COLOR     (vec3(1.0, 0.78, 0.62) * 1.95)
+#define AMBIENT_COLOR (vec3(0.38, 0.12, 0.09) * 0.11)
+#define FOG_COLOR     vec3(0.38, 0.16, 0.10)
+#define FOG_DENSITY   0.32
 
 uniform float uTime;
 
@@ -88,18 +88,22 @@ void main() {
 
     lit *= mix(1.0, occlusion, 0.4);
 
-    // --- Fog ---
-    float dist   = length(vWorldPos - cameraPosition);
-    float fogAmt = 1.0 - exp(-dist * dist * FOG_DENSITY * 0.05);
-    lit = mix(lit, FOG_COLOR, fogAmt);
+    // --- Fog (distance + wind-scrolled dust variation) ---
+    float dist = length(vWorldPos - cameraPosition);
+    vec2  gustUv = vWorldPos.xz * 0.22 + vec2(uTime * 1.15, uTime * 0.22);
+    float gust   = noised(gustUv).x * 0.5 + 0.5;
+    float dust   = mix(0.78, 1.28, gust);
+    float fogAmt = 1.0 - exp(-dist * dist * FOG_DENSITY * 0.055 * dust);
+    vec3  fogCol = mix(FOG_COLOR, FOG_COLOR * vec3(1.12, 0.94, 0.82), gust * 0.35);
+    lit = mix(lit, fogCol, fogAmt);
 
     // --- Tonemap + gamma ---
     lit = (lit * (2.51 * lit + 0.03)) / (lit * (2.43 * lit + 0.59) + 0.14);
     lit = pow(clamp(lit, 0.0, 1.0), vec3(1.0 / 2.2));
 
-    // Saturation boost — pull colors away from grey
+    // Slight desaturation — dusty air, flatter palette
     float luma = dot(lit, vec3(0.299, 0.587, 0.114));
-    lit = mix(vec3(luma), lit, 1.15);
+    lit = mix(vec3(luma), lit, 0.92);
     lit = clamp(lit, 0.0, 1.0);
 
     gl_FragColor = vec4(lit, 1.0);

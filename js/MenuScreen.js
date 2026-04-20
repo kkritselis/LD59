@@ -5,8 +5,8 @@
  * on #menu-bg-canvas while the menu is visible.
  *
  * Ported from a Shadertoy volumetric planet shader.
- * Both iChannel0 and iChannel1 texture lookups have been replaced with
- * procedural 2D value noise — no image assets required.
+ * Uses `assets/textures/iChannel0.png` and `iChannel1.jpg` for the original
+ * `texture(iChannel0, …)` / `texture(iChannel1, …)` lookups.
  */
 
 import * as THREE from 'three';
@@ -24,23 +24,8 @@ const FRAG = /* glsl */`
   precision mediump float;
   uniform float uTime;
   uniform vec2  uResolution;
-
-  // ── Procedural noise (replaces iChannel0 and iChannel1) ───────────────
-  float hash21(vec2 p) {
-    p = fract(p * vec2(127.1, 311.7));
-    p += dot(p, p + 19.19);
-    return fract(p.x * p.y);
-  }
-  float noise2D(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(
-      mix(hash21(i),              hash21(i + vec2(1.0, 0.0)), u.x),
-      mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x),
-      u.y
-    );
-  }
+  uniform sampler2D iChannel0;
+  uniform sampler2D iChannel1;
 
   // ── Planet / atmosphere params ─────────────────────────────────────────
   const float sphsize     = 0.7;
@@ -78,8 +63,8 @@ const FRAG = /* glsl */`
 
     vec3 dir  = vec3(uv, 1.0);
 
-    // Ray origin — slight procedural dither for anti-banding
-    float dither = noise2D(uv * 80.0 + uTime * 2.0) * stepsize;
+    // Ray origin — dither from iChannel0 (matches Shadertoy)
+    float dither = texture2D(iChannel0, uv * 0.5 + vec2(uTime, 0.0)).x * stepsize;
     vec3  from   = vec3(0.0, 0.0, -2.0 + dither);
 
     float v = 0.0, l = -0.0001;
@@ -87,14 +72,14 @@ const FRAG = /* glsl */`
 
     for (float r = 10.0; r < steps; r++) {
       vec3  p  = from + r * dir * stepsize;
-      // Hot-air displacement (replaces iChannel0 texture)
-      float tx = noise2D(uv * 50.0 + vec2(t * 5.0, 0.0)) * displacement;
+      float tx = texture2D(iChannel0, uv * 0.2 + vec2(t, 0.0)).x * displacement;
       if (length(p) - sphsize - tx > 0.0) {
         v += min(50.0, wind(p)) * max(0.0, 1.0 - r * fade);
       } else if (l < 0.0) {
-        // Planet surface shading (replaces iChannel1 texture)
-        float surf = noise2D(uv * vec2(120.0, 60.0) * (1.0 + p.z * 0.5)
-                             + vec2(tx * 10.0 + t * 2.0, 0.0));
+        float surf = texture2D(
+          iChannel1,
+          uv * vec2(2.0, 1.0) * (1.0 + p.z * 0.5) + vec2(tx + t * 0.5, 0.0)
+        ).x;
         l = pow(max(0.53, dot(normalize(p), normalize(vec3(-1.0, 0.5, -0.3)))), 4.0)
             * (0.5 + surf * 2.0);
       }
@@ -155,6 +140,20 @@ export class MenuScreen {
 
     this._clock = new THREE.Clock(false);
 
+    const placeholderData = new Uint8Array([128, 128, 128, 255]);
+    const placeholderTex = new THREE.DataTexture(placeholderData, 1, 1);
+    placeholderTex.colorSpace = THREE.NoColorSpace;
+    placeholderTex.needsUpdate = true;
+
+    const configureChannel = (tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.colorSpace = THREE.NoColorSpace;
+      tex.flipY = false;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+    };
+
     // Use the actual framebuffer dimensions (CSS size × DPR) so the shader
     // UV calculation matches the real pixel grid regardless of device pixel ratio.
     this._uniforms = {
@@ -163,7 +162,29 @@ export class MenuScreen {
         canvas.width,   // set by setSize × pixelRatio
         canvas.height,
       )},
+      iChannel0:   { value: placeholderTex },
+      iChannel1:   { value: placeholderTex },
     };
+
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      'assets/textures/iChannel0.png',
+      (tex) => {
+        configureChannel(tex);
+        this._uniforms.iChannel0.value = tex;
+      },
+      undefined,
+      (err) => console.error('MenuScreen: failed to load iChannel0.png', err),
+    );
+    loader.load(
+      'assets/textures/iChannel1.jpg',
+      (tex) => {
+        configureChannel(tex);
+        this._uniforms.iChannel1.value = tex;
+      },
+      undefined,
+      (err) => console.error('MenuScreen: failed to load iChannel1.jpg', err),
+    );
 
     // Full-screen triangle covers the viewport without edge gaps
     const geo = new THREE.BufferGeometry();
