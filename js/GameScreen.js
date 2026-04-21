@@ -41,6 +41,14 @@ const TOWER_HEIGHT          = 0.21;
 const TOWER_DROP_SEC        = 0.5;
 /** World +X offset from hangar root so the mast sits beside the pad, not on center. */
 const TRANSMISSION_PAD_OFFSET_X = 0.38;
+/** Transmission mast (`tower1.fbx`) target world height before funding scale. */
+const TRANSMISSION_VISUAL_HEIGHT = 1.55;
+/** Defense tower base / weapon pieces — world heights after OBJ_SCALE fit (single scale on clones). */
+const DEFENSE_BASE_TARGET_HEIGHT   = 0.04;
+const DEFENSE_WEAPON_TARGET_HEIGHT = 0.02;
+/** Nudge root Y so the base clears terrain / z-fight after placement. */
+const DEFENSE_TOWER_GROUND_BIAS = 0.004;
+const TURRET_TURN_RATE             = 10;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cross-section geometry builder
@@ -182,10 +190,10 @@ export class GameScreen {
 
     // HUD element references (cached once)
     this._hudHP        = document.getElementById('hud-hp');
-    this._hudWave      = document.getElementById('hud-wave');
     this._hudResources = document.getElementById('hud-resources');
 
     // Radar / flow field overlay — on by default, F key toggles it
+    this._flowRadarHud  = document.getElementById('flow-radar-hud');
     this._flowCanvas    = document.getElementById('flow-canvas');
     this._showFlowField = true;
 
@@ -207,9 +215,22 @@ export class GameScreen {
     this._transmissionMesh   = null;
     this._distressSent       = false;
     this._winOverlayEl       = document.getElementById('win-overlay');
+    this._introModalEl      = document.getElementById('game-intro-modal');
+    /** When true, `update()` skips simulation (briefing modal). */
+    this._introBlocking     = false;
 
-    /** @type {{ uvx: number, uvy: number, mesh: THREE.Mesh, state: string, dropT: number, fireTimer: number }[]} */
+    /** @type {{ uvx: number, uvy: number, mesh: THREE.Object3D, state: string, dropT: number, fireTimer: number, useFbx?: boolean, weaponPivot?: THREE.Object3D, beamLocalY?: number }[]} */
     this._defenseTowers = [];
+
+    /** FBX templates (never added to scene). */
+    this._transmissionFbxTemplate = null;
+    this._defenseBaseTemplate     = null;
+    this._defenseWeaponTemplate   = null;
+    /** World Y from base root to top surface (for weapon pivot). */
+    this._defenseBaseTopY         = 0.12;
+    /** Local Y on weapon pivot toward barrel for beam origin. */
+    this._defenseWeaponBeamLocalY = 0.06;
+    this._fbxSharedMat            = null;
 
     this._initRenderer();
     this._initScene();
@@ -227,11 +248,19 @@ export class GameScreen {
     this._running = true;
     this.clock.start();
     if (!this._dustPoints && this.scene) this._addDustMotes();
+    this._showGameIntro();
     this._loop();
+  }
+
+  /** True between `start()` and `stop()`. */
+  isRunning() {
+    return this._running;
   }
 
   stop() {
     this._running = false;
+    this.audioManager?.stopBackgroundLoop();
+    this._hideGameIntro();
     if (this._animFrameId) {
       cancelAnimationFrame(this._animFrameId);
       this._animFrameId = null;
@@ -283,14 +312,14 @@ export class GameScreen {
   _clearBuildables() {
     for (const tw of this._defenseTowers) {
       this.scene?.remove(tw.mesh);
-      tw.mesh.geometry.dispose();
-      tw.mesh.material.dispose();
+      if (!tw.useFbx && tw.mesh.isMesh) {
+        tw.mesh.geometry?.dispose();
+        tw.mesh.material?.dispose();
+      }
     }
     this._defenseTowers = [];
     if (this._transmissionMesh) {
       this.scene?.remove(this._transmissionMesh);
-      this._transmissionMesh.geometry.dispose();
-      this._transmissionMesh.material.dispose();
       this._transmissionMesh = null;
     }
   }
@@ -307,8 +336,45 @@ export class GameScreen {
     return FIRE_RATE / this._weaponMult;
   }
 
+  /** Snap ship to pad center and full landing so the dock UI matches the resting pose. */
+  _snapShipToPlatform() {
+    const HANGAR_RAISE = 0.05;
+    const platformY = sampleHeight(0.5, 0.5) * this._HEIGHT_SCALE + HANGAR_RAISE;
+
+    this._offset.set(0, 0);
+    this._velocity.set(0, 0);
+    this._landFactor = 1.0;
+    this._shipY = platformY;
+    this._shipAngle = 0;
+    this._shipBank = 0;
+    this._shipPitch = 0;
+
+    if (this._ship) {
+      this._ship.position.y = this._shipY;
+      this._ship.rotation.y = Math.PI - this._shipAngle;
+      this._ship.rotation.z = 0;
+      this._ship.rotation.x = 0;
+    }
+
+    if (this._uniforms?.uOffset) this._uniforms.uOffset.value.copy(this._offset);
+
+    if (this._csMesh && this._csBandColors) {
+      this._csMesh.geometry.dispose();
+      this._csMesh.geometry = _buildCrossSection(
+        this._HEIGHT_SCALE,
+        this._uniforms.uScale.value,
+        this._offset.x,
+        this._offset.y,
+        this._csBandColors,
+      );
+      this._prevOffsetX = this._offset.x;
+      this._prevOffsetY = this._offset.y;
+    }
+  }
+
   _openDockShop() {
     if (this._dockModalOpen || !this._dockModalEl || this._baseHP <= 0) return;
+    this._snapShipToPlatform();
     this._dockModalOpen = true;
     this._dockModalEl.classList.remove('hidden');
     this._dockModalEl.setAttribute('aria-hidden', 'false');
@@ -391,20 +457,21 @@ export class GameScreen {
     this._syncResourceHud();
   }
 
-  /** Upright mast; height scales with `_transmissionProgress` / TRANSMISSION_GOAL. */
+  /** Transmission mast from `tower1.fbx`; uniform scale grows with funding. */
   _spawnTransmissionMesh() {
     if (this._transmissionMesh || !this.scene) return;
-    const h = 1.6;
-    const r0 = 0.1 / 3;
-    const r1 = 0.12 / 3;
-    const geo = new THREE.CylinderGeometry(r0, r1, h, 18, 1, false);
-    geo.translate(0, h * 0.5, 0);
-    const mat = new THREE.MeshPhongMaterial({
-      color:     0x6a5a48,
-      specular:  0x222222,
-      shininess: 30,
+    if (!this._transmissionFbxTemplate) return;
+
+    const mesh = this._transmissionFbxTemplate.clone(true);
+    const embedded = [];
+    mesh.traverse((ch) => {
+      if (ch.isLight) embedded.push(ch);
+      if (ch.isMesh) ch.material = this._fbxSharedMat;
     });
-    const mesh = new THREE.Mesh(geo, mat);
+    embedded.forEach((l) => l.parent?.remove(l));
+
+    const s0 = mesh.scale.x;
+    mesh.userData.transmissionScale0 = s0;
     this._syncTransmissionTowerScale(mesh);
     this._transmissionMesh = mesh;
     this.scene.add(mesh);
@@ -413,7 +480,8 @@ export class GameScreen {
   _syncTransmissionTowerScale(mesh = this._transmissionMesh) {
     if (!mesh) return;
     const t = Math.max(0.008, this._transmissionProgress / TRANSMISSION_GOAL);
-    mesh.scale.set(1, t, 1);
+    const s0 = mesh.userData.transmissionScale0 ?? mesh.scale.x;
+    mesh.scale.setScalar(s0 * t);
   }
 
   _purchaseWeapon() {
@@ -426,36 +494,78 @@ export class GameScreen {
   }
 
   _tryPlaceTower() {
-    if (!this._pendingTowerPlace || this._dockModalOpen || !this._ship) return;
-    const airborne = 1.0 - this._landFactor;
-    if (airborne < 0.55) return;
+    if (!this._pendingTowerPlace || !this._ship) return;
+    if (this._dockModalOpen) return;
 
+    const airborne = 1.0 - this._landFactor;
     const off = this._offset;
+    const distFromPad = off.length();
+    // Was: airborne < 0.55 only — that blocks placement until the ship is well above the
+    // hangar, which feels broken after a long dock session (player nudges horizontally but
+    // landFactor still reads "landed"). Allow drop once we're past the pad bubble OR airborne enough.
+    const DOCK_R = 0.25;
+    const hangarBlockR = DOCK_R + 0.14;
+    const hangarStillTooTight = distFromPad < hangarBlockR && airborne < 0.38;
+    if (hangarStillTooTight) return;
+
     const uScale = this._uniforms.uScale.value;
     const uvx = THREE.MathUtils.clamp(0.5 + off.x / uScale, 0.02, 0.98);
     const uvy = THREE.MathUtils.clamp(0.5 + off.y / uScale, 0.02, 0.98);
 
-    const geo = new THREE.BoxGeometry(0.07, TOWER_HEIGHT, 0.07);
-    const mat = new THREE.MeshPhongMaterial({
-      color:     0x4a3528,
-      specular:  0x111111,
-      shininess: 20,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(0, this._shipY, 0);
-    mesh.scale.set(1, 0.12, 1);
-    this.scene.add(mesh);
+    if (this._defenseBaseTemplate && this._defenseWeaponTemplate) {
+      const root = new THREE.Group();
+      const base = this._defenseBaseTemplate.clone(true);
+      this._stripLightsApplyMat(base, this._fbxSharedMat);
+      const weaponPivot = new THREE.Object3D();
+      weaponPivot.position.y = this._defenseBaseTopY;
+      const weapon = this._defenseWeaponTemplate.clone(true);
+      this._stripLightsApplyMat(weapon, this._fbxSharedMat);
+      weaponPivot.add(weapon);
+      root.add(base);
+      root.add(weaponPivot);
 
-    this._defenseTowers.push({
-      uvx, uvy, mesh,
-      state:     'dropping',
-      dropT:     0,
-      fireTimer: Math.random() * 0.4,
-    });
+      // Root scale is only the drop shrink (0.12→1). Base/weapon keep template scale `u` / `uw` — do not multiply `u` here or world scale becomes u² and the tower vanishes.
+      root.position.set(0, this._shipY, 0);
+      root.scale.setScalar(0.12);
+      this.scene.add(root);
+
+      this._defenseTowers.push({
+        uvx, uvy,
+        mesh:         root,
+        weaponPivot,
+        beamLocalY:   this._defenseWeaponBeamLocalY,
+        useFbx:       true,
+        state:        'dropping',
+        dropT:        0,
+        fireTimer:    Math.random() * 0.4,
+      });
+    } else {
+      const geo = new THREE.BoxGeometry(0.07, TOWER_HEIGHT, 0.07);
+      const mat = new THREE.MeshPhongMaterial({
+        color:     0x4a3528,
+        specular:  0x111111,
+        shininess: 20,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(0, this._shipY, 0);
+      mesh.scale.set(1, 0.12, 1);
+      this.scene.add(mesh);
+
+      this._defenseTowers.push({
+        uvx, uvy, mesh,
+        useFbx:    false,
+        state:     'dropping',
+        dropT:     0,
+        fireTimer: Math.random() * 0.4,
+      });
+    }
     this._pendingTowerPlace = false;
   }
 
   _pushLaser(from, to, color, isTower) {
+    if (isTower) this.audioManager?.playBlasterTower();
+    else this.audioManager?.playBlasterShip();
+
     const geo = new LineGeometry();
     geo.setPositions([from.x, from.y, from.z, to.x, to.y, to.z]);
     const mat = new LineMaterial({
@@ -490,6 +600,7 @@ export class GameScreen {
     if (this._distressSent || this._transmissionProgress < TRANSMISSION_GOAL) return;
     this._distressSent = true;
     this._closeDockShop();
+    this.audioManager?.stopBackgroundLoop();
     this._running = false;
     if (this._animFrameId) {
       cancelAnimationFrame(this._animFrameId);
@@ -519,31 +630,64 @@ export class GameScreen {
       if (tw.state === 'dropping') {
         tw.dropT += delta / TOWER_DROP_SEC;
         const p = Math.min(1, tw.dropT);
-        const ty = THREE.MathUtils.lerp(this._shipY, gy + TOWER_HEIGHT * 0.5, p);
-        tw.mesh.position.set(
-          THREE.MathUtils.lerp(0, wx, p),
-          ty,
-          THREE.MathUtils.lerp(0, wz, p),
-        );
-        tw.mesh.scale.y = THREE.MathUtils.lerp(0.12, 1, p);
+        const s = THREE.MathUtils.lerp(0.12, 1, p);
+        if (tw.useFbx) {
+          const ty = THREE.MathUtils.lerp(this._shipY, gy + DEFENSE_TOWER_GROUND_BIAS, p);
+          tw.mesh.position.set(
+            THREE.MathUtils.lerp(0, wx, p),
+            ty,
+            THREE.MathUtils.lerp(0, wz, p),
+          );
+          tw.mesh.scale.setScalar(s);
+        } else {
+          const ty = THREE.MathUtils.lerp(this._shipY, gy + TOWER_HEIGHT * 0.5, p);
+          tw.mesh.position.set(
+            THREE.MathUtils.lerp(0, wx, p),
+            ty,
+            THREE.MathUtils.lerp(0, wz, p),
+          );
+          tw.mesh.scale.y = s;
+        }
         if (p >= 1) {
           tw.state = 'ready';
-          tw.mesh.scale.y = 1;
+          if (tw.useFbx) tw.mesh.scale.setScalar(1);
+          else tw.mesh.scale.y = 1;
         }
+      } else if (tw.useFbx) {
+        tw.mesh.position.set(wx, gy + DEFENSE_TOWER_GROUND_BIAS, wz);
       } else {
         tw.mesh.position.set(wx, gy + TOWER_HEIGHT * 0.5, wz);
       }
 
       if (tw.state !== 'ready' || !this._enemyManager || !inTile) continue;
 
+      const ox = tw.mesh.position.x;
+      const oz = tw.mesh.position.z;
+
+      if (tw.useFbx && tw.weaponPivot) {
+        tw.mesh.updateMatrixWorld(true);
+        let aimE = null;
+        let bestA = rng;
+        for (const e of this._enemyManager.enemies) {
+          const d = Math.hypot(e.mesh.position.x - ox, e.mesh.position.z - oz);
+          if (d < bestA) { bestA = d; aimE = e; }
+        }
+        if (aimE) {
+          const dx = aimE.mesh.position.x - ox;
+          const dz = aimE.mesh.position.z - oz;
+          const targetYaw = Math.atan2(dx, -dz);
+          let diff = targetYaw - tw.weaponPivot.rotation.y;
+          while (diff > Math.PI) diff -= 2 * Math.PI;
+          while (diff < -Math.PI) diff += 2 * Math.PI;
+          tw.weaponPivot.rotation.y += diff * Math.min(1, TURRET_TURN_RATE * delta);
+        }
+      }
+
       tw.fireTimer -= delta;
       if (tw.fireTimer > 0) continue;
 
       let bestD = rng;
       let bestE = null;
-      const ox = tw.mesh.position.x;
-      const oz = tw.mesh.position.z;
-      const beamY = tw.mesh.position.y + TOWER_HEIGHT * 0.35;
       for (const e of this._enemyManager.enemies) {
         const dx = e.mesh.position.x - ox;
         const dz = e.mesh.position.z - oz;
@@ -551,7 +695,16 @@ export class GameScreen {
         if (d < bestD) { bestD = d; bestE = e; }
       }
       if (bestE) {
-        const from = new THREE.Vector3(ox, beamY, oz);
+        let from;
+        if (tw.useFbx && tw.weaponPivot) {
+          tw.mesh.updateMatrixWorld(true);
+          const local = new THREE.Vector3(0, tw.beamLocalY ?? this._defenseWeaponBeamLocalY, 0);
+          local.applyMatrix4(tw.weaponPivot.matrixWorld);
+          from = local;
+        } else {
+          const beamY = tw.mesh.position.y + TOWER_HEIGHT * 0.35;
+          from = new THREE.Vector3(ox, beamY, oz);
+        }
         const to   = bestE.mesh.position.clone();
         this._pushLaser(from, to, 0x66ddff, true);
         this._resourceManager?.trySpawnEnemyDrop(bestE.uvx, bestE.uvy);
@@ -597,6 +750,8 @@ export class GameScreen {
   }
 
   update(delta, elapsed) {
+    if (this._introBlocking) return;
+
     const keys = this._keys;
     const off  = this._offset;
 
@@ -839,7 +994,6 @@ export class GameScreen {
 
       // HUD text
       if (this._hudHP)   this._hudHP.textContent  = `Base: ${this._baseHP} / ${BASE_MAX_HP}`;
-      if (this._hudWave) this._hudWave.textContent = `Wave: ${this._wave}`;
 
       // Flow field overlay (drawn every frame so enemy dots stay live)
       if (this._showFlowField && this._flowCanvas) {
@@ -854,6 +1008,7 @@ export class GameScreen {
     if (this._resourceManager && this._ship) {
       const got = this._resourceManager.update(delta, elapsed, off, this._shipY);
       if (got > 0) {
+        this.audioManager?.playResourcePickup();
         this._resourceCount += got;
         this._syncResourceHud();
       }
@@ -1032,6 +1187,7 @@ export class GameScreen {
     // Models
     this._loadShip();
     this._loadHangar();
+    this._loadFbxBuildables();
 
     // Enemy system — flow field build happens here (one-time ~20–50 ms stutter)
     this._enemyManager = new EnemyManager(
@@ -1071,6 +1227,89 @@ export class GameScreen {
     });
     this._dustPoints = new THREE.Points(geo, mat);
     this.scene.add(this._dustPoints);
+  }
+
+  _stripLightsApplyMat(root, mat) {
+    const embedded = [];
+    root.traverse((ch) => {
+      if (ch.isLight) embedded.push(ch);
+      if (ch.isMesh && mat) ch.material = mat;
+    });
+    embedded.forEach((l) => l.parent?.remove(l));
+  }
+
+  /** OBJ_SCALE then fit to `targetWorldHeight`; center on XZ; bottom at y = 0. */
+  _fitObjectToGroundHeightCenterXZ(root, targetWorldHeight) {
+    root.scale.setScalar(OBJ_SCALE);
+    root.position.set(0, 0, 0);
+    root.rotation.set(0, 0, 0);
+    root.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(root);
+    const h = box.max.y - box.min.y;
+    if (h > 1e-6) root.scale.multiplyScalar(targetWorldHeight / h);
+    root.updateMatrixWorld(true);
+    box = new THREE.Box3().setFromObject(root);
+    root.position.x -= (box.min.x + box.max.x) * 0.5;
+    root.position.z -= (box.min.z + box.max.z) * 0.5;
+    root.position.y -= box.min.y;
+    root.updateMatrixWorld(true);
+  }
+
+  /**
+   * Shared atlas material plus FBX templates: transmission (`tower1.fbx`),
+   * defense base (`base1.FBX`) and weapon (`weapon1.FBX`). None are added to the scene.
+   */
+  _loadFbxBuildables() {
+    const atlas = new THREE.TextureLoader().load('assets/textures/PolygonSciFiCity_Texture_01_A.png');
+    atlas.colorSpace = THREE.SRGBColorSpace;
+    this._fbxSharedMat = new THREE.MeshPhongMaterial({
+      map:       atlas,
+      specular:  0x111122,
+      shininess: 25,
+    });
+
+    const fbx = new FBXLoader();
+    fbx.setResourcePath('assets/textures/');
+    const err = (label, e) => console.error(`${label} FBX load failed:`, e);
+
+    fbx.load(
+      'assets/obj/tower1.fbx',
+      (obj) => {
+        this._stripLightsApplyMat(obj, this._fbxSharedMat);
+        this._fitObjectToGroundHeightCenterXZ(obj, TRANSMISSION_VISUAL_HEIGHT);
+        this._transmissionFbxTemplate = obj;
+      },
+      undefined,
+      (e) => err('Transmission mast', e),
+    );
+
+    fbx.load(
+      'assets/obj/base1.FBX',
+      (obj) => {
+        this._stripLightsApplyMat(obj, this._fbxSharedMat);
+        this._fitObjectToGroundHeightCenterXZ(obj, DEFENSE_BASE_TARGET_HEIGHT);
+        const box = new THREE.Box3().setFromObject(obj);
+        const span = box.max.y - box.min.y;
+        this._defenseBaseTopY = span > 1e-6 ? box.max.y : 0.12;
+        this._defenseBaseTemplate = obj;
+      },
+      undefined,
+      (e) => err('Defense tower base', e),
+    );
+
+    fbx.load(
+      'assets/obj/weapon1.FBX',
+      (obj) => {
+        this._stripLightsApplyMat(obj, this._fbxSharedMat);
+        this._fitObjectToGroundHeightCenterXZ(obj, DEFENSE_WEAPON_TARGET_HEIGHT);
+        const box = new THREE.Box3().setFromObject(obj);
+        const span = box.max.y - box.min.y;
+        this._defenseWeaponBeamLocalY = span > 1e-6 ? box.max.y * 0.88 : 0.06;
+        this._defenseWeaponTemplate = obj;
+      },
+      undefined,
+      (e) => err('Defense tower weapon', e),
+    );
   }
 
   _loadHangar() {
@@ -1158,15 +1397,22 @@ export class GameScreen {
     ]);
     window.addEventListener('keydown', e => {
       this._keys[e.code] = true;
-      if (this._running && e.code === 'KeyT' && !e.repeat && !this._dockModalOpen) {
-        this._tryPlaceTower();
-        e.preventDefault();
+      if (this._running && e.code === 'KeyT' && !e.repeat) {
+        if (this._dockModalOpen && this._pendingTowerPlace) {
+          this._closeDockShop();
+        }
+        if (!this._dockModalOpen) {
+          this._tryPlaceTower();
+          e.preventDefault();
+        }
       }
       if (this._running && HANDLED.has(e.code)) e.preventDefault();
       // Toggle flow-field overlay
       if (this._running && e.code === 'KeyF') {
         this._showFlowField = !this._showFlowField;
-        if (this._flowCanvas) {
+        if (this._flowRadarHud) {
+          this._flowRadarHud.style.display = this._showFlowField ? 'flex' : 'none';
+        } else if (this._flowCanvas) {
           this._flowCanvas.style.display = this._showFlowField ? 'block' : 'none';
         }
       }
@@ -1176,13 +1422,28 @@ export class GameScreen {
 
   // ── HUD ────────────────────────────────────────────────────────────────────
 
+  _showGameIntro() {
+    if (!this._introModalEl) return;
+    this._introBlocking = true;
+    this._introModalEl.classList.remove('hidden');
+    this._introModalEl.setAttribute('aria-hidden', 'false');
+    document.getElementById('btn-game-intro-continue')?.focus();
+  }
+
+  _hideGameIntro() {
+    this._introBlocking = false;
+    if (!this._introModalEl) return;
+    this._introModalEl.classList.add('hidden');
+    this._introModalEl.setAttribute('aria-hidden', 'true');
+  }
+
   _bindHUD() {
+    document.getElementById('btn-game-intro-continue')?.addEventListener('click', () => {
+      this._hideGameIntro();
+      this.audioManager?.startBackgroundLoop();
+    });
     document.getElementById('btn-game-settings')?.addEventListener('click', () => {
       this.onOpenSettings?.();
-    });
-    document.getElementById('btn-main-menu')?.addEventListener('click', () => {
-      this.stop();
-      this.onMainMenu?.();
     });
     document.getElementById('btn-win-main-menu')?.addEventListener('click', () => {
       this._hideWinOverlay();

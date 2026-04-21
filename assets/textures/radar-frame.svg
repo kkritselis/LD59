@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .st0 { fill: none; stroke: #3232fc; stroke-miterlimit: 10; stroke-width: 3.6px; }
+      .st1 { fill: none; stroke: #3232fc; stroke-miterlimit: 10; stroke-width: 2.9px; }
+      .st2 { fill: none; stroke: #3232fc; stroke-miterlimit: 10; stroke-width: 2.2px; }
+    </style>
+  </defs>
+  <circle class="st0" cx="256" cy="256" r="252.3"/>
+  <circle class="st1" cx="256" cy="256" r="186"/>
+  <circle class="st2" cx="256" cy="256" r="119.9"/>
+</svg>

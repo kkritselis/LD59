@@ -16,6 +16,8 @@ const CHANNELS = ['master', 'sfx', 'music', 'ambient'];
 export class SettingsModal {
   constructor(audioManager) {
     this.audio = audioManager;
+    /** @type {null | (() => void | Promise<void>)} */
+    this._onAbandonRun = null;
 
     this._overlay  = document.getElementById('settings-modal');
     this._sliders  = {};
@@ -29,6 +31,7 @@ export class SettingsModal {
     this._bindButtons();
     this._bindOverlayClick();
     this._bindEscapeKey();
+    this._syncAbandonButton();
   }
 
   // ------------------------------------------------------------------
@@ -38,8 +41,15 @@ export class SettingsModal {
   open() {
     this._snapshot = this._captureCurrentVolumes();
     this._syncSlidersFromAudio();
+    this._syncAbandonButton();
     this._overlay.classList.remove('hidden');
     document.getElementById('btn-close-settings')?.focus();
+  }
+
+  /** While a run is active, wire this so "Abandon run" returns to the menu. Pass null to disable. */
+  setAbandonHandler(fn) {
+    this._onAbandonRun = typeof fn === 'function' ? fn : null;
+    this._syncAbandonButton();
   }
 
   close() {
@@ -91,6 +101,30 @@ export class SettingsModal {
       this.audio.saveSettings();
       this.close();
     });
+
+    document.getElementById('btn-abandon-run')?.addEventListener('click', async () => {
+      if (!this._onAbandonRun) return;
+      this.audio.saveSettings();
+      this._closeWithoutRevert();
+      const fn = this._onAbandonRun;
+      await fn();
+    });
+  }
+
+  _syncAbandonButton() {
+    const btn = document.getElementById('btn-abandon-run');
+    if (!btn) return;
+    const on = Boolean(this._onAbandonRun);
+    btn.disabled = !on;
+    btn.classList.toggle('hidden', !on);
+  }
+
+  /** Hide overlay without restoring the volume snapshot (volumes already saved or committed). */
+  _closeWithoutRevert() {
+    if (this._overlay.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+    this._overlay.classList.add('hidden');
   }
 
   _bindOverlayClick() {

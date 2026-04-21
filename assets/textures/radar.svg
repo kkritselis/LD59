@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke-width: 3.6px;
+      }
+
+      .st0, .st1, .st2 {
+        fill: none;
+        stroke: #3232fc;
+        stroke-miterlimit: 10;
+      }
+
+      .st1 {
+        stroke-width: 2.9px;
+      }
+
+      .st2 {
+        stroke-width: 2.2px;
+      }
+    </style>
+  </defs>
+  <image width="503" height="502" transform="translate(5 5)" xlink:href="radar-1.png"/>
+  <circle class="st0" cx="256" cy="256" r="252.3"/>
+  <circle class="st1" cx="256" cy="256" r="186"/>
+  <circle class="st2" cx="256" cy="256" r="119.9"/>
+</svg>

@@ -4,8 +4,8 @@
  * Builds a flow field over the terrain heightmap using Dijkstra from the base
  * (UV 0.5, 0.5), then spawns and moves enemies through it each frame.
  *
- * All positions are stored in heightmap UV space (0–1) so they remain correct
- * as the terrain offset changes.  World position is derived each frame via:
+ * Positions are stored in heightmap UV space (often within ~0–1 for the play tile;
+ * flow field sampling spans a wider UV window). World position is derived each frame via:
  *   worldX = (uvx - 0.5) * uScale - offset.x
  *   worldZ = -(uvy - 0.5) * uScale + offset.y
  */
@@ -15,7 +15,17 @@ import { sampleHeight, WATER_LEVEL } from './terrain.js';
 
 // ── Tunables ────────────────────────────────────────────────────────────────
 
-const GRID         = 96;   // flow field resolution (higher = better paths, slower build)
+/** UV domain area vs a 1×1 tile (4 = 4× area vs unit tile); linear span per axis = sqrt(this). */
+const FLOW_FIELD_AREA_MULT = 4;
+const FLOW_UV_AXIS         = Math.sqrt(FLOW_FIELD_AREA_MULT);
+/** Flow field is built on this UV range (extends past [0,1] so paths use more terrain). */
+export const FLOW_UV_MIN = 0.5 - 0.5 * FLOW_UV_AXIS;
+export const FLOW_UV_MAX = 0.5 + 0.5 * FLOW_UV_AXIS;
+const FLOW_UV_SPAN       = FLOW_UV_MAX - FLOW_UV_MIN;
+
+/** Grid size — scale with domain so UV step stays similar to the old 96×96 on 0–1. */
+const GRID = Math.max(96, Math.round(96 * FLOW_UV_AXIS));
+
 const STEEP_BLOCK  = 1.0;  // world-slope magnitude above which terrain is impassable
 const HIGH_ALT     = 0.525; // UV height above which the air is too thin (blocks enemies)
 const ENEMY_SPEED  = 0.02; // UV units / second on flat terrain
@@ -74,14 +84,15 @@ export class EnemyManager {
     this._enemies     = [];
     this._field       = null;
 
-    // Shared geometry — all enemies reference the same buffers (25% of original size)
-    const geo = new THREE.ConeGeometry(0.015, 0.04, 6);
-    geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI)); // tip downward
+    // Trefoil-style knot (p,q) = (2,3); thicker tube + more radial segments so the rope reads solid.
+    const geo = new THREE.TorusKnotGeometry(0.02, 0.015, 48, 12, 2, 3);
+    geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
     this._geo = geo;
     this._mat = new THREE.MeshPhongMaterial({
-      color:    0xff2200,
-      emissive: 0x440000,
-      shininess: 60,
+      color:    0x5a1428,
+      emissive: 0x1c080e,
+      specular: 0x281018,
+      shininess: 48,
     });
 
     this._buildField();
@@ -99,13 +110,15 @@ export class EnemyManager {
     const heights = new Float32Array(G * G);
     for (let gy = 0; gy < G; gy++) {
       for (let gx = 0; gx < G; gx++) {
-        heights[gy * G + gx] = sampleHeight(gx / (G - 1), gy / (G - 1));
+        const uvx = FLOW_UV_MIN + (gx / (G - 1)) * FLOW_UV_SPAN;
+        const uvy = FLOW_UV_MIN + (gy / (G - 1)) * FLOW_UV_SPAN;
+        heights[gy * G + gx] = sampleHeight(uvx, uvy);
       }
     }
 
     // Step 2: compute steepness and mark blocked cells
     // Slope = world height change / world horizontal distance (dimensionless)
-    const uvStep  = 1 / (G - 1);
+    const uvStep  = FLOW_UV_SPAN / (G - 1);
     const wStep   = uvStep * US;          // world distance per grid step
     const steep   = new Float32Array(G * G);
     const blocked = new Uint8Array(G * G);
@@ -124,8 +137,8 @@ export class EnemyManager {
     }
 
     // Step 3: Dijkstra outward from base cell (UV 0.5, 0.5)
-    const bx = Math.round((G - 1) * 0.5);
-    const by = Math.round((G - 1) * 0.5);
+    const bx = Math.round(((0.5 - FLOW_UV_MIN) / FLOW_UV_SPAN) * (G - 1));
+    const by = Math.round(((0.5 - FLOW_UV_MIN) / FLOW_UV_SPAN) * (G - 1));
 
     const dist = new Float32Array(G * G).fill(Infinity);
     const fdx  = new Float32Array(G * G);   // UV-space direction X toward base
@@ -170,15 +183,16 @@ export class EnemyManager {
       }
     }
 
-    this._field = { G, dist, fdx, fdy, fspd, blocked };
-    console.log(`[EnemyManager] Flow field (${G}×${G}) built in ${(performance.now() - t0).toFixed(0)} ms`);
+    this._field = { G, dist, fdx, fdy, fspd, blocked, uvSpan: FLOW_UV_SPAN };
+    console.log(`[EnemyManager] Flow field (${G}×${G}, UV span ${FLOW_UV_SPAN.toFixed(3)}) built in ${(performance.now() - t0).toFixed(0)} ms`);
   }
 
   /** Look up flow field at a UV position. */
   _sample(uvx, uvy) {
-    const { G, dist, fdx, fdy, fspd, blocked } = this._field;
-    const gx = Math.max(0, Math.min(G - 1, Math.round(uvx * (G - 1))));
-    const gy = Math.max(0, Math.min(G - 1, Math.round(uvy * (G - 1))));
+    const { G, dist, fdx, fdy, fspd, blocked, uvSpan } = this._field;
+    const span = uvSpan ?? 1;
+    const gx = Math.max(0, Math.min(G - 1, Math.round(((uvx - FLOW_UV_MIN) / span) * (G - 1))));
+    const gy = Math.max(0, Math.min(G - 1, Math.round(((uvy - FLOW_UV_MIN) / span) * (G - 1))));
     const i  = gy * G + gx;
     return { dirX: fdx[i], dirY: fdy[i], spd: fspd[i], blocked: blocked[i] === 1, dist: dist[i] };
   }
@@ -208,9 +222,20 @@ export class EnemyManager {
       const fi = gy * G + gx;
       if (blocked[fi] || !isFinite(dist[fi])) continue;
 
+      const uvx = FLOW_UV_MIN + (gx / (G - 1)) * FLOW_UV_SPAN;
+      const uvy = FLOW_UV_MIN + (gy / (G - 1)) * FLOW_UV_SPAN;
       const mesh = new THREE.Mesh(this._geo, this._mat);
       this._scene.add(mesh);
-      this._enemies.push({ mesh, uvx: gx / (G - 1), uvy: gy / (G - 1) });
+      const t = Math.random() * Math.PI * 2;
+      this._enemies.push({
+        mesh,
+        uvx,
+        uvy,
+        tumbleX: (Math.random() - 0.5) * 4.2,
+        tumbleY: (Math.random() - 0.5) * 5.5,
+        tumbleZ: (Math.random() - 0.5) * 4.2,
+        tumblePh: t,
+      });
       return;
     }
   }
@@ -235,8 +260,10 @@ export class EnemyManager {
       // Move in UV space using flow direction and terrain-adjusted speed
       if (!f.blocked && isFinite(f.dist) && f.dist > 0) {
         const spd = ENEMY_SPEED * Math.max(0.05, f.spd);
-        e.uvx = Math.max(0, Math.min(1, e.uvx + f.dirX * spd * delta));
-        e.uvy = Math.max(0, Math.min(1, e.uvy + f.dirY * spd * delta));
+        const lo = FLOW_UV_MIN + 1e-6;
+        const hi = FLOW_UV_MAX - 1e-6;
+        e.uvx = Math.max(lo, Math.min(hi, e.uvx + f.dirX * spd * delta));
+        e.uvy = Math.max(lo, Math.min(hi, e.uvy + f.dirY * spd * delta));
       }
 
       // Derive world position from UV + current terrain offset
@@ -244,8 +271,15 @@ export class EnemyManager {
       // worldZ = -(uvy - 0.5) * uScale + offset.y
       const wx = (e.uvx - 0.5) * US - off.x;
       const wz = -(e.uvy - 0.5) * US + off.y;
-      e.mesh.position.set(wx, sampleHeight(e.uvx, e.uvy) * HS + 0.1, wz);
-      e.mesh.rotation.y += delta * 1.5;   // slow spin for visual interest
+      e.mesh.position.set(wx, sampleHeight(e.uvx, e.uvy) * HS + 0.045, wz);
+
+      const moving = !f.blocked && isFinite(f.dist) && f.dist > 0;
+      const moveK  = moving ? (1.15 + 2.4 * Math.max(0.08, f.spd)) : 0.45;
+      const ph     = (e.tumblePh += delta * 1.1);
+      const wobble = 0.35 * Math.sin(ph * 2.3);
+      e.mesh.rotation.x += delta * (e.tumbleX + wobble) * moveK;
+      e.mesh.rotation.y += delta * e.tumbleY * moveK;
+      e.mesh.rotation.z += delta * (e.tumbleZ - wobble * 0.6) * moveK;
 
       // Hide enemies that have scrolled beyond the terrain tile boundary
       const HALF = US * 0.5;
@@ -293,57 +327,54 @@ export class EnemyManager {
    * @param {number} shipUVY   ship's current heightmap UV y (0–1)
    */
   drawToCanvas(canvas, shipUVX, shipUVY) {
-    const { G, dist, fdx, fdy, blocked } = this._field;
+    const { G, dist, fdx, fdy, blocked, uvSpan } = this._field;
+    const span = uvSpan ?? 1;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
 
-    // Find max finite distance for normalization
     let maxDist = 0;
     for (let i = 0; i < G * G; i++) {
       if (isFinite(dist[i]) && dist[i] > maxDist) maxDist = dist[i];
     }
+    if (maxDist < 1e-6) maxDist = 1;
 
-    // Draw cells as a heatmap using ImageData (fast pixel fill)
+    // Heatmap: each pixel shows the same 0–1 UV tile as before (radar unchanged); field samples the wider domain.
     const img = ctx.createImageData(W, H);
     const d   = img.data;
+    const dUvCell = span / (G - 1);
 
-    for (let gy = 0; gy < G; gy++) {
-      for (let gx = 0; gx < G; gx++) {
-        const fi  = gy * G + gx;
-        const blk = blocked[fi];
-        const dst = dist[fi];
-
-        let r, g, b;
-        if (blk) {
-          r = 12; g = 6; b = 28;      // blocked — near-black purple
-        } else if (!isFinite(dst)) {
-          r = 35; g = 35; b = 35;     // unreachable island — dark grey
+    for (let py = 0; py < H; py++) {
+      for (let px = 0; px < W; px++) {
+        const worldUvX = (px + 0.5) / W;
+        const worldUvY = 1 - (py + 0.5) / H;
+        let r, g, b, a = 210;
+        if (worldUvX < FLOW_UV_MIN || worldUvX > FLOW_UV_MAX || worldUvY < FLOW_UV_MIN || worldUvY > FLOW_UV_MAX) {
+          r = 6; g = 4; b = 12;
         } else {
-          const t = dst / maxDist;    // 0 = at base, 1 = far edge
-          // Green (close) → amber → red (far)
-          r = Math.round(40  + t * 200);
-          g = Math.round(180 - t * 160);
-          b = 20;
-        }
-
-        // Map grid cell → pixel rect (Y flipped so UV top = canvas top of world view)
-        const fgy  = G - 1 - gy;
-        const px0 = Math.round(gx  * W / G);
-        const px1 = Math.round((gx + 1) * W / G);
-        const py0 = Math.round(fgy * H / G);
-        const py1 = Math.round((fgy + 1) * H / G);
-
-        for (let py = py0; py < py1; py++) {
-          for (let px = px0; px < px1; px++) {
-            const di = (py * W + px) * 4;
-            d[di] = r; d[di + 1] = g; d[di + 2] = b; d[di + 3] = 210;
+          const gxf = ((worldUvX - FLOW_UV_MIN) / span) * (G - 1);
+          const gyf = ((worldUvY - FLOW_UV_MIN) / span) * (G - 1);
+          const gxC = Math.max(0, Math.min(G - 1, Math.round(gxf)));
+          const gyC = Math.max(0, Math.min(G - 1, Math.round(gyf)));
+          const fi  = gyC * G + gxC;
+          const blk = blocked[fi];
+          const dst = dist[fi];
+          if (blk) {
+            r = 12; g = 6; b = 28;
+          } else if (!isFinite(dst)) {
+            r = 35; g = 35; b = 35;
+          } else {
+            const t = dst / maxDist;
+            r = Math.round(40  + t * 200);
+            g = Math.round(180 - t * 160);
+            b = 20;
           }
         }
+        const di = (py * W + px) * 4;
+        d[di] = r; d[di + 1] = g; d[di + 2] = b; d[di + 3] = a;
       }
     }
     ctx.putImageData(img, 0, 0);
 
-    // Flow direction arrows (every 6th cell)
     const STEP = 6;
     ctx.lineWidth = 0.8;
     ctx.strokeStyle = 'rgba(255,255,255,0.45)';
@@ -351,11 +382,13 @@ export class EnemyManager {
       for (let gx = STEP >> 1; gx < G; gx += STEP) {
         const fi = gy * G + gx;
         if (blocked[fi] || !isFinite(dist[fi]) || dist[fi] === 0) continue;
-        const fgy = G - 1 - gy;
-        const cx = (gx + 0.5) * W / G;
-        const cy = (fgy + 0.5) * H / G;
-        const ax =  fdx[fi] * (W / G) * STEP * 0.38;
-        const ay = -fdy[fi] * (H / G) * STEP * 0.38;  // negate: Y flipped
+        const cellUvX = FLOW_UV_MIN + ((gx + 0.5) / (G - 1)) * span;
+        const cellUvY = FLOW_UV_MIN + ((gy + 0.5) / (G - 1)) * span;
+        if (cellUvX < 0 || cellUvX > 1 || cellUvY < 0 || cellUvY > 1) continue;
+        const cx = cellUvX * W;
+        const cy = (1 - cellUvY) * H;
+        const ax = fdx[fi] * STEP * dUvCell * W * 0.38;
+        const ay = -fdy[fi] * STEP * dUvCell * H * 0.38;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(cx + ax, cy + ay);
@@ -363,32 +396,30 @@ export class EnemyManager {
       }
     }
 
-    // Enemy dots (Y flipped)
+    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
     ctx.fillStyle = '#ff3300';
     for (const e of this._enemies) {
+      const ux = clamp01(e.uvx);
+      const uy = clamp01(e.uvy);
       ctx.beginPath();
-      ctx.arc(e.uvx * W, (1 - e.uvy) * H, 3, 0, Math.PI * 2);
+      ctx.arc(ux * W, (1 - uy) * H, 3, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Ship position (white, Y flipped)
     if (shipUVX !== undefined) {
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(shipUVX * W, (1 - shipUVY) * H, 4, 0, Math.PI * 2);
+      ctx.arc(clamp01(shipUVX) * W, (1 - clamp01(shipUVY)) * H, 4, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Base marker (gold)
     ctx.fillStyle = '#ffd700';
     ctx.beginPath();
     ctx.arc(W * 0.5, H * 0.5, 5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Label
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font      = '9px monospace';
-    ctx.fillText('[F] toggle radar', 4, H - 4);
+    // Hint text lives in HTML (`.flow-radar-hint`) so it stays outside the circular clip.
   }
 
   /** Full teardown — call when the game session ends. */

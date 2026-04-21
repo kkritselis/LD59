@@ -56,10 +56,18 @@ async function main() {
       game.onOpenSettings = () => settings.open();
 
       game.onMainMenu = async () => {
+        settings.setAbandonHandler(null);
         await screens.show('menu');
         menu.start();
       };
     }
+
+    settings.setAbandonHandler(async () => {
+      settings.setAbandonHandler(null);
+      game.stop();
+      await screens.show('menu');
+      menu.start();
+    });
 
     await screens.show('game');
     game.start();

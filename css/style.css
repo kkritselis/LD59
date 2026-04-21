@@ -219,17 +219,75 @@ html, body {
   pointer-events: all;
 }
 
-#flow-canvas {
-  display: block;
+/* Flow-field radar — circular clip + Synty-style bezel SVG on top */
+.flow-radar-hud {
   position: absolute;
-  bottom: 16px;
+  bottom: 12px;
   left: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.flow-radar {
+  position: relative;
   width: 288px;
   height: 288px;
-  border: 1px solid rgba(255, 220, 150, 0.35);
-  border-radius: 4px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 220, 150, 0.22),
+    0 8px 28px rgba(0, 0, 0, 0.5);
+}
+
+#flow-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
   pointer-events: none;
+}
+
+.flow-radar-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.flow-radar-texture {
+  z-index: 1;
+  /* Clockwise sweep; shorten duration for a faster spin */
+  --radar-sweep-period: 12s;
+  transform-origin: 50% 50%;
+  animation: flow-radar-sweep var(--radar-sweep-period) linear infinite;
+}
+
+@keyframes flow-radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.flow-radar-rings {
+  z-index: 2;
+}
+
+.flow-radar-hint {
+  margin: 0;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: rgba(232, 208, 176, 0.75);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 /* ============================================================
@@ -329,6 +387,21 @@ html, body {
   background: transparent;
   color: var(--color-text-muted);
   border: 1px solid transparent;
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #8b2a2a 0%, #5c1818 100%);
+  color: #f5e6e6;
+  border: 1px solid rgba(255, 120, 120, 0.35);
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-danger:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .btn-ghost:hover {
@@ -442,14 +515,67 @@ html, body {
   display: none !important;
 }
 
+/* Game briefing — full dim; blocks input until Begin.
+   #screen-game uses pointer-events: none so the canvas receives input; overlays
+   that must capture clicks must re-enable explicitly (same pattern as .win-overlay). */
+.game-intro-overlay {
+  z-index: 108;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  pointer-events: auto;
+}
+
+.game-intro-modal {
+  width: min(920px, 94vw);
+  max-height: min(88vh, 640px);
+  display: flex;
+  flex-direction: column;
+}
+
+.game-intro-body {
+  overflow-y: auto;
+  line-height: 1.55;
+}
+
+.game-intro-story {
+  margin: 0 0 16px;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.game-intro-subhead {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+}
+
+.game-intro-goals {
+  margin: 0;
+  padding-left: 1.15em;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.game-intro-goals li + li {
+  margin-top: 8px;
+}
+
+.game-intro-footer {
+  justify-content: flex-end;
+}
+
 #dock-shop-modal.dock-shop-overlay {
   position: fixed;
   inset: auto;
   top: max(10px, env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  width: min(440px, 96vw);
-  max-height: min(48vh, 400px);
+  width: min(960px, 96vw);
+  max-height: none;
   z-index: var(--z-modal);
   margin: 0;
   padding: 0;
@@ -467,8 +593,10 @@ html, body {
 
 #dock-shop-modal.dock-shop-overlay .modal {
   width: 100%;
-  max-height: inherit;
-  overflow: auto;
+  max-height: min(85vh, 720px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .dock-shop-modal {
@@ -477,6 +605,11 @@ html, body {
 
 .dock-shop-body {
   gap: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .dock-shop-hint {
@@ -491,18 +624,47 @@ html, body {
   letter-spacing: 0.06em;
 }
 
-.dock-shop-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.dock-shop-actions-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-top: 4px;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
 }
 
-button.dock-action {
-  display: block;
+.dock-shop-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 14px;
+  align-items: stretch;
+  min-height: 132px;
+}
+
+.dock-card {
+  flex: 0 0 min(280px, 78vw);
+  max-width: min(300px, 82vw);
+}
+
+button.dock-action.dock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   width: 100%;
+  min-height: 120px;
   text-align: left;
   white-space: normal;
+}
+
+button.dock-action.dock-action-inline {
+  display: inline-flex;
+  width: 100%;
+  margin-top: auto;
+  text-align: center;
+  justify-content: center;
 }
 
 .dock-sub {
@@ -529,6 +691,19 @@ button.dock-action:disabled {
   margin-bottom: 4px;
 }
 
+.dock-transmission-row.dock-card {
+  flex-direction: column;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  padding: 14px 16px;
+  margin-bottom: 0;
+  border-bottom: none;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.12);
+  min-height: 120px;
+}
+
 .dock-transmission-label {
   font-size: 13px;
   color: var(--color-text-muted);
@@ -541,7 +716,20 @@ button.dock-action:disabled {
   color: var(--color-text);
 }
 
-#btn-dock-transmission-add {
+.dock-transmission-row:not(.dock-card) #btn-dock-transmission-add {
+  margin-left: auto;
+}
+
+.settings-modal-footer {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.settings-modal-footer-actions {
+  display: flex;
+  gap: 12px;
   margin-left: auto;
 }
 

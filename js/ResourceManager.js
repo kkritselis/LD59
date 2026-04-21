@@ -7,17 +7,31 @@
  */
 
 import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { sampleHeight, WATER_LEVEL } from './terrain.js';
+import { FLOW_UV_MIN, FLOW_UV_MAX } from './EnemyManager.js';
 
 // ── Tunables ────────────────────────────────────────────────────────────────
 
-const RESOURCE_COUNT  = 50;    // how many nodes to scatter
+const RESOURCE_COUNT  = 100;   // how many nodes to scatter
 const PICKUP_RADIUS   = 0.05;  // UV units from ship to trigger beam
 const CANCEL_RADIUS   = 0.14;  // UV units — beam cancels if player strays this far
 const ATTRACT_RATE    = 2.5;   // lerp rate pulling resource toward ship (per second)
 const BEAM_BASE_R     = 0.14;  // tractor-beam cone base radius (world units)
 const BEAM_OPACITY    = 0.25;
 const ENEMY_DROP_CHANCE = 0.3;
+
+/** Same Synty FBX scale as `GameScreen.js` ship / hangar (`OBJ_SCALE`). */
+const OBJ_SCALE = 0.0001;
+/** Multiplier on top of `OBJ_SCALE` for pickup mesh size (dial in here). */
+const RESOURCE_SCALE = 0.075;
+/** Uniform scale for resource FBX clones — single source of truth in `update`. */
+const RESOURCE_MESH_SCALE = OBJ_SCALE * RESOURCE_SCALE;
+/** Tractor beam world height (cap `shipY - baseY` so the cone cannot span the whole map). */
+const BEAM_HEIGHT_MIN = 0.06;
+const BEAM_HEIGHT_MAX = 2.8;
+
+const RESOURCE_URLS = ['assets/obj/resource1.fbx', 'assets/obj/resource2.fbx'];
 
 // ── ResourceManager ──────────────────────────────────────────────────────────
 
@@ -32,34 +46,129 @@ export class ResourceManager {
     this._HS    = heightScale;
     this._US    = uScale;
 
-    /** @type {{ mesh: THREE.Mesh, beamMesh: THREE.Mesh|null, uvx: number, uvy: number, baseY: number, animY: number, state: string, credit?: number, visualScale?: number }[]} */
+    /** @type {{ mesh: THREE.Object3D, beamMesh: THREE.Mesh|null, uvx: number, uvy: number, baseY: number, animY: number, state: string, credit?: number, visualScale?: number }[]} */
     this._resources = [];
     this._collected = 0;
 
-    // Shared sphere geometry + material for idle resources (half original size)
-    this._geo = new THREE.SphereGeometry(0.02, 8, 6);
-    this._mat = new THREE.MeshPhongMaterial({
-      color:     0x2266ff,
-      emissive:  0x001144,
-      shininess: 100,
-    });
+    /** Prepared roots (never in scene); clones pick one at random. */
+    this._resourceTemplates = [];
+    this._resourceMat = null;
+    this._useSphereFallback = false;
+    this._fallbackGeo = null;
+
+    this._pendingScatterAfterLoad = true;
 
     // Shared cone geometry for beam (height=1 so scale.y = world distance)
     this._beamGeo = new THREE.ConeGeometry(BEAM_BASE_R, 1, 10, 1, true);
 
-    this._scatter();
+    this._initResourceModels();
+  }
+
+  _stripLights(root) {
+    const lights = [];
+    root.traverse((ch) => {
+      if (ch.isLight) lights.push(ch);
+    });
+    lights.forEach((l) => l.parent?.remove(l));
+  }
+
+  _applyMat(root, mat) {
+    root.traverse((ch) => {
+      if (ch.isMesh && mat) ch.material = mat;
+    });
+  }
+
+  /** FBX pickups use `RESOURCE_MESH_SCALE`; sphere fallback uses geometry size and scale 1. */
+  _pickupScaleBasis(mesh) {
+    if (this._useSphereFallback && this._fallbackGeo && mesh.geometry === this._fallbackGeo) return 1;
+    return RESOURCE_MESH_SCALE;
+  }
+
+  /** Synty pipeline: uniform `OBJ_SCALE` like the ship — no bbox rescale (that broke visibility). */
+  _preparePickupTemplate(root) {
+    root.scale.setScalar(RESOURCE_MESH_SCALE);
+    root.position.set(0, 0, 0);
+    root.rotation.set(0, 0, 0);
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(root);
+    root.position.x -= (box.min.x + box.max.x) * 0.5;
+    root.position.z -= (box.min.z + box.max.z) * 0.5;
+    root.position.y -= box.min.y;
+    root.updateMatrixWorld(true);
+  }
+
+  _initResourceModels() {
+    const atlas = new THREE.TextureLoader().load('assets/textures/PolygonSciFiCity_Texture_01_A.png');
+    atlas.colorSpace = THREE.SRGBColorSpace;
+    this._resourceMat = new THREE.MeshPhongMaterial({
+      map:       atlas,
+      specular:  0x111122,
+      shininess: 60,
+      emissive:  0x0a1530,
+    });
+
+    let pending = RESOURCE_URLS.length;
+    const fbx = new FBXLoader();
+    fbx.setResourcePath('assets/textures/');
+
+    const finishOne = () => {
+      pending -= 1;
+      if (pending > 0) return;
+      if (this._resourceTemplates.length === 0) {
+        this._useSphereFallback = true;
+        this._fallbackGeo = new THREE.SphereGeometry(0.02, 8, 6);
+      }
+      if (this._pendingScatterAfterLoad) {
+        this._pendingScatterAfterLoad = false;
+        this._scatter();
+      }
+    };
+
+    for (const url of RESOURCE_URLS) {
+      fbx.load(
+        url,
+        (obj) => {
+          this._stripLights(obj);
+          this._applyMat(obj, this._resourceMat);
+          this._preparePickupTemplate(obj);
+          this._resourceTemplates.push(obj);
+          finishOne();
+        },
+        undefined,
+        (err) => {
+          console.error(`[ResourceManager] FBX load failed (${url}):`, err);
+          finishOne();
+        },
+      );
+    }
+  }
+
+  /** Clone a random resource mesh with random yaw (local Y). */
+  _createPickupMesh() {
+    if (this._useSphereFallback && this._fallbackGeo) {
+      return new THREE.Mesh(this._fallbackGeo, this._resourceMat);
+    }
+    const n = this._resourceTemplates.length;
+    const tpl = this._resourceTemplates[n === 1 ? 0 : Math.floor(Math.random() * n)];
+    const mesh = tpl.clone(true);
+    this._applyMat(mesh, this._resourceMat);
+    mesh.rotation.y = Math.random() * Math.PI * 2;
+    return mesh;
   }
 
   // ── Placement ──────────────────────────────────────────────────────────────
 
   _scatter() {
-    const MAX_TRIES = 400;
+    const MAX_TRIES = 800;
     let tries = 0;
+
+    const flowSpan = FLOW_UV_MAX - FLOW_UV_MIN;
+    const edgePad  = 0.02 * flowSpan;
 
     while (this._resources.length < RESOURCE_COUNT && tries < MAX_TRIES) {
       tries++;
-      const uvx = 0.04 + Math.random() * 0.92;
-      const uvy = 0.04 + Math.random() * 0.92;
+      const uvx = FLOW_UV_MIN + edgePad + Math.random() * (flowSpan - 2 * edgePad);
+      const uvy = FLOW_UV_MIN + edgePad + Math.random() * (flowSpan - 2 * edgePad);
 
       // Keep clear of the base pad
       const du = uvx - 0.5, dv = uvy - 0.5;
@@ -69,7 +178,7 @@ export class ResourceManager {
       const h = sampleHeight(uvx, uvy);
       if (h < WATER_LEVEL + 0.02 || h > 0.52) continue;
 
-      const mesh = new THREE.Mesh(this._geo, this._mat);
+      const mesh = this._createPickupMesh();
       this._scene.add(mesh);
 
       this._resources.push({
@@ -121,8 +230,9 @@ export class ResourceManager {
       // ── Idle ──────────────────────────────────────────────────────────
       if (r.state === 'idle') {
         const vs = r.visualScale ?? 1;
+        const basis = this._pickupScaleBasis(r.mesh);
         r.mesh.position.set(wx, r.baseY + 0.02, wz);
-        r.mesh.scale.setScalar(vs);
+        r.mesh.scale.setScalar(Math.max(1e-8, basis * vs));
         r.mesh.visible = inBounds;
 
         if (uvDist < PICKUP_RADIUS && inBounds) {
@@ -147,7 +257,8 @@ export class ResourceManager {
         if (uvDist > CANCEL_RADIUS) {
           r.state = 'idle';
           r.animY = r.baseY;
-          r.mesh.scale.setScalar(r.visualScale ?? 1);
+          const basis = this._pickupScaleBasis(r.mesh);
+          r.mesh.scale.setScalar(Math.max(1e-8, basis * (r.visualScale ?? 1)));
           if (r.beamMesh) {
             this._scene.remove(r.beamMesh);
             r.beamMesh.material.dispose();
@@ -156,25 +267,30 @@ export class ResourceManager {
           continue;
         }
 
-        // Pull animY toward (shipY - small offset)
-        const targetY = shipY - 0.05;
+        // Always pull at least slightly above ground so range/progress stay stable when the ship is low.
+        const targetY = Math.max(r.baseY + 0.02, shipY - 0.05);
         r.animY = THREE.MathUtils.lerp(r.animY, targetY, Math.min(1, delta * ATTRACT_RATE));
 
-        // Progress 0→1 as resource climbs from baseY to targetY
-        const range    = Math.max(0.001, targetY - r.baseY);
-        const progress = THREE.MathUtils.clamp((r.animY - r.baseY) / range, 0, 1);
+        const range = Math.max(0.001, targetY - r.baseY);
+        const rawP  = (r.animY - r.baseY) / range;
+        const progress = Math.min(1, Math.max(0, Number.isFinite(rawP) ? rawP : 0));
+        const shrink = Math.min(1, Math.max(0.05, 1 - progress * 0.95));
 
         const vs = r.visualScale ?? 1;
-        const scale   = vs * (1 - progress * 0.95);
+        const basis = this._pickupScaleBasis(r.mesh);
         const opacity = 1 - progress;
         r.mesh.visible = inBounds;
         r.mesh.position.set(wx, r.animY, wz);
-        r.mesh.scale.setScalar(Math.max(0.001, scale));
+        r.mesh.scale.setScalar(Math.max(1e-8, basis * vs * shrink));
         r.mat?.setValues?.({ opacity }); // no-op if mat has no opacity (PhongMaterial is opaque)
 
         // Tractor-beam cone hangs straight down from the ship
         if (r.beamMesh) {
-          const vertDist = Math.max(0.01, shipY - r.baseY);
+          const vertDist = THREE.MathUtils.clamp(
+            shipY - r.baseY,
+            BEAM_HEIGHT_MIN,
+            BEAM_HEIGHT_MAX,
+          );
           r.beamMesh.position.set(0, shipY - vertDist * 0.5, 0);
           r.beamMesh.rotation.set(0, 0, 0);   // straight down, no tilt
           r.beamMesh.scale.set(1, vertDist, 1);
@@ -215,9 +331,12 @@ export class ResourceManager {
     const h = sampleHeight(uvx, uvy);
     if (h < WATER_LEVEL + 0.02 || h > 0.52) return;
 
-    const mesh = new THREE.Mesh(this._geo, this._mat);
+    if (!this._useSphereFallback && this._resourceTemplates.length === 0) return;
+
+    const mesh = this._createPickupMesh();
     const vs = 0.5;
-    mesh.scale.setScalar(vs);
+    const basis = this._pickupScaleBasis(mesh);
+    mesh.scale.setScalar(Math.max(1e-8, basis * vs));
     this._scene.add(mesh);
 
     this._resources.push({
@@ -248,13 +367,17 @@ export class ResourceManager {
   /** Clear and scatter a fresh set of resource nodes (e.g. new game session). */
   respawn() {
     this.removeAll();
-    this._scatter();
+    if (this._useSphereFallback || this._resourceTemplates.length > 0) {
+      this._scatter();
+    } else {
+      this._pendingScatterAfterLoad = true;
+    }
   }
 
   dispose() {
     this.removeAll();
-    this._geo.dispose();
-    this._mat.dispose();
+    this._fallbackGeo?.dispose();
+    this._resourceMat?.dispose();
     this._beamGeo.dispose();
   }
 

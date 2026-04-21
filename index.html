@@ -8,9 +8,12 @@
   <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-      "fflate": "https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js"
+      "three": "./js/three.module.js",
+      "fflate": "./js/browser.js",
+      "three/addons/loaders/FBXLoader.js": "./js/jsm/loaders/FBXLoader.js",
+      "three/addons/lines/Line2.js": "./js/jsm/lines/Line2.js",
+      "three/addons/lines/LineGeometry.js": "./js/jsm/lines/LineGeometry.js",
+      "three/addons/lines/LineMaterial.js": "./js/jsm/lines/LineMaterial.js"
     }
   }
   </script>
@@ -55,41 +58,94 @@
 
   <!-- ===================== GAME SCREEN ===================== -->
   <div id="screen-game" class="screen">
+    <!-- Briefing — shown when a run starts (edit copy in place) -->
+    <div id="game-intro-modal" class="modal-overlay game-intro-overlay hidden" aria-hidden="true">
+      <div class="modal game-intro-modal" role="dialog" aria-labelledby="game-intro-title">
+        <div class="modal-header">
+          <h2 id="game-intro-title">CAPTAIN'S LOG — SOL DATE 2847.6</h2>
+        </div>
+        <div class="modal-body game-intro-body">
+          <p class="game-intro-story">
+            <b>Expedition Vessel: Arden IV</b><br><br>
+            We were three days out from the relay beacon when something hit us. Something deliberate — a pulse that fried every navigation system on the ship simultaneously.<br><br>
+            We went down hard.<br><br>
+            I am the only one who walked away from the wreck. The hangar module survived the crash mostly intact, which means I have shelter, a fighter, and whatever equipment I can salvage from the surrounding terrain. I have sent a distress beacon on every frequency I can generate. So far, nothing has answered.  I need to build a signal tower and send a distress call to the fleet.<br><Br>
+            Whatever lives on this world has been watching since we landed. I can see them on the ridge lines at dusk — shapes that don't move like animals. Last night they got closer. Soon, I expect they'll be closer still.<br><Br>
+            I don't know how long rescue will take. I don't know how many of them there are. What I know is this: the hangar holds, or nothing else matters. I will push out as far as I can, take everything this planet will give me, and I will build something they cannot break.<br><Br>
+
+            <b>— Commander Reyes, Arden IV</b><br>
+            Status: Alive. For now.
+          </p>
+          <h3 class="game-intro-subhead">Goals</h3>
+          <ul class="game-intro-goals">
+            <li>Keep the base intact. Hostiles route along the terrain flow toward you.</li>
+            <li>Collect resources to repair, build defense towers, and build the transmission array.</li>
+            <li>Build the array, then send a distress call from the dock to get out alive.</li>
+          </ul>
+        </div>
+        <div class="modal-footer game-intro-footer">
+          <button type="button" class="btn btn-primary" id="btn-game-intro-continue">Begin</button>
+        </div>
+      </div>
+    </div>
+
     <div id="game-hud">
       <div class="hud-top-left">
         <div class="hud-stat" id="hud-hp">Base: 25 / 25</div>
-        <div class="hud-stat" id="hud-wave">Wave: 0</div>
         <div class="hud-stat" id="hud-resources">Resources: 0</div>
       </div>
       <div class="hud-top-right">
         <button class="btn btn-hud" id="btn-game-settings">Settings</button>
-        <button class="btn btn-hud" id="btn-main-menu">Menu</button>
       </div>
-      <canvas id="flow-canvas" width="288" height="288"></canvas>
+      <div id="flow-radar-hud" class="flow-radar-hud">
+        <div class="flow-radar">
+          <canvas id="flow-canvas" width="288" height="288" aria-hidden="true"></canvas>
+          <!-- PNG separate from SVG: embedded &lt;image&gt; inside an SVG used as &lt;img&gt; is blocked by browsers. -->
+          <img
+            class="flow-radar-layer flow-radar-texture"
+            src="assets/textures/radar-1.png"
+            width="288"
+            height="288"
+            alt=""
+            draggable="false"
+          />
+          <img
+            class="flow-radar-layer flow-radar-rings"
+            src="assets/textures/radar-frame.svg"
+            width="288"
+            height="288"
+            alt=""
+            draggable="false"
+          />
+        </div>
+        <p class="flow-radar-hint">[F] toggle base radar</p>
+      </div>
     </div>
 
     <!-- Dock shop — opens when landed on base; game keeps running -->
     <div id="dock-shop-modal" class="modal-overlay dock-shop-overlay hidden" aria-hidden="true">
       <div class="modal dock-shop-modal" role="dialog" aria-labelledby="dock-shop-title">
         <div class="modal-header">
-          <h2 id="dock-shop-title">Base services</h2>
+          <h2 id="dock-shop-title">Base Options</h2>
           <button type="button" class="btn btn-close" id="btn-dock-close" aria-label="Close">&#x2715;</button>
         </div>
         <div class="modal-body dock-shop-body">
           <p class="dock-shop-hint">Spend resources while docked. Close to resume flight.</p>
           <p class="dock-shop-resources" id="dock-shop-resources-readout">Resources: 0</p>
-          <div class="dock-shop-actions">
-            <button type="button" class="btn btn-secondary dock-action" id="btn-dock-repair">Repair base (+1 HP) — 1 <span id="dock-repair-hp">(25/25)</span></button>
-            <button type="button" class="btn btn-secondary dock-action" id="btn-dock-tower">Defense tower — 25 <span class="dock-sub">(then press T in flight to place)</span></button>
-            <div class="dock-transmission-row">
-              <span class="dock-transmission-label">Transmission array</span>
-              <span id="dock-transmission-readout" class="dock-transmission-count">(0/100)</span>
-              <button type="button" class="btn btn-secondary dock-action" id="btn-dock-transmission-add">+1 (1 resource)</button>
+          <div class="dock-shop-actions-scroll">
+            <div class="dock-shop-actions">
+              <button type="button" class="btn btn-secondary dock-action dock-card" id="btn-dock-repair">Repair base (+1 HP) — 1 <span id="dock-repair-hp">(25/25)</span></button>
+              <button type="button" class="btn btn-secondary dock-action dock-card" id="btn-dock-tower">Defense tower — 25 <span class="dock-sub">(then press T in flight to place)</span></button>
+              <div class="dock-transmission-row dock-card">
+                <span class="dock-transmission-label">Transmission array</span>
+                <span id="dock-transmission-readout" class="dock-transmission-count">(0/100)</span>
+                <button type="button" class="btn btn-secondary dock-action dock-action-inline" id="btn-dock-transmission-add">+1 (1 resource)</button>
+              </div>
+              <button type="button" class="btn btn-secondary dock-action dock-card" id="btn-dock-weapon">
+                Upgrade weapons (+10% range &amp; fire rate) — <span id="dock-weapon-cost">15</span>
+              </button>
+              <button type="button" class="btn btn-primary dock-action dock-card hidden" id="btn-dock-distress">Send Distress Call</button>
             </div>
-            <button type="button" class="btn btn-secondary dock-action" id="btn-dock-weapon">
-              Upgrade weapons (+10% range &amp; fire rate) — <span id="dock-weapon-cost">15</span>
-            </button>
-            <button type="button" class="btn btn-primary dock-action hidden" id="btn-dock-distress">Send Distress Call</button>
           </div>
         </div>
       </div>
@@ -149,9 +205,12 @@
         </div>
 
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" id="btn-save-settings">Save</button>
-        <button class="btn btn-ghost" id="btn-cancel-settings">Cancel</button>
+      <div class="modal-footer settings-modal-footer">
+        <button type="button" class="btn btn-danger btn-abandon" id="btn-abandon-run" disabled>Abandon run</button>
+        <div class="settings-modal-footer-actions">
+          <button class="btn btn-primary" id="btn-save-settings">Save</button>
+          <button class="btn btn-ghost" id="btn-cancel-settings">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
