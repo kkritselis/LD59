@@ -1,10 +1,12 @@
-# LD59# Signal's Edge
+# LD59 — Signal's Edge
 ### *They came from every direction. You came from somewhere worse.*
 
-A top-down survival defense game where you balance base protection, resource gathering, and signal integrity on a hostile alien world. After crash landing, you must expand outward under constant pressure, harvesting materials to construct and stabilize a transmission tower while escalating alien waves force you to choose between defense, exploration, and getting a signal out before everything collapses.
+A top-down survival defense game where you balance base protection, resource gathering, and signal integrity on a hostile alien world. After crash landing, you must expand outward under constant pressure, harvesting materials to construct and stabilize a transmission array while escalating alien waves force you to choose between defense, exploration, and getting a distress signal out before everything collapses.
 
-**Engine:** Three.js (HTML5)  
-**Submitted to:** Ludum Dare 59 · Fireside Jam · GDFG · 100 Day Jam
+**Engine:** Three.js (HTML5), ES modules  
+**Jam track:** Ludum Dare 59 · Fireside Jam · GDFG · 100 Day Jam  
+
+**Ludum Dare 59 build weekend:** April 17–19, 2026 — **complete** (first milestone shipped to itch / LD hosting as applicable).
 
 ---
 
@@ -21,146 +23,149 @@ Rather than burning out on a single 72-hour jam, this project runs across four o
 
 ---
 
-## Week 1 — Ludum Dare (Due Sunday Apr 19)
-*Does it feel like a game? Ugly is fine. Submit it.*
+## Week 1 — Ludum Dare 59 (Apr 17–19, 2026) — COMPLETE
 
-### Core
-- [x] Three.js scene with procedural terrain
-- [x] Ship model loaded and placed
-- [x] Delta-time corrected game loop
-- [x] WASD / arrow key flight controls
-- [x] Ship banking and pitch on movement
-- [x] Autopilot takeoff and landing sequence
-- [x] Hangar / base model placed at terrain origin
-- [x] Geological cross-section view
-- [x] Sky shader with alien atmosphere
-- [x] Menu screen with title and start button
-- [x] Screen manager (Menu → Game → Settings)
-- [x] Audio manager (volume control scaffolding)
+*Goal: does it feel like a game? Ship something playable.*
 
-### Still Needed This Weekend
-- [x] Enemy spawning — cones/placeholder meshes at radius around base
-- [x] Enemy movement — flow field pathfinding toward hangar each frame
-- [x] Base health — integer value, decrements on enemy contact
-- [ ] Game over state — stop loop, show "YOU DIED" overlay
-- [x] Wave timer — 1-minute intervals, enemy count doubles each wave (1→2→4→…→256)
-- [x] HUD overlay — base HP, wave counter, resource count (HTML divs)
-- [x] Ship autofire — laser beam fires at nearest enemy in range, instant kill
-- [ ] One placeable turret — click terrain to place, shoots nearest enemy
-- [ ] Win condition — survive N waves
+### Core loop (all in the LD59 build)
 
-### Also Completed (beyond original scope)
-- [x] Flow field (Dijkstra, 96×96 UV grid) — terrain-aware enemy pathfinding with water, steepness, and elevation barriers
-- [x] Radar HUD — live minimap showing flow field heatmap, enemy positions, and ship location
-- [x] Direction arrow — sprite above ship always points toward base
-- [x] Target reticle — projected onto terrain under ship
-- [x] Resource nodes — 50 blue spheres scattered across terrain with tractor-beam collection animation
-- [x] Resource inventory counter on HUD
-- [x] Enemy terrain clipping — enemies hidden when scrolled beyond terrain tile boundary
-- [x] Laser beam visual — animated dashed `Line2` beam with `LineDashedMaterial` dashOffset scroll
+- [x] Three.js scene with procedural terrain (shader heightmap + CPU mirror in `terrain.js`)
+- [x] Ship, hangar, transmission mast, defense tower pieces, resource pickups — FBX from Synty-style assets (`FBXLoader`, local `js/jsm` + `js/three.module.js` via import map in `index.html`)
+- [x] Delta-time game loop; screen flow Loading → Menu → Game; settings modal
+- [x] WASD / arrow flight; ship banking and pitch; autopilot takeoff / landing; snap-to-pad when near base
+- [x] Geological cross-section; sky shader; menu with procedural background; intro briefing modal (“Begin”)
+- [x] **Enemies** — shared `TorusKnotGeometry` mesh (maroon material, tumbling rotation), spawned on expanded flow-field border; movement via Dijkstra flow field toward base; base HP damage on contact; hidden when scrolled past terrain tile
+- [x] **Waves** — timer (~60s), count doubles each wave up to cap (1 → 2 → 4 → … → 256)
+- [x] **Ship laser** — dashed `Line2` / `LineMaterial` toward nearest enemy in range; SFX hooks
+- [x] **Resources** — 100 pickup nodes (FBX + fallback), tractor beam when in range; HUD resource count
+- [x] **Dock shop** — opens when landed on pad (after first departure); repair, defense tower purchase, transmission funding, weapon tier upgrade, distress call when array is fully funded
+- [x] **Defense towers** — purchase at dock, place with **T** in flight (FBX base + weapon when templates load); tower lasers and SFX
+- [x] **Win** — fund transmission to goal, send distress from dock; win overlay
+- [x] **Radar HUD** — optional flow-field canvas overlay (**F**); enemy dots, ship, base markers
+- [x] Direction arrow and target reticle above terrain
+- [x] **AudioManager** — master / SFX / music / ambient gains; BGM loop after Begin; decode via `fetch` with XHR fallback; `localStorage` for settings when allowed (embed sandboxes may block storage)
+
+### Known gaps (nice-to-have, not blocking LD59)
+
+- [ ] Full **game over** presentation when base HP reaches 0 (currently stops / logs; no dedicated overlay)
+- [ ] Further difficulty and economy tuning from playtests
 
 ---
 
-## Week 2 — Fireside Jam (Due Sunday Apr 26)
+## Week 2 — Fireside Jam (due Sunday Apr 26)
+
 *Someone else could pick it up and understand it.*
 
 ### Enemies
-- [ ] Load alien FBX — replace placeholder cones
-- [ ] Two additional enemy types (fast/fragile, slow/tanky)
-- [ ] Enemy death effect (particle burst or flash)
 
-### Combat & Building
-- [x] Ship weapon — autofires laser toward nearest enemy in range
-- [ ] Two additional turret types (area, long range)
-- [x] Resource node — collectible pickups scattered on terrain with tractor beam
-- [ ] Resource currency — spend to place turrets
+- [ ] Optional alien creature FBX again (currently torus-knot placeholder reads well and avoids asset/version drift)
+- [ ] Additional enemy archetypes (fast / tanky) with distinct silhouettes
+- [ ] Death VFX (burst, dissolve, or flash)
+
+### Combat and building
+
+- [x] Ship weapon — autofire laser (see Week 1)
+- [x] Defense tower — purchasable, placeable, fires on enemies
+- [ ] Additional tower variants (area denial, long range)
+- [x] Resources as currency — spent in dock (repair, tower, transmission segments, weapon upgrade)
 
 ### Feel
-- [ ] Sound effects (weapon fire, explosion, turret shot)
+
+- [x] Core SFX — pickup, ship blaster, tower blaster; ambient / music channels exist
 - [ ] Screen shake on base hit
-- [ ] Fog of war / unexplored terrain darkening
-- [ ] UI polish — styled HUD, readable fonts, wave announcement
-- [ ] Game over screen
+- [ ] Fog of war / unexplored terrain treatment
+- [ ] HUD polish — wave callouts, clearer onboarding strings
+- [ ] Game over screen (paired with gap above)
 
 ---
 
-## Week 3 — GDFG (Due Sunday May 3)
+## Week 3 — GDFG (due Sunday May 3)
+
 *The Double Crisis theme earns its keep.*
 
 ### Depth
-- [x] Wave escalation curve — enemy count doubles per minute (1→2→4→…→256, then holds)
-- [ ] Boss wave — large enemy, telegraphed arrival
-- [ ] Double crisis mechanic — two spawn points on opposite sides of map activate simultaneously
-- [ ] Signal tower — core structure to build and protect, win condition tied to it
-- [ ] Ship upgrade system — Vampire Survivors style level-up pick on XP threshold
+
+- [x] Wave escalation — doubling schedule with cap (see Week 1)
+- [ ] Boss or set-piece wave
+- [ ] **Double crisis** mechanic — two simultaneous pressure sources on opposite sides of the map
+- [x] Transmission array — staged funding + distress win (extend with more drama / failure states if desired)
+- [ ] Ship upgrade pick-ups or meta progression between sorties
 
 ### World
-- [ ] Map events — signal anomalies that trigger when investigated
-- [ ] Environmental hazard — storm, terrain damage, or visibility disruption
-- [ ] Exploration reward — resource caches hidden in fog of war
+
+- [ ] Map events — anomalies, escorts, or timed hazards
+- [ ] Environmental hazard — storm, visibility, or terrain damage layer
+- [ ] Exploration rewards — caches tied to riskier terrain or flow-field corners
 
 ---
 
-## Week 4 — 100 Day Jam (Due May 12)
+## Week 4 — 100 Day Jam (due May 12)
+
 *The game you always wished you had time for.*
 
 ### Meta
-- [ ] Roguelite run structure — fresh start each run, persistent unlocks
-- [ ] Persistent upgrade tree — unlocks carry between runs
-- [ ] Multiple ship types with different stats
+
+- [ ] Roguelite run structure with persistent unlocks
+- [ ] Upgrade tree across runs
+- [ ] Multiple ships / loadouts
 
 ### Polish
-- [ ] Full particle system — explosions, resource collection, thruster trails
-- [ ] Music — ambient alien atmosphere track
-- [ ] Full sound design pass
-- [ ] Difficulty tuning from playtesting
-- [ ] Enemy variety pass — visual distinction between all types
-- [ ] Lore / codex entries discovered through exploration
-- [ ] Leaderboard or score screen
+
+- [ ] Particle pass — impacts, thrusters, collection sparkle
+- [ ] Full music / ambience bed and mix pass
+- [ ] Difficulty and UX tuning from wider playtests
+- [ ] Enemy and tower read hierarchy at a glance
+- [ ] Lore or log entries
+- [ ] Score / time leaderboard if scope allows
 
 ---
 
 ## Architecture
 
 ```
+index.html                — import map: `three` → ./js/three.module.js; explicit ./js/jsm/... addon paths; optional ./js/browser.js (fflate) if needed
 js/
+  three.module.js         — Three r169 bundle (keep in sync with js/jsm addon versions)
+  jsm/                    — examples modules (FBXLoader, lines, curves, libs/fflate.module.js, …)
   shaders/
-    noise.js              — GLSL noise functions (shared)
+    noise.js              — GLSL noise (shared)
     terrain.vert.js       — Terrain vertex shader
     terrain.frag.js       — Terrain fragment shader
-  AudioManager.js         — Volume control for BGM / SFX / music
-  EnemyManager.js         — Flow field construction, enemy spawn/move/kill
-  GameScreen.js           — Scene, camera, renderer, game loop, weapon, HUD
-  LoadingScreen.js        — Asset preload screen
-  MenuScreen.js           — Title screen with procedural planet shader background
-  ResourceManager.js      — Resource node scatter, tractor-beam pickup animation
-  ScreenManager.js        — Routes between screens
-  SettingsModal.js        — Settings overlay
-  terrain.js              — CPU-side heightmap (mirrors GLSL, used by Enemy/Resource managers)
+  AudioManager.js         — Web Audio graph, buffers, settings persistence
+  EnemyManager.js         — Flow field, spawn, update, kill; shared enemy geometry + material
+  GameScreen.js           — Scene, loop, ship, weapons, dock, transmission, win, HUD wiring
+  LoadingScreen.js        — Boot bar (simulated steps)
+  MenuScreen.js           — Title + procedural background
+  ResourceManager.js      — Scatter, tractor beam, collection
+  ScreenManager.js        — Screen fades
+  SettingsModal.js        — Audio sliders; abandon run when in game
+  terrain.js              — CPU heightmap (mirrors shader; flow + placement)
+  main.js                 — Bootstrap
 
 assets/
-  obj/                    — FBX models (Synty Sci-Fi pack)
-  textures/               — Atlas textures, terrain channels, SVG overlays
-  audio/                  — BGM and SFX
+  obj/                    — FBX models
+  textures/               — Atlases, SVG HUD art, terrain channels
+  audio/                  — BGM and WAV SFX
 ```
 
-### Coordinate System
-The ship is always at world `(0, y, 0)`. The terrain and hangar slide in the opposite direction of the offset to create the illusion of movement. Enemies and resources live in heightmap UV space `(0–1)` and derive world position each frame via:
+### Coordinate system
+
+The ship stays at world `(0, y, 0)`. Terrain and hangar move opposite the scroll offset. Enemies and resources use heightmap UV coordinates; each frame:
+
 ```
 worldX = (uvx - 0.5) * uScale - offset.x
 worldZ = -(uvy - 0.5) * uScale + offset.y
 ```
-This keeps all game objects correctly pinned to the scrolling terrain regardless of how far the player has flown.
 
-### Flow Field
-A 96×96 Dijkstra grid is pre-computed from the base center (UV 0.5, 0.5) at game start. Each cell stores a direction vector toward the base and a speed multiplier. Three terrain types are impassable: water (`h < 0.45`), steep cliffs (slope `> 1.0`), and thin-air peaks (`h > 0.525`). Enemies sample the nearest cell and step in UV space each frame — no per-enemy pathfinding, just a single array lookup.
+### Flow field
+
+`EnemyManager` builds a **Dijkstra** field on a square UV grid whose span is controlled by `FLOW_FIELD_AREA_MULT` (currently **4×** the unit tile’s area, so each axis spans `sqrt(4)` around `0.5`). Grid resolution scales with that span so cell size stays in the same ballpark as the original 96×96 on a 1×1 tile. Each cell stores direction toward base, speed factor, and blocked flags for water, excessive slope, and high-altitude “thin air” cells. Enemies only **sample** the field each frame (no per-agent A* ).
 
 ---
 
 ## Notes
-- All movement is delta-time corrected — behavior is frame-rate independent
-- Drag uses `Math.pow(0.35, delta)` — exponential form keeps half-life constant regardless of FPS
-- Lerps use `Math.min(1, delta * rate)` — clamps at 1 so frame spikes can't overshoot
-- Menu and Game renderers use isolated `THREE.Clock` instances — neither affects the other's timing
-- Enemies spawn on the UV border (terrain perimeter) and navigate inward via flow field
-- Resources spawn on valid mid-elevation terrain, collected via tractor beam when ship flies over
+
+- Movement uses delta time; drag uses `Math.pow(0.35, delta)`; lerps clamp with `Math.min(1, delta * rate)`.
+- Menu and game each use their own `THREE.Clock` so timing stays isolated.
+- Keep **`js/three.module.js`** and **`js/jsm/**`** on the **same Three.js revision** (or patch APIs like `ColorManagement.toWorkingColorSpace` vs `colorSpaceToWorking` when mixing versions).
+- FBX textures resolve with `setResourcePath('assets/textures/')`; embedded paths inside FBX must still exist under the zip layout for hosting (e.g. Ludum Dare embed).
