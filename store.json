@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "id": "repair",
+      "action": "repair",
+      "name": "Base Armor Repair",
+      "description": "Restore hull integrity to the grounded hangar. Each purchase restores 1 armor up to the maximum.",
+      "cost": 1,
+      "damage": "—",
+      "armor": "+1 / buy",
+      "current": "0",
+      "max": "25",
+      "image": "assets/textures/base_repair_btn.png"
+    },
+    {
+      "id": "transmission",
+      "action": "transmission",
+      "name": "Transmission Array",
+      "description": "Complete the array to unlock sending a distress call from the dock.",
+      "cost": 1,
+      "damage": "—",
+      "armor": "—",
+      "current": "0",
+      "max": "100",
+      "image": "assets/textures/transmission_build_btn.png"
+    },
+    {
+      "id": "tower_mini",
+      "action": "tower_mini",
+      "name": "Mini Defense Turret",
+      "description": "Purchase a defense tower license. After buying, press T while flying to place the turret in the world.",
+      "cost": 25,
+      "damage": "Blaster",
+      "armor": "—",
+      "current": "0",
+      "max": "—",
+      "image": "assets/textures/mini_tower_btn.png"
+    },
+    {
+      "id": "tower_medium",
+      "action": "tower_medium",
+      "name": "Medium Defense Turret",
+      "description": "Purchase a defense tower license (medium tier art; same placement flow as mini until tiers are split in code).",
+      "cost": 25,
+      "damage": "Blaster",
+      "armor": "—",
+      "current": "0",
+      "max": "—",
+      "image": "assets/textures/medium_tower_btn.png"
+    },
+    {
+      "id": "tower_mega",
+      "action": "tower_mega",
+      "name": "Mega Defense Turret",
+      "description": "Purchase a defense tower license (mega tier art; same placement flow as mini until tiers are split in code).",
+      "cost": 25,
+      "damage": "Blaster",
+      "armor": "—",
+      "current": "0",
+      "max": "—",
+      "image": "assets/textures/mega_tower_btn.png"
+    }
+  ]
+}

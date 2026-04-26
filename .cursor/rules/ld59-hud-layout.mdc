@@ -1,0 +1,17 @@
+---
+description: Preserve hand-tweaked game HUD HTML/CSS in LD59 (frame, radar, stats, fonts).
+globs: index.html,css/style.css
+alwaysApply: false
+---
+
+# LD59 HUD and layout (user-maintained)
+
+The game screen markup in `index.html` and styles in `css/style.css` include **manual layout and typography tweaks** (frame layers, radar position, resources readout positions, base armor / HP bar structure, Environment Controls button, z-index stacking, etc.).
+
+When editing this project:
+
+1. **Read the current file** before changing HUD-related sections. Do not restore older values from chat memory or prior diffs.
+2. **Prefer minimal, localized edits.** Extend or add rules instead of replacing large blocks of HUD/CSS unless the user asks for a reset.
+3. **Do not “fix”** positioning, `z-index`, `clamp()`, font sizes, or HTML structure the user has already adjusted unless they explicitly request a change.
+
+If something must change for a feature (e.g. new element IDs for JS), **preserve** surrounding layout and styling and call out what moved in the summary.

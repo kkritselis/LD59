@@ -189,8 +189,15 @@ export class GameScreen {
     this._resourceCount   = 0;
 
     // HUD element references (cached once)
-    this._hudHP        = document.getElementById('hud-hp');
-    this._hudResources = document.getElementById('hud-resources');
+    this._hudHPValue   = document.getElementById('hud-hp-value');
+    this._hudHPBar     = document.getElementById('hud-hp-bar');
+    /** @type {HTMLSpanElement[]|null} */
+    this._hudHPSegments = null;
+    this._initHudHpBar();
+
+    this._hudResourcesValue = document.getElementById('hud-resources-value');
+
+    this._baseBackdropEl = document.getElementById('game-base-backdrop');
 
     // Radar / flow field overlay — on by default, F key toggles it
     this._flowRadarHud  = document.getElementById('flow-radar-hud');
@@ -204,6 +211,10 @@ export class GameScreen {
     this._dockModalEl       = null;
     this._dockModalOpen     = false;
     this._dockLandingLatch = false;
+    /** @type {null | { id: string, action: string, name: string, description: string, cost: number, image: string, max?: string|number }[]> */
+    this._storeItems        = null;
+    /** @type {Promise<void> | null} */
+    this._storeLoadPromise  = null;
     /** True after the player leaves the pad once — suppresses shop on session start. */
     this._playerHasLeftPadOnce = false;
 
@@ -236,6 +247,7 @@ export class GameScreen {
     this._initScene();
     this._bindHUD();
     this._bindDockShop();
+    this._startDockStoreLoad();
     this._bindResize();
     this._bindKeys();
   }
@@ -270,6 +282,7 @@ export class GameScreen {
     this._resourceManager?.removeAll();
     this._clearBuildables();
     this._closeDockShop();
+    this._syncBaseDockBackdrop(false);
     this._hideWinOverlay();
     if (this._dustPoints) {
       this.scene?.remove(this._dustPoints);
@@ -301,8 +314,9 @@ export class GameScreen {
     this._waveTimer = 60.0;
     this._fireTimer = 0;
 
-    if (this._hudHP) this._hudHP.textContent = `Base: ${this._baseHP} / ${BASE_MAX_HP}`;
-    if (this._hudResources) this._hudResources.textContent = `Resources: ${this._formatResourceAmount(0)}`;
+    this._syncBaseDockBackdrop(false);
+    this._syncBaseHpHud();
+    if (this._hudResourcesValue) this._hudResourcesValue.textContent = this._formatResourceAmount(0);
 
     this._clearBuildables();
     this._resourceManager?.respawn();
@@ -372,12 +386,15 @@ export class GameScreen {
     }
   }
 
-  _openDockShop() {
+  async _openDockShop() {
     if (this._dockModalOpen || !this._dockModalEl || this._baseHP <= 0) return;
     this._snapShipToPlatform();
     this._dockModalOpen = true;
     this._dockModalEl.classList.remove('hidden');
     this._dockModalEl.setAttribute('aria-hidden', 'false');
+    try {
+      await this._storeLoadPromise;
+    } catch { /* store load failed; UI still opens */ }
     this._refreshDockShopUI();
   }
 
@@ -386,6 +403,32 @@ export class GameScreen {
     this._dockModalOpen = false;
     this._dockModalEl.classList.add('hidden');
     this._dockModalEl.setAttribute('aria-hidden', 'true');
+    this._syncBaseDockBackdrop(false);
+  }
+
+  /** Show or hide the hangar full-screen backdrop (used by `_updateBaseDockBackdrop` and reset/stop). */
+  _syncBaseDockBackdrop(visible) {
+    const el = this._baseBackdropEl;
+    if (!el) return;
+    el.classList.toggle('is-visible', visible);
+    el.setAttribute('aria-hidden', visible ? 'false' : 'true');
+  }
+
+  /**
+   * Hangar backdrop only after the player has left the pad at least once, and only while
+   * the dock shop modal is open (hides as soon as the modal closes).
+   */
+  _updateBaseDockBackdrop() {
+    const DOCK_RADIUS = 0.25;
+    const dist = this._offset.length();
+    const fullyDocked = dist < DOCK_RADIUS && this._landFactor > 0.96;
+    const show = (
+      fullyDocked
+      && this._playerHasLeftPadOnce
+      && this._dockModalOpen
+      && this._baseHP > 0
+    );
+    this._syncBaseDockBackdrop(show);
   }
 
   _formatResourceAmount(n) {
@@ -403,20 +446,43 @@ export class GameScreen {
     const wSpan = el('dock-weapon-cost');
     if (wSpan) wSpan.textContent = String(wCost);
 
-    const hpSpan = el('dock-repair-hp');
-    if (hpSpan) hpSpan.textContent = `(${this._baseHP}/${BASE_MAX_HP})`;
+    const items = this._storeItems;
+    if (items && this._dockModalEl) {
+      for (const item of items) {
+        const card = this._dockModalEl.querySelector(`.dock-store-card[data-store-id="${item.id}"]`);
+        if (!card) continue;
+        const buy = card.querySelector('.dock-store-buy');
+        const setText = (bind, text) => {
+          const node = card.querySelector(`[data-bind="${bind}"]`);
+          if (node) node.textContent = text;
+        };
+        setText('cost', String(item.cost ?? ''));
 
-    const txSpan = el('dock-transmission-readout');
-    if (txSpan) txSpan.textContent = `(${this._transmissionProgress}/${TRANSMISSION_GOAL})`;
-
-    const bRepair = el('btn-dock-repair');
-    if (bRepair) bRepair.disabled = r < 1 || this._baseHP >= BASE_MAX_HP;
-    const bTower = el('btn-dock-tower');
-    if (bTower) bTower.disabled = r < TOWER_COST;
-    const bTxAdd = el('btn-dock-transmission-add');
-    if (bTxAdd) {
-      bTxAdd.disabled = r < 1 || this._transmissionProgress >= TRANSMISSION_GOAL;
+        let disabled = true;
+        let ratioText = '';
+        const act = item.action;
+        if (act === 'repair') {
+          ratioText = `${this._baseHP}/${BASE_MAX_HP}`;
+          disabled = r < 1 || this._baseHP >= BASE_MAX_HP;
+        } else if (act === 'transmission') {
+          ratioText = `${this._transmissionProgress}/${TRANSMISSION_GOAL}`;
+          disabled = r < 1 || this._transmissionProgress >= TRANSMISSION_GOAL;
+        } else if (typeof act === 'string' && act.startsWith('tower')) {
+          const n = this._defenseTowers?.length ?? 0;
+          const rawMax = item.max;
+          let maxPart = '—';
+          if (rawMax != null && rawMax !== '' && rawMax !== '—') {
+            const num = Number(rawMax);
+            if (!Number.isNaN(num)) maxPart = String(rawMax);
+          }
+          ratioText = `${n}/${maxPart}`;
+          disabled = r < TOWER_COST;
+        }
+        setText('ratio', ratioText);
+        if (buy) buy.disabled = disabled;
+      }
     }
+
     const bDistress = el('btn-dock-distress');
     if (bDistress) {
       if (this._distressSent) bDistress.classList.add('hidden');
@@ -429,15 +495,38 @@ export class GameScreen {
 
   _syncResourceHud() {
     const s = this._formatResourceAmount(this._resourceCount);
-    if (this._hudResources) this._hudResources.textContent = `Resources: ${s}`;
+    if (this._hudResourcesValue) this._hudResourcesValue.textContent = s;
     if (this._dockModalOpen) this._refreshDockShopUI();
+  }
+
+  _initHudHpBar() {
+    const track = this._hudHPBar;
+    if (!track || track.querySelector('.hud-hp-bar-seg')) return;
+    track.setAttribute('aria-valuemax', String(BASE_MAX_HP));
+    this._hudHPSegments = [];
+    for (let i = 0; i < BASE_MAX_HP; i++) {
+      const seg = document.createElement('span');
+      seg.className = 'hud-hp-bar-seg';
+      seg.setAttribute('aria-hidden', 'true');
+      track.appendChild(seg);
+      this._hudHPSegments.push(seg);
+    }
+  }
+
+  _syncBaseHpHud() {
+    if (this._hudHPValue) this._hudHPValue.textContent = `${this._baseHP} / ${BASE_MAX_HP}`;
+    if (this._hudHPBar) this._hudHPBar.setAttribute('aria-valuenow', String(this._baseHP));
+    const segs = this._hudHPSegments;
+    if (segs) {
+      for (let i = 0; i < BASE_MAX_HP; i++) segs[i].classList.toggle('is-on', i < this._baseHP);
+    }
   }
 
   _purchaseRepair() {
     if (this._resourceCount < 1 || this._baseHP >= BASE_MAX_HP) return;
     this._resourceCount -= 1;
     this._baseHP += 1;
-    if (this._hudHP) this._hudHP.textContent = `Base: ${this._baseHP} / ${BASE_MAX_HP}`;
+    this._syncBaseHpHud();
     this._syncResourceHud();
   }
 
@@ -721,21 +810,109 @@ export class GameScreen {
     document.getElementById('btn-dock-close')?.addEventListener('click', () => {
       this._closeDockShop();
     });
-    document.getElementById('btn-dock-repair')?.addEventListener('click', () => {
-      this._purchaseRepair();
-    });
-    document.getElementById('btn-dock-tower')?.addEventListener('click', () => {
-      this._purchaseTower();
-    });
-    document.getElementById('btn-dock-transmission-add')?.addEventListener('click', () => {
-      this._purchaseTransmissionOne();
-    });
     document.getElementById('btn-dock-distress')?.addEventListener('click', () => {
       this._sendDistressCall();
     });
     document.getElementById('btn-dock-weapon')?.addEventListener('click', () => {
       this._purchaseWeapon();
     });
+  }
+
+  _startDockStoreLoad() {
+    this._storeLoadPromise = fetch('./store.json')
+      .then((res) => {
+        if (!res.ok) throw new Error(`store.json ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        this._storeItems = Array.isArray(data?.items) ? data.items : [];
+        this._buildDockStoreCards();
+      })
+      .catch((err) => {
+        console.warn('[GameScreen] store.json', err);
+        this._storeItems = [];
+      });
+  }
+
+  /** Resolve store image path relative to the document (same as paths in index.html). */
+  _storeImageUrl(path) {
+    const raw = String(path ?? '').trim();
+    if (!raw) return '';
+    try {
+      return new URL(raw, document.baseURI || window.location.href).href;
+    } catch {
+      return raw;
+    }
+  }
+
+  _buildDockStoreCards() {
+    const root = document.getElementById('dock-store-cards');
+    if (!root || !this._storeItems?.length) return;
+
+    root.replaceChildren();
+
+    for (const item of this._storeItems) {
+      if (!item?.id || !item.image) continue;
+      const article = document.createElement('article');
+      article.className = 'dock-store-card';
+      article.dataset.storeId = item.id;
+
+      const frame = document.createElement('div');
+      frame.className = 'dock-store-card-frame';
+
+      const img = document.createElement('img');
+      img.className = 'dock-store-card-art';
+      img.src = this._storeImageUrl(item.image);
+      img.alt = '';
+      img.draggable = false;
+      img.decoding = 'async';
+
+      const body = document.createElement('div');
+      body.className = 'dock-store-card-body';
+
+      const main = document.createElement('div');
+      main.className = 'dock-store-card-main';
+
+      const h3 = document.createElement('h3');
+      h3.className = 'dock-store-name';
+      h3.textContent = item.name ?? '';
+
+      const p = document.createElement('p');
+      p.className = 'dock-store-desc';
+      p.textContent = item.description ?? '';
+
+      const ratio = document.createElement('span');
+      ratio.className = 'dock-store-ratio';
+      ratio.dataset.bind = 'ratio';
+
+      const costNum = document.createElement('span');
+      costNum.className = 'dock-store-costnum';
+      costNum.dataset.bind = 'cost';
+
+      const buy = document.createElement('button');
+      buy.type = 'button';
+      buy.className = 'dock-store-buy';
+      buy.dataset.action = item.action ?? '';
+      buy.setAttribute('aria-label', `Buy ${item.name ?? item.action ?? 'item'}`);
+      buy.addEventListener('click', () => this._onStorePurchase(item.action));
+
+      main.appendChild(h3);
+      main.appendChild(p);
+      main.appendChild(ratio);
+      main.appendChild(costNum);
+      body.appendChild(main);
+      body.appendChild(buy);
+      frame.appendChild(img);
+      frame.appendChild(body);
+      article.appendChild(frame);
+      root.appendChild(article);
+    }
+  }
+
+  _onStorePurchase(action) {
+    if (action === 'repair') this._purchaseRepair();
+    else if (action === 'transmission') this._purchaseTransmissionOne();
+    else if (typeof action === 'string' && action.startsWith('tower')) this._purchaseTower();
   }
 
   // ── Game loop ──────────────────────────────────────────────────────────────
@@ -878,6 +1055,8 @@ export class GameScreen {
       this._openDockShop();
     }
 
+    this._updateBaseDockBackdrop();
+
     // ── Ship model: heading rotation + banking roll ────────────────────────
     if (this._ship) {
       // Math.PI - angle so that D (increasing angle) rotates the nose clockwise (right first).
@@ -984,6 +1163,7 @@ export class GameScreen {
       const dmg = this._enemyManager.update(delta, off);
       if (dmg > 0) {
         this._baseHP = Math.max(0, this._baseHP - dmg);
+        this._syncBaseHpHud();
         if (this._baseHP === 0) {
           console.warn('[Game Over] Base destroyed!');
           this._closeDockShop();
@@ -991,9 +1171,6 @@ export class GameScreen {
           // TODO: show game-over screen
         }
       }
-
-      // HUD text
-      if (this._hudHP)   this._hudHP.textContent  = `Base: ${this._baseHP} / ${BASE_MAX_HP}`;
 
       // Flow field overlay (drawn every frame so enemy dots stay live)
       if (this._showFlowField && this._flowCanvas) {

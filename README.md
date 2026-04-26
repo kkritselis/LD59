@@ -1,3 +1,5 @@
+![Signal's Edge — game logo](assets/textures/logo.png)
+
 # LD59 — Signal's Edge
 ### *They came from every direction. You came from somewhere worse.*
 
@@ -8,7 +10,7 @@ A top-down survival defense game where you balance base protection, resource gat
 
 **Ludum Dare 59 (Apr 17–19, 2026):** **complete** — first milestone shipped (LD / embed / local package).
 
-**Fireside Jam (Apr 17–26, 2026, theme: Manage):** **in progress** — second weekend of the multi-jam experiment. Jam deadline is tight; personal schedule limits this sprint to a **single concentrated work block (~12–14 hours)** before travel (San Antonio). Optimize for shippable deltas: credits compliance, clearer presentation, stronger early-game feel, and one solid enemy visual pass.
+**Fireside Jam (Apr 17–26, 2026, theme: Manage):** **in progress** — second weekend of the multi-jam experiment. Jam deadline is tight; personal schedule limits this sprint to a **single concentrated work block (~12–14 hours)**. Optimize for shippable deltas: credits compliance, clearer presentation, stronger early-game feel, and one solid enemy visual pass.
 
 ---
 
@@ -31,11 +33,11 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 
 ### Must / should ship today
 
-- [ ] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** add a dedicated **Credits** tab/section (alongside audio controls) so judges and players can find it without hunting a separate file.
+- [ ] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
 - [ ] **Enemy creature FBX** — replace shared **torus-knot** placeholder with the new enemy model; match scale/orientation to terrain; keep flow-field movement + cleanup paths sound.
 - [ ] **Wave pacing** — address LD feedback: **first waves felt too slow**. Tune `_waveTimer` / first-wave delay / initial counts so action ramps sooner without instant overwhelm (see `GameScreen.js` wave block).
 - [ ] **Spawn presentation** — stop enemies **materializing in a long line on the UV border**; add **spawn holes / surface portals** (mesh + short emerge animation or staged visibility) so spawns read as “emerging from the ground” at a small set of perimeter points.
-- [ ] **UI pass** — wire **new texture art** under `assets/textures/` (modal frames, settings chrome, buttons on/off states, `system_modal.png`, etc.) into `index.html` / `css/style.css` / modals as designed. Note: `frame_bottom_rigft.png` looks like a filename typo (`right`) — fix when referencing to avoid 404s.
+- [ ] **UI pass (remaining)** — extra modal chrome, polish pass on store card typography vs art. **Shipped in-repo:** game-screen **frame overlay** (corners + edge strips; BL over radar); **Base Armor** + **Resources** HUD; **Environment Controls** typography; **settings** panel (`settings_modal.png`, audio sliders only, image close/abandon, header toggles **Audio** vs **System** tab with `system_modal.png`); **dock store** from **`store.json`** (vertical image cards, ratio `current/max`, cost number, `buy_btn_off` / `buy_btn_over`); **hangar backdrop** `base_bkgd.png` while dock shop is open after first leave-pad return (`#game-base-backdrop` in `#game-hud`). BR corner filename remains `frame_bottom_rigft.png` unless renamed with paths.
 - [ ] **Audio “attention” pass** — once clips exist: stronger sting for wave start / tension; **attack / impact SFX** when enemies **damage the base** or **pressure a tower** (distinct from generic ambience). *Asset discovery TBD; reserve hooks in `AudioManager` / game loop.*
 
 ### Ship / ops (non-code or parallel)
@@ -66,11 +68,12 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 - [x] **Enemies** — shared **`TorusKnotGeometry`** placeholder (maroon, tumbling); flow-field border spawn; Dijkstra movement; base damage on contact; culled past terrain tile
 - [x] **Waves** — ~**60 s** timer, count doubles each wave to cap (1 → 2 → 4 → … → 256) — *schedule itself is a tuning target for Fireside (see sprint goals)*
 - [x] **Ship laser** — dashed `Line2` / `LineMaterial`; SFX
-- [x] **Resources** — 100 pickups (FBX + fallback), tractor beam; HUD count
-- [x] **Dock shop** — repair, tower, transmission funding, weapon upgrade, distress when array complete
+- [x] **Resources** — 100 pickups (FBX + fallback), tractor beam; HUD count (split label/value, see `#hud-resources-label` / `#hud-resources-value` in `index.html`)
+- [x] **Base HP HUD** — label + 25-bar graph + numeric readout (`GameScreen.js` syncs bar segments to `BASE_MAX_HP`)
+- [x] **Dock store** — `store.json` drives catalog cards (repair, transmission, three tower SKUs → same `_purchaseTower()` until tiers split); weapon + distress remain footer actions; `fetch('./store.json')` at runtime (**include in zip** for embeds)
 - [x] **Defense towers** — purchase at dock, **T** to place; FBX base + weapon; tower lasers + SFX
 - [x] **Win** — distress flow + overlay
-- [x] **Radar HUD**; direction arrow; target reticle
+- [x] **Radar HUD** (position/size in `css/style.css` — `.flow-radar-hud` / `.flow-radar`); direction arrow; target reticle
 - [x] **AudioManager** — channel gains; BGM; `fetch` + XHR fallback for buffers; `localStorage` when embed allows
 
 ### Known gaps (carry to Fireside / later)
@@ -99,9 +102,9 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 ### Feel
 
 - [x] Baseline SFX + music channel
-- [ ] Screen shake; fog-of-war treatment; HUD / wave callouts
+- [ ] Screen shake; fog-of-war treatment; wave callouts (game HUD frame + stats layout largely in place)
 - [ ] Game over screen
-- [ ] Credits surface in UI (sprint — **required for jam rules**)
+- [ ] Credits **content** in Settings system tab (shell + scrollable panel shipped — **required for jam rules**)
 
 ---
 
@@ -140,24 +143,25 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 
 ```
 index.html                — import map: `three` → ./js/three.module.js; explicit ./js/jsm/... addon paths; optional ./js/browser.js (fflate) if needed
+store.json                — Dock store catalog (items: id, action, name, description, cost, image; optional tower max); loaded by GameScreen
 js/
   three.module.js         — Three r169 bundle (keep in sync with js/jsm addon versions)
   jsm/                    — examples modules (FBXLoader, lines, curves, libs/fflate.module.js, …)
   shaders/                — terrain + shared noise
   AudioManager.js
   EnemyManager.js         — Flow field, spawn, update, kill; shared enemy geometry + material
-  GameScreen.js           — Scene, loop, ship, weapons, dock, transmission, win, HUD
+  GameScreen.js           — Scene, loop, ship, weapons, dock store UI, transmission, win, HUD, base backdrop
   LoadingScreen.js
   MenuScreen.js
   ResourceManager.js
   ScreenManager.js
-  SettingsModal.js        — Audio + (planned) Credits tab
+  SettingsModal.js        — Audio volumes; header toggles system tab (credits placeholder); persist on dismiss
   terrain.js
   main.js
 
 assets/
   obj/                    — FBX models
-  textures/               — Atlases, HUD, **new modal/frame PNGs** (integrate in UI pass)
+  textures/               — HUD frames, radar, **store** / **modal** / **buy** PNGs, `base_bkgd.png`, logos
   audio/                  — BGM and WAV SFX (+ room for new stings / attack cues)
 ```
 
@@ -178,6 +182,8 @@ worldZ = -(uvy - 0.5) * uScale + offset.y
 
 ## Notes
 
+- **`store.json`** must ship beside **`index.html`** (same folder in the zip) so `fetch('./store.json')` works on itch and other static hosts.
+- Hand-tweaked **game HUD** layout lives in `index.html` (`#game-hud`) and `css/style.css`. See `.cursor/rules/ld59-hud-layout.mdc` for agent guidance when editing those files.
 - Movement uses delta time; drag uses `Math.pow(0.35, delta)`; lerps clamp with `Math.min(1, delta * rate)`.
 - Menu and game each use their own `THREE.Clock`.
 - Keep **`js/three.module.js`** and **`js/jsm/**`** on the **same Three.js revision** (or patch `ColorManagement` API mismatches).

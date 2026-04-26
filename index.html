@@ -90,12 +90,37 @@
     </div>
 
     <div id="game-hud">
+      <div id="game-base-backdrop" class="game-base-backdrop" aria-hidden="true"></div>
+      <div class="hud-frame-edges" aria-hidden="true">
+        <img class="hud-frame-edge hud-frame-edge--right" src="assets/textures/frame_right.png" alt="" draggable="false" />
+        <img class="hud-frame-edge hud-frame-edge--left" src="assets/textures/frame_right.png" alt="" draggable="false" />
+        <img class="hud-frame-edge hud-frame-edge--bottom" src="assets/textures/frame_bottom.png" alt="" draggable="false" />
+        <img class="hud-frame-edge hud-frame-edge--top" src="assets/textures/frame_bottom.png" alt="" draggable="false" />
+      </div>
+      <div class="hud-frame-corners" aria-hidden="true">
+        <img class="hud-frame-corner hud-frame-corner--tl" src="assets/textures/frame_top_left.png" alt="" draggable="false" />
+        <img class="hud-frame-corner hud-frame-corner--tr" src="assets/textures/frame_top_right.png" alt="" draggable="false" />
+        <img class="hud-frame-corner hud-frame-corner--br" src="assets/textures/frame_bottom_rigft.png" alt="" draggable="false" />
+      </div>
       <div class="hud-top-left">
-        <div class="hud-stat" id="hud-hp">Base: 25 / 25</div>
-        <div class="hud-stat" id="hud-resources">Resources: 0</div>
+        <div class="hud-stat hud-stat-label" id="hud-hp-label">Base Armor:</div>
+        <span
+          id="hud-hp-bar"
+          class="hud-stat-value-graphbar hud-hp-bar"
+          role="img"
+          aria-valuenow="25"
+          aria-valuemin="0"
+          aria-valuemax="25"
+          aria-labelledby="hud-hp-label"
+        ></span>
+        <div class="hud-stat hud-stat-value" id="hud-hp-value">25 / 25</div>
+      </div>
+      <div class="hud-resources-br" aria-label="Resources">
+        <span class="hud-stat hud-resources-label" id="hud-resources-label">Resources:</span>
+        <span class="hud-stat hud-resources-value" id="hud-resources-value">0</span>
       </div>
       <div class="hud-top-right">
-        <button class="btn btn-hud" id="btn-game-settings">Settings</button>
+        <button class="btn btn-hud" id="btn-game-settings">Environment<br>Controls</button>
       </div>
       <div id="flow-radar-hud" class="flow-radar-hud">
         <div class="flow-radar">
@@ -120,33 +145,23 @@
         </div>
         <p class="flow-radar-hint">[F] toggle base radar</p>
       </div>
+      <img class="hud-frame-corner hud-frame-corner--bl" src="assets/textures/frame_bottom_left.png" alt="" draggable="false" aria-hidden="true" />
     </div>
 
-    <!-- Dock shop — opens when landed on base; game keeps running -->
+    <!-- Dock store — cards from store.json; opens when landed on base -->
     <div id="dock-shop-modal" class="modal-overlay dock-shop-overlay hidden" aria-hidden="true">
-      <div class="modal dock-shop-modal" role="dialog" aria-labelledby="dock-shop-title">
-        <div class="modal-header">
-          <h2 id="dock-shop-title">Base Options</h2>
-          <button type="button" class="btn btn-close" id="btn-dock-close" aria-label="Close">&#x2715;</button>
-        </div>
-        <div class="modal-body dock-shop-body">
-          <p class="dock-shop-hint">Spend resources while docked. Close to resume flight.</p>
+      <div class="dock-store-panel" role="dialog" aria-labelledby="dock-store-heading">
+        <div class="dock-store-header">
+          <h2 id="dock-store-heading" class="dock-store-heading">Command Panel</h2>
           <p class="dock-shop-resources" id="dock-shop-resources-readout">Resources: 0</p>
-          <div class="dock-shop-actions-scroll">
-            <div class="dock-shop-actions">
-              <button type="button" class="btn btn-secondary dock-action dock-card" id="btn-dock-repair">Repair base (+1 HP) — 1 <span id="dock-repair-hp">(25/25)</span></button>
-              <button type="button" class="btn btn-secondary dock-action dock-card" id="btn-dock-tower">Defense tower — 25 <span class="dock-sub">(then press T in flight to place)</span></button>
-              <div class="dock-transmission-row dock-card">
-                <span class="dock-transmission-label">Transmission array</span>
-                <span id="dock-transmission-readout" class="dock-transmission-count">(0/100)</span>
-                <button type="button" class="btn btn-secondary dock-action dock-action-inline" id="btn-dock-transmission-add">+1 (1 resource)</button>
-              </div>
-              <button type="button" class="btn btn-secondary dock-action dock-card" id="btn-dock-weapon">
-                Upgrade weapons (+10% range &amp; fire rate) — <span id="dock-weapon-cost">15</span>
-              </button>
-              <button type="button" class="btn btn-primary dock-action dock-card hidden" id="btn-dock-distress">Send Distress Call</button>
-            </div>
-          </div>
+          <button type="button" class="btn btn-close" id="btn-dock-close" aria-label="Close store">&#x2715;</button>
+        </div>
+        <div id="dock-store-cards" class="dock-store-cards"></div>
+        <div class="dock-store-footer">
+          <button type="button" class="btn btn-secondary dock-store-extra" id="btn-dock-weapon">
+            Upgrade weapons (+10% range &amp; fire rate) — <span id="dock-weapon-cost">15</span>
+          </button>
+          <button type="button" class="btn btn-primary dock-store-extra hidden" id="btn-dock-distress">Send Distress Call</button>
         </div>
       </div>
     </div>
@@ -163,54 +178,44 @@
 
   <!-- ===================== SETTINGS MODAL ===================== -->
   <div id="settings-modal" class="modal-overlay hidden">
-    <div class="modal" role="dialog" aria-labelledby="settings-title">
-      <div class="modal-header">
-        <h2 id="settings-title">Settings</h2>
-        <button class="btn btn-close" id="btn-close-settings" aria-label="Close settings">&#x2715;</button>
+    <div class="modal settings-modal-dialog" id="settings-modal-dialog" role="dialog" aria-label="Settings">
+      <div class="modal-header settings-modal-header" id="settings-modal-header">
+        <button type="button" class="btn-settings-close" id="btn-close-settings" aria-label="Close settings"></button>
       </div>
-      <div class="modal-body">
-
-        <div class="setting-section-label">Audio</div>
+      <div class="modal-body settings-modal-body">
 
         <div class="setting-row">
-          <label for="slider-master">Master Volume</label>
           <div class="slider-group">
-            <input type="range" id="slider-master" class="volume-slider" data-channel="master" min="0" max="100" value="80">
-            <span class="slider-readout" id="readout-master">80%</span>
+            <input type="range" id="slider-master" class="volume-slider" data-channel="master" min="0" max="100" value="80" aria-label="Master volume">
           </div>
         </div>
 
         <div class="setting-row">
-          <label for="slider-sfx">SFX Volume</label>
           <div class="slider-group">
-            <input type="range" id="slider-sfx" class="volume-slider" data-channel="sfx" min="0" max="100" value="100">
-            <span class="slider-readout" id="readout-sfx">100%</span>
+            <input type="range" id="slider-sfx" class="volume-slider" data-channel="sfx" min="0" max="100" value="100" aria-label="SFX volume">
           </div>
         </div>
 
         <div class="setting-row">
-          <label for="slider-music">Music Volume</label>
           <div class="slider-group">
-            <input type="range" id="slider-music" class="volume-slider" data-channel="music" min="0" max="100" value="70">
-            <span class="slider-readout" id="readout-music">70%</span>
+            <input type="range" id="slider-music" class="volume-slider" data-channel="music" min="0" max="100" value="70" aria-label="Music volume">
           </div>
         </div>
 
         <div class="setting-row">
-          <label for="slider-ambient">Ambient Volume</label>
           <div class="slider-group">
-            <input type="range" id="slider-ambient" class="volume-slider" data-channel="ambient" min="0" max="100" value="60">
-            <span class="slider-readout" id="readout-ambient">60%</span>
+            <input type="range" id="slider-ambient" class="volume-slider" data-channel="ambient" min="0" max="100" value="60" aria-label="Ambient volume">
           </div>
         </div>
 
+      </div>
+      <div class="modal-body info-modal-body" id="settings-info-body" aria-hidden="true">
+        <p class="settings-info-text" id="settings-info-text">
+          Credits and system information will go here. This paragraph scrolls when content exceeds the panel.
+        </p>
       </div>
       <div class="modal-footer settings-modal-footer">
-        <button type="button" class="btn btn-danger btn-abandon" id="btn-abandon-run" disabled>Abandon run</button>
-        <div class="settings-modal-footer-actions">
-          <button class="btn btn-primary" id="btn-save-settings">Save</button>
-          <button class="btn btn-ghost" id="btn-cancel-settings">Cancel</button>
-        </div>
+        <button type="button" class="btn-settings-abandon" id="btn-abandon-run" disabled aria-label="Abandon run"></button>
       </div>
     </div>
   </div>

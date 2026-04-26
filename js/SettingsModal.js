@@ -2,9 +2,8 @@
  * SettingsModal
  *
  * Controls the settings modal overlay. Works with AudioManager to
- * read and write volume levels. Supports a pending-changes pattern:
- * changes are applied live for preview but only committed on Save.
- * Cancel restores the previous state.
+ * read and write volume levels. Sliders apply live; closing the modal
+ * (X, overlay, Escape) persists levels via `saveSettings()`.
  *
  * Usage:
  *   const settings = new SettingsModal(audioManager);
@@ -20,15 +19,13 @@ export class SettingsModal {
     this._onAbandonRun = null;
 
     this._overlay  = document.getElementById('settings-modal');
+    this._dialog   = document.getElementById('settings-modal-dialog');
     this._sliders  = {};
-    this._readouts = {};
-    // Pre-populate with current audio values so revert is always safe,
-    // even if close() is somehow called before open() ever runs.
-    this._snapshot = this._captureCurrentVolumes();
 
     this._cacheElements();
     this._bindSliders();
     this._bindButtons();
+    this._bindHeaderTabToggle();
     this._bindOverlayClick();
     this._bindEscapeKey();
     this._syncAbandonButton();
@@ -39,7 +36,7 @@ export class SettingsModal {
   // ------------------------------------------------------------------
 
   open() {
-    this._snapshot = this._captureCurrentVolumes();
+    this._setSystemTab(false);
     this._syncSlidersFromAudio();
     this._syncAbandonButton();
     this._overlay.classList.remove('hidden');
@@ -67,8 +64,7 @@ export class SettingsModal {
 
   _cacheElements() {
     for (const ch of CHANNELS) {
-      this._sliders[ch]  = document.getElementById(`slider-${ch}`);
-      this._readouts[ch] = document.getElementById(`readout-${ch}`);
+      this._sliders[ch] = document.getElementById(`slider-${ch}`);
     }
   }
 
@@ -79,7 +75,6 @@ export class SettingsModal {
 
       slider.addEventListener('input', () => {
         const value = parseInt(slider.value, 10);
-        this._updateReadout(ch, value);
         // Apply live so the user can hear changes immediately
         this.audio.setVolume(ch, value / 100);
       });
@@ -87,19 +82,10 @@ export class SettingsModal {
   }
 
   _bindButtons() {
-    document.getElementById('btn-close-settings')?.addEventListener('click', () => {
-      this._revertToSnapshot();
-      this.close();
-    });
-
-    document.getElementById('btn-cancel-settings')?.addEventListener('click', () => {
-      this._revertToSnapshot();
-      this.close();
-    });
-
-    document.getElementById('btn-save-settings')?.addEventListener('click', () => {
-      this.audio.saveSettings();
-      this.close();
+    const closeBtn = document.getElementById('btn-close-settings');
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._dismissAndPersist();
     });
 
     document.getElementById('btn-abandon-run')?.addEventListener('click', async () => {
@@ -111,6 +97,37 @@ export class SettingsModal {
     });
   }
 
+  _dismissAndPersist() {
+    this.audio.saveSettings();
+    this.close();
+  }
+
+  _bindHeaderTabToggle() {
+    const header = document.getElementById('settings-modal-header');
+    if (!header) return;
+    header.addEventListener('click', (e) => {
+      if (e.target.closest('#btn-close-settings')) return;
+      this._toggleSettingsTab();
+    });
+  }
+
+  _isSystemTab() {
+    return Boolean(this._dialog?.classList.contains('settings-modal-dialog--system'));
+  }
+
+  /** @param {boolean} system true = system / credits panel */
+  _setSystemTab(system) {
+    this._dialog?.classList.toggle('settings-modal-dialog--system', system);
+    const audioBody = this._overlay?.querySelector('.settings-modal-body');
+    const infoBody  = this._overlay?.querySelector('.info-modal-body');
+    if (audioBody) audioBody.setAttribute('aria-hidden', system ? 'true' : 'false');
+    if (infoBody)  infoBody.setAttribute('aria-hidden', system ? 'false' : 'true');
+  }
+
+  _toggleSettingsTab() {
+    this._setSystemTab(!this._isSystemTab());
+  }
+
   _syncAbandonButton() {
     const btn = document.getElementById('btn-abandon-run');
     if (!btn) return;
@@ -119,7 +136,7 @@ export class SettingsModal {
     btn.classList.toggle('hidden', !on);
   }
 
-  /** Hide overlay without restoring the volume snapshot (volumes already saved or committed). */
+  /** Hide overlay after volumes were already saved (e.g. abandon run). */
   _closeWithoutRevert() {
     if (this._overlay.contains(document.activeElement)) {
       document.activeElement.blur();
@@ -129,18 +146,14 @@ export class SettingsModal {
 
   _bindOverlayClick() {
     this._overlay.addEventListener('click', (e) => {
-      if (e.target === this._overlay) {
-        this._revertToSnapshot();
-        this.close();
-      }
+      if (e.target === this._overlay) this._dismissAndPersist();
     });
   }
 
   _bindEscapeKey() {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !this._overlay.classList.contains('hidden')) {
-        this._revertToSnapshot();
-        this.close();
+        this._dismissAndPersist();
       }
     });
   }
@@ -148,28 +161,8 @@ export class SettingsModal {
   _syncSlidersFromAudio() {
     for (const ch of CHANNELS) {
       const value = Math.round(this.audio.getVolume(ch) * 100);
-      if (this._sliders[ch])  this._sliders[ch].value = value;
-      this._updateReadout(ch, value);
+      if (this._sliders[ch]) this._sliders[ch].value = value;
     }
   }
 
-  _updateReadout(channel, intValue) {
-    if (this._readouts[channel]) {
-      this._readouts[channel].textContent = `${intValue}%`;
-    }
-  }
-
-  _captureCurrentVolumes() {
-    const snap = {};
-    for (const ch of CHANNELS) {
-      snap[ch] = this.audio.getVolume(ch);
-    }
-    return snap;
-  }
-
-  _revertToSnapshot() {
-    for (const ch of CHANNELS) {
-      this.audio.setVolume(ch, this._snapshot[ch]);
-    }
-  }
 }

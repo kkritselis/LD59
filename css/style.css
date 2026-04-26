@@ -16,6 +16,7 @@
   --color-success:      #4fdfaa;
 
   --font-heading:       'Courier New', Courier, monospace;
+  --font-mono:          'Courier New', Courier, monospace;
   --font-body:          system-ui, -apple-system, sans-serif;
 
   --radius-sm:          4px;
@@ -191,19 +192,178 @@ html, body {
   pointer-events: none;
 }
 
+/* Hangar interior while dock shop is open (after first departure) — below HUD frame art */
+#game-hud .game-base-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: none;
+  background-color: var(--color-bg);
+  background-image: url('../assets/textures/base_bkgd.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#game-hud .game-base-backdrop.is-visible {
+  display: block;
+}
+
+/* Frame sides — behind corners (z-index); reuse right/bottom assets, flip 180 for left/top */
+.hud-frame-edges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hud-frame-edge {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  object-fit: fill;
+}
+
+.hud-frame-edge--right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* width: clamp(96px, 14vw, 240px); */
+  height: 90%;
+}
+
+.hud-frame-edge--left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  /* width: clamp(96px, 14vw, 240px); */
+  height: 60%;
+  transform: rotate(180deg);
+  transform-origin: center center;
+}
+
+.hud-frame-edge--bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(72px, 10vh, 200px);
+}
+
+.hud-frame-edge--top {
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: clamp(72px, 10vh, 200px);
+  transform: rotate(180deg);
+  transform-origin: center center;
+}
+
+/* Decorative frame corners — pinned to viewport edges of the HUD layer */
+.hud-frame-corners {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hud-frame-corner {
+  position: absolute;
+  display: block;
+  width: 450px;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hud-frame-corner--tl {
+  top: 0;
+  left: 0;
+}
+
+.hud-frame-corner--tr {
+  top: 0;
+  right: 0;
+}
+
+/* Sibling after .flow-radar-hud so it stacks above the radar (see #game-hud) */
+.hud-frame-corner--bl {
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.hud-frame-corner--br {
+  bottom: 0;
+  right: 0;
+}
+
 .hud-top-left {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 55px;
+  left: 68px;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 6px;
   pointer-events: none;
 }
 
+/* Base HP: 25 segments (filled by GameScreen); tweak size here */
+.hud-hp-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  max-width: 220px;
+  height: 10px;
+  box-sizing: border-box;
+}
+
+.hud-hp-bar-seg {
+  flex: 1 1 0;
+  min-width: 0;
+  background: rgba(60, 32, 32, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+
+.hud-hp-bar-seg.is-on {
+  background: linear-gradient(180deg, rgba(130, 170, 110, 0.95), rgba(70, 110, 58, 0.95));
+}
+
+/* Resources — label and value are separate absolutely positioned nodes (tweak bottom/right each) */
+.hud-resources-br {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hud-resources-label,
+.hud-resources-value {
+  position: absolute;
+}
+
+.hud-resources-label {
+  bottom: 75px;
+  right: 120px;
+}
+
+#hud-resources-value {
+  font-size: 26px;
+  bottom: 45px;
+  right: 101px;
+}
+
 .hud-stat {
-  font-family: var(--font-mono, 'Courier New', monospace);
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 20px;
   color: #e8d0b0;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.04em;
@@ -212,8 +372,9 @@ html, body {
 
 .hud-top-right {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 55px;
+  right: 65px;
+  z-index: 1;
   display: flex;
   gap: 8px;
   pointer-events: all;
@@ -222,8 +383,9 @@ html, body {
 /* Flow-field radar — circular clip + Synty-style bezel SVG on top */
 .flow-radar-hud {
   position: absolute;
-  bottom: 12px;
-  left: 16px;
+  bottom: 58px;
+  left: 46px;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -233,8 +395,8 @@ html, body {
 
 .flow-radar {
   position: relative;
-  width: 288px;
-  height: 288px;
+  width: 280px;
+  height: 280px;
   border-radius: 50%;
   overflow: hidden;
   box-shadow:
@@ -425,18 +587,23 @@ html, body {
 
 .btn-hud {
   background: rgba(7, 7, 15, 0.75);
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-  padding: 8px 16px;
-  font-size: 12px;
+  color: var(--color-accent);
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  line-height: 1.25;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   border-radius: var(--radius-sm);
   backdrop-filter: blur(8px);
+  clip-path: polygon(9% 0, 89% 0, 100% 24%, 100% 78%, 91% 100%, 17% 100%, 0 61%, 0 17%);
 }
 
 .btn-hud:hover {
-  color: var(--color-text);
-  border-color: var(--color-accent);
-  background: rgba(108, 99, 255, 0.15);
+  color: #f5ead8;
+  background: rgba(85, 79, 206, 0.15);
 }
 
 /* ============================================================
@@ -574,7 +741,7 @@ html, body {
   top: max(10px, env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  width: min(960px, 96vw);
+  width: 800px;
   max-height: none;
   z-index: var(--z-modal);
   margin: 0;
@@ -591,80 +758,198 @@ html, body {
   animation: none;
 }
 
-#dock-shop-modal.dock-shop-overlay .modal {
+.dock-store-panel {
   width: 100%;
-  max-height: min(85vh, 720px);
+  max-width: 800px;
+  max-height: min(88vh, 820px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 10, 20, 0.92);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
-.dock-shop-modal {
-  width: 100%;
+.dock-store-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.dock-shop-body {
-  gap: 12px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+.dock-store-heading {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.dock-store-header .dock-shop-resources {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: #e8d0b0;
+}
+
+.dock-store-cards {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dock-store-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 783px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  /* border: 1px solid rgba(255, 220, 150, 0.15); */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* Item art fills the card; text + buy sit in an overlay on top of the image */
+.dock-store-card-frame {
+  position: relative;
+  display: block;
+}
+
+.dock-store-card-art {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 783px;
+  height: 119px;
+  object-fit: cover;
+  object-position: center;
+  vertical-align: middle;
+}
+
+.dock-store-card-body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.dock-store-card-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.dock-store-name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  color: #f0e6d8;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+}
+
+.dock-store-desc {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(240, 228, 210, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.dock-shop-hint {
+.dock-store-ratio {
+  font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--color-text-muted);
-  line-height: 1.45;
+  color: #e8d0b0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+}
+
+/* Cost digits only — position with margin/absolute in your stylesheet */
+.dock-store-costnum {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff8ec;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+}
+
+.dock-store-buy {
+  align-self: center;
+  flex: 0 0 auto;
+  margin: 0;
+  width: 133px;
+  height: 63px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  background-color: transparent;
+  background-image: url('../assets/textures/buy_btn_off.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.dock-store-buy:hover:not(:disabled),
+.dock-store-buy:focus-visible:not(:disabled) {
+  background-image: url('../assets/textures/buy_btn_over.png');
+}
+
+.dock-store-buy:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.35);
+}
+
+.dock-store-buy:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.dock-store-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.dock-store-extra {
+  width: 100%;
+  white-space: normal;
+  text-align: center;
 }
 
 .dock-shop-resources {
   font-family: var(--font-heading);
   font-size: 14px;
   letter-spacing: 0.06em;
-}
-
-.dock-shop-actions-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  margin-top: 4px;
-  padding-bottom: 10px;
-  -webkit-overflow-scrolling: touch;
-  flex: 1;
-  min-height: 0;
-}
-
-.dock-shop-actions {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 14px;
-  align-items: stretch;
-  min-height: 132px;
-}
-
-.dock-card {
-  flex: 0 0 min(280px, 78vw);
-  max-width: min(300px, 82vw);
-}
-
-button.dock-action.dock-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100%;
-  min-height: 120px;
-  text-align: left;
-  white-space: normal;
-}
-
-button.dock-action.dock-action-inline {
-  display: inline-flex;
-  width: 100%;
-  margin-top: auto;
-  text-align: center;
-  justify-content: center;
 }
 
 .dock-sub {
@@ -721,16 +1006,152 @@ button.dock-action:disabled {
 }
 
 .settings-modal-footer {
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.settings-modal-footer-actions {
+/* Settings modal — panel art; system tab swaps background */
+#settings-modal .settings-modal-dialog {
+  background-color: var(--color-surface);
+  background-image: url('../assets/textures/settings_modal.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  width: 839px;
+  height: 707px;
+}
+
+#settings-modal .settings-modal-dialog--system {
+  background-image: url('../assets/textures/system_modal.png');
+}
+
+#settings-modal .settings-modal-header {
+  justify-content: flex-end;
+  border-bottom: none;
+  padding-bottom: 8px;
+  height: 130px;
+  cursor: pointer;
+}
+
+/* Image chrome — close / abandon (hover swaps *_over assets) */
+#settings-modal .btn-settings-close {
+  box-sizing: border-box;
+  position: relative;
+  top: 10px;
+  right: 20px;
+  width: 125px;
+  height: 90px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url('../assets/textures/modal_close_off.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#settings-modal .btn-settings-close:hover:not(:disabled),
+#settings-modal .btn-settings-close:focus-visible:not(:disabled) {
+  background-image: url('../assets/textures/modal_close_over.png');
+}
+
+#settings-modal .btn-settings-close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+#settings-modal .btn-settings-abandon {
+  box-sizing: border-box;
+  min-width: 260px;
+  height: 90px;
+  position: relative;
+  top: 1px;
+  left: 45px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url('../assets/textures/modal_abandon_off.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  cursor: pointer;
+}
+
+#settings-modal .btn-settings-abandon:hover:not(:disabled),
+#settings-modal .btn-settings-abandon:focus-visible:not(:disabled) {
+  background-image: url('../assets/textures/modal_abandon_over.png');
+}
+
+#settings-modal .btn-settings-abandon:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+#settings-modal .btn-settings-abandon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  background-image: url('../assets/textures/modal_abandon_off.png');
+}
+
+#settings-modal .btn-settings-abandon.hidden {
+  display: none;
+}
+
+#settings-modal .settings-modal-body {
+  height: 420px;
+  padding-top: 115px;
+}
+
+#settings-modal .settings-modal-body .setting-row {
+  justify-content: stretch;
+  margin-left: 325px;
+  padding: 6px 0;
+  width: 325px;
+  margin-bottom: 53px;
+}
+
+#settings-modal .settings-modal-body .slider-group {
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+#settings-modal .info-modal-body {
+  display: none;
+  flex-direction: column;
+  height: 420px;
+  padding-top: 115px;
+  padding-left: 48px;
+  padding-right: 48px;
+  padding-bottom: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#settings-modal .settings-modal-dialog--system .settings-modal-body {
+  display: none;
+}
+
+#settings-modal .settings-modal-dialog--system .info-modal-body {
   display: flex;
-  gap: 12px;
-  margin-left: auto;
+}
+
+#settings-modal .settings-info-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e8d0b0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 /* Win state — full-screen over game after distress call */
@@ -791,30 +1212,12 @@ button.dock-action:disabled {
 /* ============================================================
    SETTINGS ROWS
    ============================================================ */
-.setting-section-label {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  font-weight: 600;
-  padding-bottom: 4px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
-}
-
 .setting-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 8px 0;
-}
-
-.setting-row label {
-  font-size: 14px;
-  color: var(--color-text);
-  min-width: 120px;
-  flex-shrink: 0;
 }
 
 .slider-group {
@@ -872,14 +1275,6 @@ button.dock-action:disabled {
 .volume-slider:focus::-moz-range-thumb {
   transform: scale(1.25);
   box-shadow: 0 0 14px var(--color-accent-glow);
-}
-
-.slider-readout {
-  font-size: 13px;
-  font-family: var(--font-heading);
-  color: var(--color-text-muted);
-  min-width: 40px;
-  text-align: right;
 }
 
 /* ============================================================
