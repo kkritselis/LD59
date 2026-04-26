@@ -1224,6 +1224,14 @@ button.dock-action:disabled {
   margin-bottom: 22px;
 }
 
+.game-end-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: 6px;
+}
+
 #btn-dock-distress {
   margin-top: 6px;
 }

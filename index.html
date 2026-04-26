@@ -157,12 +157,16 @@
       </div>
     </div>
 
-    <div id="win-overlay" class="win-overlay hidden" aria-hidden="true">
-      <div class="win-card">
-        <p class="win-eyebrow">Transmission online</p>
-        <h2 class="win-title">Distress call sent</h2>
-        <p class="win-body">Your beacon reached the fleet. Help is inbound.</p>
-        <button type="button" class="btn btn-primary" id="btn-win-main-menu">Main menu</button>
+    <div id="game-end-modal" class="win-overlay hidden" aria-hidden="true">
+      <div class="win-card" role="dialog" aria-modal="true" aria-labelledby="game-end-title">
+        <p class="win-eyebrow" id="game-end-eyebrow">Run complete</p>
+        <h2 class="win-title" id="game-end-title">You won!</h2>
+        <p class="win-body" id="game-end-body"></p>
+        <p class="win-body" id="game-end-rate">If you enjoyed this build, please rate it on the jam page. It helps a lot.</p>
+        <div class="game-end-actions">
+          <button type="button" class="btn btn-secondary" id="btn-game-end-rate">Open jam page</button>
+          <button type="button" class="btn btn-primary" id="btn-game-end-main-menu">Main menu</button>
+        </div>
       </div>
     </div>
   </div>

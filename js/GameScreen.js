@@ -35,6 +35,8 @@ const LASER_SPEED    = 1.2;   // dashOffset scroll rate — how fast pulses trav
 // Dock shop / buildables
 const TOWER_COST            = 25;
 const TRANSMISSION_GOAL     = 100;
+/** Jam listing page for ratings (edit to your itch.io page if you ship there instead). */
+const JAM_RATE_URL          = 'https://ldjam.com/events/ludum-dare/59';
 const WEAPON_COST_BASE      = 15;
 const WEAPON_COST_PER_TIER  = 5;
 const WEAPON_MULT_STEP      = 1.1;   // +10% range and fire rate per tier
@@ -226,7 +228,12 @@ export class GameScreen {
     this._transmissionProgress = 0;
     this._transmissionMesh   = null;
     this._distressSent       = false;
-    this._winOverlayEl       = document.getElementById('win-overlay');
+    this._gameEndModalEl    = document.getElementById('game-end-modal');
+    this._gameEndEyebrowEl  = document.getElementById('game-end-eyebrow');
+    this._gameEndTitleEl    = document.getElementById('game-end-title');
+    this._gameEndBodyEl     = document.getElementById('game-end-body');
+    this._gameEndRateEl     = document.getElementById('game-end-rate');
+    this._gameEnded         = false;
     this._introModalEl      = document.getElementById('game-intro-modal');
     /** When true, `update()` skips simulation (briefing modal). */
     this._introBlocking     = false;
@@ -270,7 +277,11 @@ export class GameScreen {
     return this._running;
   }
 
-  stop() {
+  /**
+   * @param {{ hideEndModal?: boolean }} [options]
+   */
+  stop(options = {}) {
+    const hideEndModal = options.hideEndModal !== false;
     this._running = false;
     this.audioManager?.stopBackgroundLoop();
     this._hideGameIntro();
@@ -284,7 +295,7 @@ export class GameScreen {
     this._clearBuildables();
     this._closeDockShop();
     this._syncBaseDockBackdrop(false);
-    this._hideWinOverlay();
+    if (hideEndModal) this._hideGameEndModal();
     if (this._dustPoints) {
       this.scene?.remove(this._dustPoints);
       this._dustPoints.geometry.dispose();
@@ -310,7 +321,8 @@ export class GameScreen {
     this._pendingTowerPlace = false;
     this._transmissionProgress = 0;
     this._distressSent = false;
-    this._hideWinOverlay();
+    this._gameEnded = false;
+    this._hideGameEndModal();
     this._wave = 0;
     this._waveTimer = 60.0;
     this._fireTimer = 0;
@@ -546,6 +558,10 @@ export class GameScreen {
     if (!this._transmissionMesh && this._transmissionProgress > 0) this._spawnTransmissionMesh();
     else this._syncTransmissionTowerScale();
     this._syncResourceHud();
+    if (this._transmissionProgress >= TRANSMISSION_GOAL) {
+      this.stop({ hideEndModal: false });
+      this._showGameEndModal('win_transmission');
+    }
   }
 
   /** Transmission mast from `tower1.fbx`; uniform scale grows with funding. */
@@ -681,15 +697,13 @@ export class GameScreen {
     this._syncTransmissionTowerScale(m);
   }
 
-  _hideWinOverlay() {
-    if (!this._winOverlayEl) this._winOverlayEl = document.getElementById('win-overlay');
-    this._winOverlayEl?.classList.add('hidden');
-    this._winOverlayEl?.setAttribute('aria-hidden', 'true');
+  _hideGameEndModal() {
+    if (!this._gameEndModalEl) this._gameEndModalEl = document.getElementById('game-end-modal');
+    this._gameEndModalEl?.classList.add('hidden');
+    this._gameEndModalEl?.setAttribute('aria-hidden', 'true');
   }
 
-  _sendDistressCall() {
-    if (this._distressSent || this._transmissionProgress < TRANSMISSION_GOAL) return;
-    this._distressSent = true;
+  _freezeRunLoop() {
     this._closeDockShop();
     this.audioManager?.stopBackgroundLoop();
     this._running = false;
@@ -698,9 +712,61 @@ export class GameScreen {
       this._animFrameId = null;
     }
     this.clock.stop();
-    if (!this._winOverlayEl) this._winOverlayEl = document.getElementById('win-overlay');
-    this._winOverlayEl?.classList.remove('hidden');
-    this._winOverlayEl?.setAttribute('aria-hidden', 'false');
+  }
+
+  /**
+   * @param {'win_transmission'|'win_distress'|'lose'} kind
+   */
+  _showGameEndModal(kind) {
+    if (this._gameEnded) return;
+    this._gameEnded = true;
+
+    if (!this._gameEndModalEl) this._gameEndModalEl = document.getElementById('game-end-modal');
+    const modal = this._gameEndModalEl;
+    if (!modal) return;
+
+    const eyebrow = this._gameEndEyebrowEl ?? document.getElementById('game-end-eyebrow');
+    const title   = this._gameEndTitleEl ?? document.getElementById('game-end-title');
+    const body    = this._gameEndBodyEl ?? document.getElementById('game-end-body');
+    const rate    = this._gameEndRateEl ?? document.getElementById('game-end-rate');
+    const rateBtn = document.getElementById('btn-game-end-rate');
+
+    if (kind === 'lose') {
+      if (eyebrow) eyebrow.textContent = 'Hangar lost';
+      if (title) title.textContent = 'You lost';
+      if (body) {
+        body.textContent = 'The base armor failed. The hangar is overrun.';
+      }
+      if (rate) rate.textContent = 'If you tried the build, a rating with honest feedback still helps.';
+      if (rateBtn) rateBtn.style.display = '';
+    } else if (kind === 'win_transmission') {
+      if (eyebrow) eyebrow.textContent = 'Transmission online';
+      if (title) title.textContent = 'You won!';
+      if (body) {
+        body.textContent = 'Your signal tower reached full height. The uplink is stable enough to call for help.';
+      }
+      if (rate) rate.textContent = 'If you enjoyed this build, please rate it on the jam page. It helps a lot.';
+      if (rateBtn) rateBtn.style.display = '';
+    } else {
+      if (eyebrow) eyebrow.textContent = 'Beacon away';
+      if (title) title.textContent = 'You won!';
+      if (body) {
+        body.textContent = 'Your distress call punched through the storm. Help is inbound.';
+      }
+      if (rate) rate.textContent = 'If you enjoyed this build, please rate it on the jam page. It helps a lot.';
+      if (rateBtn) rateBtn.style.display = '';
+    }
+
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.getElementById('btn-game-end-main-menu')?.focus();
+  }
+
+  _sendDistressCall() {
+    if (this._distressSent || this._transmissionProgress < TRANSMISSION_GOAL) return;
+    this._distressSent = true;
+    this._freezeRunLoop();
+    this._showGameEndModal('win_distress');
     this._refreshDockShopUI();
   }
 
@@ -1169,9 +1235,8 @@ export class GameScreen {
         this._syncBaseHpHud();
         if (this._baseHP === 0) {
           console.warn('[Game Over] Base destroyed!');
-          this._closeDockShop();
-          this.stop();
-          // TODO: show game-over screen
+          this.stop({ hideEndModal: false });
+          this._showGameEndModal('lose');
         }
       }
 
@@ -1268,7 +1333,7 @@ export class GameScreen {
     };
 
     // Terrain mesh
-    const geo = new THREE.PlaneGeometry(4, 4, 768, 768);
+    const geo = new THREE.PlaneGeometry(4, 4, 600, 600);
     geo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
     const mat = new THREE.ShaderMaterial({
       uniforms:       this._uniforms,
@@ -1625,8 +1690,13 @@ export class GameScreen {
     document.getElementById('btn-game-settings')?.addEventListener('click', () => {
       this.onOpenSettings?.();
     });
-    document.getElementById('btn-win-main-menu')?.addEventListener('click', () => {
-      this._hideWinOverlay();
+    document.getElementById('btn-game-end-rate')?.addEventListener('click', () => {
+      if (!JAM_RATE_URL) return;
+      window.open(JAM_RATE_URL, '_blank', 'noopener,noreferrer');
+    });
+    document.getElementById('btn-game-end-main-menu')?.addEventListener('click', () => {
+      this._gameEnded = false;
+      this._hideGameEndModal();
       this.stop();
       this.onMainMenu?.();
     });
