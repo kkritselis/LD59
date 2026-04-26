@@ -33,17 +33,31 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 
 ### Must / should ship today
 
-- [ ] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
-- [ ] **Enemy creature FBX** — replace shared **torus-knot** placeholder with the new enemy model; match scale/orientation to terrain; keep flow-field movement + cleanup paths sound.
-- [ ] **Wave pacing** — address LD feedback: **first waves felt too slow**. Tune `_waveTimer` / first-wave delay / initial counts so action ramps sooner without instant overwhelm (see `GameScreen.js` wave block).
+- [X] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
+- [x] **Enemy creature model pass** — replaced torus placeholder with `assets/obj/spider.glb`; enemy scale tuned down; attack/death playback works; walk clip selection now auto-falls back by name matching and clip exclusion.
+- [x] **Wave pacing / opening pressure** — added a strong opening read by spawning **50 enemies at session start**, scattered over valid flow-field cells. Regular wave schedule remains the 60-second cadence.
 - [ ] **Spawn presentation** — stop enemies **materializing in a long line on the UV border**; add **spawn holes / surface portals** (mesh + short emerge animation or staged visibility) so spawns read as “emerging from the ground” at a small set of perimeter points.
-- [ ] **UI pass (remaining)** — extra modal chrome, polish pass on store card typography vs art. **Shipped in-repo:** game-screen **frame overlay** (corners + edge strips; BL over radar); **Base Armor** + **Resources** HUD; **Environment Controls** typography; **settings** panel (`settings_modal.png`, audio sliders only, image close/abandon, header toggles **Audio** vs **System** tab with `system_modal.png`); **dock store** from **`store.json`** (vertical image cards, ratio `current/max`, cost number, `buy_btn_off` / `buy_btn_over`); **hangar backdrop** `base_bkgd.png` while dock shop is open after first leave-pad return (`#game-base-backdrop` in `#game-hud`). BR corner filename remains `frame_bottom_rigft.png` unless renamed with paths.
+- [x] **UI pass (current sprint)** — dock store card layout retuned for manual positioning: card body de-flexed, ratio/cost decoupled via absolute positioning, ratio omitted when `store.json` `max` is null/empty, and dock footer actions removed from modal markup for a cleaner panel while polishing.
 - [ ] **Audio “attention” pass** — once clips exist: stronger sting for wave start / tension; **attack / impact SFX** when enemies **damage the base** or **pressure a tower** (distinct from generic ambience). *Asset discovery TBD; reserve hooks in `AudioManager` / game loop.*
 
 ### Ship / ops (non-code or parallel)
 
 - [ ] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
 - [ ] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
+
+### Final 90-minute closeout plan (time-boxed)
+
+You have one short build window left before test lock:
+
+- **Next 30 min (implementation only):**
+  - [X] Fill **credits content** in `SettingsModal` system tab text (`#settings-info-text`) from a single source list.
+  - [ ] Decide ship state for enemy walk animation: exact clip-name map or accept fallback if visual motion is adequate.
+  - [ ] Re-enable base damage in `GameScreen.js` (currently intentionally commented for UI work) and quick sanity-check HP loss/game-over flow.
+  - [X] Quick smoke check that removing dock footer did not leave dead controls or hidden dependencies.
+- **Final 60 min (no new features):**
+  - [ ] Two full playthroughs with notes (open, midgame, win/lose edge cases).
+  - [ ] One focused economy/wave tuning pass only if a blocker appears.
+  - [ ] Build package + verify zip root layout + final README/credits proofread.
 
 ### Already true in repo (do not duplicate work)
 
@@ -65,12 +79,12 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 - [x] Delta-time game loop; screen flow Loading → Menu → Game; settings modal
 - [x] WASD / arrow flight; ship banking and pitch; autopilot takeoff / landing; snap-to-pad when near base
 - [x] Geological cross-section; sky shader; menu with procedural background; intro briefing modal (“Begin”)
-- [x] **Enemies** — shared **`TorusKnotGeometry`** placeholder (maroon, tumbling); flow-field border spawn; Dijkstra movement; base damage on contact; culled past terrain tile
+- [x] **Enemies** — `spider.glb` model integration with animation mixer support (walk/attack/death detection + fallback), flow-field movement, and scattered opening spawn support.
 - [x] **Waves** — ~**60 s** timer, count doubles each wave to cap (1 → 2 → 4 → … → 256) — *schedule itself is a tuning target for Fireside (see sprint goals)*
 - [x] **Ship laser** — dashed `Line2` / `LineMaterial`; SFX
 - [x] **Resources** — 100 pickups (FBX + fallback), tractor beam; HUD count (split label/value, see `#hud-resources-label` / `#hud-resources-value` in `index.html`)
 - [x] **Base HP HUD** — label + 25-bar graph + numeric readout (`GameScreen.js` syncs bar segments to `BASE_MAX_HP`)
-- [x] **Dock store** — `store.json` drives catalog cards (repair, transmission, three tower SKUs → same `_purchaseTower()` until tiers split); weapon + distress remain footer actions; `fetch('./store.json')` at runtime (**include in zip** for embeds)
+- [x] **Dock store** — `store.json` drives catalog cards (repair, transmission, three tower SKUs → same `_purchaseTower()` until tiers split); ratio node is omitted when `max` is null/empty; `fetch('./store.json')` at runtime (**include in zip** for embeds)
 - [x] **Defense towers** — purchase at dock, **T** to place; FBX base + weapon; tower lasers + SFX
 - [x] **Win** — distress flow + overlay
 - [x] **Radar HUD** (position/size in `css/style.css` — `.flow-radar-hud` / `.flow-radar`); direction arrow; target reticle
@@ -80,6 +94,7 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 
 - [ ] Full **game over** screen when base HP hits 0
 - [ ] Broader difficulty / economy tuning
+- [ ] Replace temporary test toggle: base-damage application is currently commented in `GameScreen.update()` during dock UI polish
 
 ---
 
@@ -105,6 +120,7 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 - [ ] Screen shake; fog-of-war treatment; wave callouts (game HUD frame + stats layout largely in place)
 - [ ] Game over screen
 - [ ] Credits **content** in Settings system tab (shell + scrollable panel shipped — **required for jam rules**)
+- [ ] Enemy spawn VFX/readability pass (optional if testing time is tight)
 
 ---
 

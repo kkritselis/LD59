@@ -21,7 +21,7 @@
       "damage": "—",
       "armor": "—",
       "current": "0",
-      "max": "100",
+      "max": "200",
       "image": "assets/textures/transmission_build_btn.png"
     },
     {
@@ -33,7 +33,7 @@
       "damage": "Blaster",
       "armor": "—",
       "current": "0",
-      "max": "—",
+      "max": null,
       "image": "assets/textures/mini_tower_btn.png"
     },
     {
@@ -45,7 +45,7 @@
       "damage": "Blaster",
       "armor": "—",
       "current": "0",
-      "max": "—",
+      "max": null,
       "image": "assets/textures/medium_tower_btn.png"
     },
     {
@@ -57,7 +57,7 @@
       "damage": "Blaster",
       "armor": "—",
       "current": "0",
-      "max": "—",
+      "max": null,
       "image": "assets/textures/mega_tower_btn.png"
     }
   ]

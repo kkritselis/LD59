@@ -22,6 +22,7 @@ const OBJ_SCALE = 0.0001;  // uniform scale applied to all loaded FBX assets
 
 // Base HP at which the game ends
 const BASE_MAX_HP = 25;
+const INITIAL_ENEMY_COUNT = 50;
 
 // Weapon
 const FIRE_RATE      = 0.12;  // seconds between shots
@@ -321,6 +322,7 @@ export class GameScreen {
     this._clearBuildables();
     this._resourceManager?.respawn();
     this._enemyManager?.removeAll();
+    this._enemyManager?.spawnWave(INITIAL_ENEMY_COUNT, { scatter: true });
   }
 
   _clearBuildables() {
@@ -884,6 +886,7 @@ export class GameScreen {
       const ratio = document.createElement('span');
       ratio.className = 'dock-store-ratio';
       ratio.dataset.bind = 'ratio';
+      const hasMaxValue = item.max != null && String(item.max).trim() !== '';
 
       const costNum = document.createElement('span');
       costNum.className = 'dock-store-costnum';
@@ -898,7 +901,7 @@ export class GameScreen {
 
       main.appendChild(h3);
       main.appendChild(p);
-      main.appendChild(ratio);
+      if (hasMaxValue) main.appendChild(ratio);
       main.appendChild(costNum);
       body.appendChild(main);
       body.appendChild(buy);

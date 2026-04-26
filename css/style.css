@@ -840,20 +840,21 @@ html, body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 10px;
+  display: block;
   padding: 10px 12px;
   box-sizing: border-box;
   pointer-events: none;
 }
 
+.dock-store-card-body > * {
+  position: relative;
+}
+
 .dock-store-card-main {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
+  position: relative;
+  /* display: flex; */
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
@@ -863,39 +864,55 @@ html, body {
 .dock-store-name {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 14px;
+  font-size: 20px;
   letter-spacing: 0.05em;
   line-height: 1.2;
   color: #f0e6d8;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  position: relative;
+  left: 100px;
+  top: 10px;
 }
 
 .dock-store-desc {
   margin: 0;
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.35;
   color: rgba(240, 228, 210, 0.95);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
-  overflow: hidden;
+  width: 400px;
+  position: relative;
+  left: 100px;
+  top: 10px;
 }
 
 .dock-store-ratio {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 36px;
   color: #e8d0b0;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  position: absolute;
+  right: 140px;
+  top: 0;
 }
 
 /* Cost digits only — position with margin/absolute in your stylesheet */
 .dock-store-costnum {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 36px;
   font-weight: 600;
+  line-height: 1;
   color: #fff8ec;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  display: inline-block;
+  width: 58px;
+  text-align: right;
+  position: absolute;
+  right: 140px;
+  top: 58px;
 }
 
 .dock-store-buy {
@@ -904,6 +921,8 @@ html, body {
   margin: 0;
   width: 133px;
   height: 63px;
+  left: 624px;
+  bottom: 42px;
   padding: 0;
   border: none;
   border-radius: 0;
