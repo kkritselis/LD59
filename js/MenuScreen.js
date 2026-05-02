@@ -24,6 +24,8 @@ const FRAG = /* glsl */`
   precision mediump float;
   uniform float uTime;
   uniform vec2  uResolution;
+  uniform float uZoomT;
+  uniform float uBlackout;
   uniform sampler2D iChannel0;
   uniform sampler2D iChannel1;
 
@@ -61,6 +63,11 @@ const FRAG = /* glsl */`
     vec2 uv = fragCoord / uResolution - 0.5;
     uv.x *= uResolution.x / uResolution.y;
 
+    // Zoom toward left side of the frame (aspect-corrected space: negative x = left)
+    vec2 focal = vec2(-0.42, 0.0);
+    float zoomAmt = mix(1.0, 5.5, clamp(uZoomT, 0.0, 1.0));
+    uv = focal + (uv - focal) / max(zoomAmt, 0.001);
+
     vec3 dir  = vec3(uv, 1.0);
 
     // Ray origin — dither from iChannel0 (matches Shadertoy)
@@ -93,9 +100,16 @@ const FRAG = /* glsl */`
     vec2 uvRaw = fragCoord / uResolution - 0.5;
     col *= 1.0 - length(pow(abs(uvRaw), vec2(5.0))) * 14.0;
 
+    col = mix(col, vec3(0.0), clamp(uBlackout, 0.0, 1.0));
     gl_FragColor = vec4(col, 1.0);
   }
 `;
+
+/** Ease for zoom (slow in / slow out). */
+function _easeInOutCubic(t) {
+  const x = Math.max(0, Math.min(1, t));
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
 
 // ── MenuScreen class ───────────────────────────────────────────────────────
 
@@ -106,6 +120,10 @@ export class MenuScreen {
 
     this._animFrameId = null;
     this._running     = false;
+    this._transitioning = false;
+    this._transitionStart = 0;
+    /** @type {null | (() => void)} */
+    this._transitionResolve = null;
 
     this._initRenderer();
     this._bindButtons();
@@ -115,6 +133,17 @@ export class MenuScreen {
 
   start() {
     if (this._running) return;
+    this._transitioning = false;
+    this._transitionStart = 0;
+    this._transitionResolve = null;
+    if (this._uniforms) {
+      this._uniforms.uZoomT.value = 0;
+      this._uniforms.uBlackout.value = 0;
+    }
+    document.querySelector('.menu-content')?.classList.remove('menu-content--to-game');
+    const startBtn = document.getElementById('btn-start');
+    if (startBtn) startBtn.disabled = false;
+
     this._running = true;
     this._clock.start();
     this._loop();
@@ -122,11 +151,31 @@ export class MenuScreen {
 
   stop() {
     this._running = false;
+    this._transitioning = false;
+    this._transitionStart = 0;
+    this._transitionResolve = null;
     if (this._animFrameId) {
       cancelAnimationFrame(this._animFrameId);
       this._animFrameId = null;
     }
     this._clock.stop();
+  }
+
+  /**
+   * Cinematic handoff: fade menu UI, ~8s zoom into the planet on the left, fade to black.
+   * Keeps the menu renderer running until resolved.
+   * @returns {Promise<void>}
+   */
+  playStartTransition() {
+    if (this._transitioning) return Promise.resolve();
+    return new Promise((resolve) => {
+      this._transitioning = true;
+      this._transitionStart = performance.now();
+      this._transitionResolve = resolve;
+      document.querySelector('.menu-content')?.classList.add('menu-content--to-game');
+      const startBtn = document.getElementById('btn-start');
+      if (startBtn) startBtn.disabled = true;
+    });
   }
 
   // ── Three.js planet background ──────────────────────────────────────────
@@ -162,6 +211,8 @@ export class MenuScreen {
         canvas.width,   // set by setSize × pixelRatio
         canvas.height,
       )},
+      uZoomT:      { value: 0 },
+      uBlackout:   { value: 0 },
       iChannel0:   { value: placeholderTex },
       iChannel1:   { value: placeholderTex },
     };
@@ -209,6 +260,33 @@ export class MenuScreen {
     if (!this._running) return;
     this._animFrameId = requestAnimationFrame(() => this._loop());
     this._uniforms.uTime.value = this._clock.getElapsedTime();
+
+    if (this._transitioning && this._transitionStart > 0) {
+      const elapsed = performance.now() - this._transitionStart;
+      const ZOOM_MS = 8000;
+      const BLACKOUT_START_MS = 6080;
+      const BLACKOUT_MS = 1200;
+      const END_MS = BLACKOUT_START_MS + BLACKOUT_MS + 350;
+
+      const zoomPhase = Math.min(1, elapsed / ZOOM_MS);
+      this._uniforms.uZoomT.value = _easeInOutCubic(zoomPhase);
+
+      let bo = 0;
+      if (elapsed >= BLACKOUT_START_MS) {
+        bo = Math.min(1, (elapsed - BLACKOUT_START_MS) / BLACKOUT_MS);
+      }
+      this._uniforms.uBlackout.value = bo;
+
+      if (elapsed >= END_MS) {
+        this._uniforms.uBlackout.value = 1;
+        this._transitioning = false;
+        this._transitionStart = 0;
+        const done = this._transitionResolve;
+        this._transitionResolve = null;
+        done?.();
+      }
+    }
+
     this._renderer.render(this._scene, this._camera);
   }
 

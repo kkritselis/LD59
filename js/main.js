@@ -48,6 +48,7 @@ async function main() {
   menu.onStartGame = async () => {
     // Initialize audio on first user gesture
     audio.init();
+    await menu.playStartTransition();
     menu.stop();
 
     if (!game) {

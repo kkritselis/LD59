@@ -32,7 +32,6 @@ const STEEP_BLOCK  = 1.0;  // world-slope magnitude above which terrain is impas
 const HIGH_ALT     = 0.525; // UV height above which the air is too thin (blocks enemies)
 const ENEMY_SPEED  = 0.02; // UV units / second on flat terrain
 const CONTACT_DIST = 0.025; // UV distance from base centre to trigger a hit
-const SPAWN_RADIUS = 0.44;  // UV units from base centre for the spawn ring
 const ENEMY_MODEL_PATH = 'assets/obj/spider.glb';
 const ENEMY_TARGET_HEIGHT = 0.04;
 const ENEMY_DEATH_SECONDS = 0.7;
@@ -90,20 +89,16 @@ export class EnemyManager {
     this._field       = null;
     this._enemyModelTemplate = null;
     this._enemyModelClips = [];
-    this._enemyClipNames = { walk: null, attack: null, death: null };
-    this._enemyClipByName = {};
+    /** @type {THREE.AnimationClip|null} */
+    this._clipWalk = null;
+    /** @type {THREE.AnimationClip|null} */
+    this._clipAttack = null;
+    /** @type {THREE.AnimationClip|null} */
+    this._clipDeath = null;
     this._enemyModelScale = 1;
-
-    // Trefoil-style knot (p,q) = (2,3); thicker tube + more radial segments so the rope reads solid.
-    const geo = new THREE.TorusKnotGeometry(0.02, 0.015, 48, 12, 2, 3);
-    geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-    this._geo = geo;
-    this._mat = new THREE.MeshPhongMaterial({
-      color:    0x5a1428,
-      emissive: 0x1c080e,
-      specular: 0x281018,
-      shininess: 48,
-    });
+    this._modelLoadFailed = false;
+    /** @type {{ count: number, options: { scatter?: boolean } }[]} */
+    this._pendingSpawns = [];
 
     this._buildField();
     this._loadEnemyModel();
@@ -223,105 +218,106 @@ export class EnemyManager {
         this._enemyModelScale = h > 1e-6 ? (ENEMY_TARGET_HEIGHT / h) : 1;
         this._enemyModelTemplate = root;
         this._enemyModelClips = Array.isArray(gltf.animations) ? gltf.animations : [];
-        this._enemyClipByName = {};
-        for (const clip of this._enemyModelClips) {
-          const name = (clip?.name ?? '').trim();
-          if (!name) continue;
-          this._enemyClipByName[name] = clip;
-        }
-        this._enemyClipNames.attack = this._findClipName(/attack|bite|hit|strike/i);
-        this._enemyClipNames.death = this._findClipName(/death|die|dead|destroy|defeat/i);
-        this._enemyClipNames.walk = this._resolveWalkClipName();
-        const list = this._enemyModelClips.map((c, i) => (c?.name?.trim() ? c.name : `unnamed_${i}`));
+        this._clipAttack = this._findClip(/attack|bite|hit|strike/i);
+        this._clipDeath = this._findClip(/death|die|dead|destroy|defeat/i);
+        this._clipWalk = this._resolveWalkClip();
+
+        const list = this._enemyModelClips.map((c, i) => {
+          const n = (c?.name ?? '').trim();
+          return n || `unnamed_${i}`;
+        });
         console.log(`[EnemyManager] Enemy clips: ${list.join(', ')}`);
-        console.log(`[EnemyManager] Selected clips -> walk: ${this._enemyClipNames.walk ?? 'none'}, attack: ${this._enemyClipNames.attack ?? 'none'}, death: ${this._enemyClipNames.death ?? 'none'}`);
+        console.log(`[EnemyManager] Selected clips -> walk: ${this._clipWalk?.name || 'unnamed'}, attack: ${this._clipAttack?.name || 'none'}, death: ${this._clipDeath?.name || 'none'}`);
         console.log(`[EnemyManager] Enemy model loaded (${this._enemyModelClips.length} clips): ${ENEMY_MODEL_PATH}`);
+
+        const pending = this._pendingSpawns.splice(0);
+        for (const job of pending) {
+          this.spawnWave(job.count, job.options);
+        }
       },
       undefined,
       (err) => {
-        console.warn('[EnemyManager] spider.glb load failed, using fallback enemy mesh.', err);
+        this._modelLoadFailed = true;
+        this._pendingSpawns.length = 0;
+        console.error('[EnemyManager] spider.glb load failed; enemies will not spawn.', err);
       },
     );
   }
 
-  _findClipName(regex) {
-    const hit = this._enemyModelClips.find((clip) => regex.test(clip?.name ?? ''));
-    return hit?.name ?? null;
+  /** @param {RegExp} regex */
+  _findClip(regex) {
+    return this._enemyModelClips.find((clip) => regex.test(clip?.name ?? '')) ?? null;
   }
 
-  _resolveWalkClipName() {
-    const direct = this._findClipName(/walk|run|move|locomotion|idle|crawl/i);
+  /** Walk clip: name match, else first clip that is not attack/death (by reference). */
+  _resolveWalkClip() {
+    const direct = this._findClip(/walk|run|move|locomotion|idle|crawl|stride/i);
     if (direct) return direct;
 
-    // Fallback: use any clip that is not tagged as attack/death.
     for (const clip of this._enemyModelClips) {
-      const name = (clip?.name ?? '').trim();
-      if (this._enemyClipNames.attack && name === this._enemyClipNames.attack) continue;
-      if (this._enemyClipNames.death && name === this._enemyClipNames.death) continue;
-      if (!name) continue;
-      return name;
+      if (clip === this._clipAttack || clip === this._clipDeath) continue;
+      return clip;
     }
     return null;
   }
 
   _makeEnemyInstance(uvx, uvy) {
-    let mesh = null;
-    let mixer = null;
-    let actions = null;
+    if (!this._enemyModelTemplate) return;
 
-    if (this._enemyModelTemplate) {
-      mesh = cloneSkeleton(this._enemyModelTemplate);
-      mesh.scale.setScalar(this._enemyModelScale);
-      mesh.traverse((node) => {
-        if (node.isMesh) {
-          node.castShadow = false;
-          node.receiveShadow = false;
-        }
-      });
-      if (this._enemyModelClips.length > 0) {
-        mixer = new THREE.AnimationMixer(mesh);
-        actions = {};
-        for (const clip of this._enemyModelClips) actions[clip.name] = mixer.clipAction(clip);
+    const mesh = cloneSkeleton(this._enemyModelTemplate);
+    mesh.scale.setScalar(this._enemyModelScale);
+    mesh.traverse((node) => {
+      if (node.isMesh) {
+        node.castShadow = false;
+        node.receiveShadow = false;
       }
-    } else {
-      mesh = new THREE.Mesh(this._geo, this._mat);
+    });
+
+    let mixer = null;
+    if (this._enemyModelClips.length > 0) {
+      mixer = new THREE.AnimationMixer(mesh);
     }
 
     this._scene.add(mesh);
-    const t = Math.random() * Math.PI * 2;
     const enemy = {
       mesh,
       uvx,
       uvy,
       mixer,
-      actions,
-      currentAnim: null,
+      currentClip: null,
       dying: false,
       deathTimer: 0,
-      tumbleX: (Math.random() - 0.5) * 4.2,
-      tumbleY: (Math.random() - 0.5) * 5.5,
-      tumbleZ: (Math.random() - 0.5) * 4.2,
-      tumblePh: t,
     };
-    this._setEnemyAnim(enemy, this._enemyClipNames.walk);
+    this._playClip(enemy, this._clipWalk, false);
     this._enemies.push(enemy);
   }
 
-  _setEnemyAnim(enemy, clipName, once = false) {
-    if (!enemy?.actions || !clipName) return;
-    if (enemy.currentAnim === clipName) return;
-    const next = enemy.actions[clipName];
-    if (!next) return;
-    if (enemy.currentAnim && enemy.actions[enemy.currentAnim]) {
-      enemy.actions[enemy.currentAnim].fadeOut(0.12);
+  /**
+   * @param {{ mixer: THREE.AnimationMixer|null, currentClip: THREE.AnimationClip|null }} enemy
+   * @param {THREE.AnimationClip|null} clip
+   * @param {boolean} once
+   */
+  _playClip(enemy, clip, once) {
+    if (!enemy?.mixer || !clip) return;
+    if (!once && enemy.currentClip === clip) return;
+
+    const next = enemy.mixer.clipAction(clip);
+    if (enemy.currentClip) {
+      const prev = enemy.mixer.clipAction(enemy.currentClip);
+      prev.fadeOut(0.15);
     }
     next.reset();
     next.enabled = true;
-    next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, 1);
-    next.clampWhenFinished = once;
+    if (once) {
+      next.setLoop(THREE.LoopOnce, 1);
+      next.clampWhenFinished = true;
+    } else {
+      next.setLoop(THREE.LoopRepeat, Infinity);
+      next.clampWhenFinished = false;
+    }
     next.fadeIn(0.12);
     next.play();
-    enemy.currentAnim = clipName;
+    if (!once) enemy.currentClip = clip;
   }
 
   _removeEnemyInstance(enemy) {
@@ -335,6 +331,12 @@ export class EnemyManager {
    * @param {{ scatter?: boolean }} [options]
    */
   spawnWave(count, options = {}) {
+    if (!this._enemyModelTemplate) {
+      if (!this._modelLoadFailed) {
+        this._pendingSpawns.push({ count, options });
+      }
+      return;
+    }
     const scatter = options.scatter === true;
     for (let i = 0; i < count; i++) {
       if (scatter) this._spawnOneScattered();
@@ -421,16 +423,6 @@ export class EnemyManager {
       const wz = -(e.uvy - 0.5) * US + off.y;
       e.mesh.position.set(wx, sampleHeight(e.uvx, e.uvy) * HS + 0.045, wz);
 
-      if (!e.mixer && !e.dying) {
-        const moving = !f.blocked && isFinite(f.dist) && f.dist > 0;
-        const moveK  = moving ? (1.15 + 2.4 * Math.max(0.08, f.spd)) : 0.45;
-        const ph     = (e.tumblePh += delta * 1.1);
-        const wobble = 0.35 * Math.sin(ph * 2.3);
-        e.mesh.rotation.x += delta * (e.tumbleX + wobble) * moveK;
-        e.mesh.rotation.y += delta * e.tumbleY * moveK;
-        e.mesh.rotation.z += delta * (e.tumbleZ - wobble * 0.6) * moveK;
-      }
-
       // Hide enemies that have scrolled beyond the terrain tile boundary
       const HALF = US * 0.5;
       e.mesh.visible = Math.abs(wx) < HALF && Math.abs(wz) < HALF;
@@ -439,16 +431,16 @@ export class EnemyManager {
       const du = e.uvx - 0.5, dv = e.uvy - 0.5;
       const d2 = du * du + dv * dv;
       if (!e.dying) {
-        if (d2 < (CONTACT_DIST * CONTACT_DIST) * 2.2) this._setEnemyAnim(e, this._enemyClipNames.attack);
-        else this._setEnemyAnim(e, this._enemyClipNames.walk);
+        if (d2 < (CONTACT_DIST * CONTACT_DIST) * 2.2) this._playClip(e, this._clipAttack, false);
+        else this._playClip(e, this._clipWalk, false);
       }
 
       if (d2 < CONTACT_DIST * CONTACT_DIST) {
         damage++;
-        if (e.actions && this._enemyClipNames.death && e.actions[this._enemyClipNames.death]) {
+        if (e.mixer && this._clipDeath) {
           e.dying = true;
           e.deathTimer = ENEMY_DEATH_SECONDS;
-          this._setEnemyAnim(e, this._enemyClipNames.death, true);
+          this._playClip(e, this._clipDeath, true);
         } else {
           dead.push(e);
         }
@@ -469,10 +461,10 @@ export class EnemyManager {
   /** Remove a specific enemy (e.g. killed by player). */
   kill(enemy) {
     if (!enemy || enemy.dying) return;
-    if (enemy.actions && this._enemyClipNames.death && enemy.actions[this._enemyClipNames.death]) {
+    if (enemy.mixer && this._clipDeath) {
       enemy.dying = true;
       enemy.deathTimer = ENEMY_DEATH_SECONDS;
-      this._setEnemyAnim(enemy, this._enemyClipNames.death, true);
+      this._playClip(enemy, this._clipDeath, true);
       return;
     }
     this._removeEnemyInstance(enemy);
@@ -593,8 +585,6 @@ export class EnemyManager {
   /** Full teardown — call when the game session ends. */
   dispose() {
     this.removeAll();
-    this._geo.dispose();
-    this._mat.dispose();
   }
 
   get enemies() { return this._enemies; }
