@@ -10,6 +10,22 @@
  */
 
 import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+/** Same unit scale as GameScreen FBX assets. */
+const OBJ_SCALE = 0.0001;
+
+/** Start transition timing (must match `_loop`). */
+const ZOOM_MS = 8000;
+const BLACKOUT_START_MS = 6080;
+const BLACKOUT_MS = 1200;
+const END_MS = BLACKOUT_START_MS + BLACKOUT_MS + 350;
+
+/** Ship covers the first half of its intro arc in this window, then eases with the planet zoom. */
+const SHIP_DASH_MS = 2000;
+
+/** Hull fades in over this window; warp stays keyed to planet time so effects lead the ship. */
+const SHIP_FADEIN_MS = 500;
 
 // ── GLSL source ────────────────────────────────────────────────────────────
 
@@ -111,6 +127,60 @@ function _easeInOutCubic(t) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
+/** Fast-out for the initial ship dash (covers half the arc quickly). */
+function _easeOutCubic(t) {
+  const x = Math.max(0, Math.min(1, t));
+  return 1 - Math.pow(1 - x, 3);
+}
+
+/** 0..1 ship path: 0–50% in SHIP_DASH_MS (ease-out), 50–100% over remaining ZOOM_MS leg (ease-in-out). */
+function _shipIntroPathT(elapsed) {
+  if (elapsed <= SHIP_DASH_MS) {
+    const p = Math.max(0, Math.min(1, elapsed / SHIP_DASH_MS));
+    return 0.5 * _easeOutCubic(p);
+  }
+  const p2 = Math.max(
+    0,
+    Math.min(1, (elapsed - SHIP_DASH_MS) / (ZOOM_MS - SHIP_DASH_MS)),
+  );
+  return 0.5 + 0.5 * _easeInOutCubic(p2);
+}
+
+// ── Warp bubble (fresnel shell, intro layer only) ───────────────────────────
+
+const WARP_BUBBLE_VERT = /* glsl */`
+  varying vec3 vNorm;
+  varying vec3 vView;
+  void main() {
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vView = -mvPosition.xyz;
+    vNorm = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const WARP_BUBBLE_FRAG = /* glsl */`
+  precision mediump float;
+  varying vec3 vNorm;
+  varying vec3 vView;
+  uniform float uPulse;
+  uniform float uTime;
+  void main() {
+    vec3 n = normalize(vNorm);
+    vec3 v = normalize(vView);
+    float nd = clamp(abs(dot(n, v)), 0.0, 1.0);
+    float rim = pow(1.0 - nd, 3.2);
+    float thin = pow(1.0 - nd, 10.0);
+    float wob = 0.04 * sin(uTime * 6.0 + n.x * 14.0 + n.y * 11.0);
+    float f = rim * (0.92 + wob) + thin * 0.55;
+    vec3 cDeep = vec3(0.02, 0.25, 0.95);
+    vec3 cHot = vec3(0.75, 0.98, 1.0);
+    vec3 col = mix(cDeep, cHot, f);
+    float a = clamp(f * 0.62 * uPulse + rim * 0.18 * uPulse, 0.0, 0.92);
+    gl_FragColor = vec4(col * uPulse * 1.65, a);
+  }
+`;
+
 // ── MenuScreen class ───────────────────────────────────────────────────────
 
 export class MenuScreen {
@@ -126,6 +196,7 @@ export class MenuScreen {
     this._transitionResolve = null;
 
     this._initRenderer();
+    this._initIntroLayer();
     this._bindButtons();
   }
 
@@ -139,6 +210,22 @@ export class MenuScreen {
     if (this._uniforms) {
       this._uniforms.uZoomT.value = 0;
       this._uniforms.uBlackout.value = 0;
+    }
+    if (this._cruiserAnimGroup) {
+      this._cruiserAnimGroup.visible = false;
+    }
+    if (this._warpExitFx) {
+      this._warpExitFx.visible = false;
+    }
+    if (this._warpPoint) {
+      this._warpPoint.intensity = 0;
+    }
+    if (this._warpPointCore) {
+      this._warpPointCore.intensity = 0;
+    }
+    this._introWarpPrevMs = null;
+    if (this._cruiserShipMat) {
+      this._cruiserShipMat.opacity = 1;
     }
     document.querySelector('.menu-content')?.classList.remove('menu-content--to-game');
     const startBtn = document.getElementById('btn-start');
@@ -172,6 +259,8 @@ export class MenuScreen {
       this._transitioning = true;
       this._transitionStart = performance.now();
       this._transitionResolve = resolve;
+      this._introWarpPrevMs = null;
+      this._resetWarpParticles();
       document.querySelector('.menu-content')?.classList.add('menu-content--to-game');
       const startBtn = document.getElementById('btn-start');
       if (startBtn) startBtn.disabled = true;
@@ -256,6 +345,409 @@ export class MenuScreen {
     window.addEventListener('resize', () => this._onResize());
   }
 
+  /** Second WebGL layer: cruiser FBX composited over the planet shader. */
+  _initIntroLayer() {
+    const canvas = document.getElementById('menu-intro-canvas');
+    if (!canvas) return;
+
+    this._introRenderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias:   true,
+      alpha:       true,
+      depth:       true,
+    });
+    this._introRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this._introRenderer.setSize(window.innerWidth, window.innerHeight);
+    this._introRenderer.setClearColor(0x000000, 0);
+    this._introRenderer.toneMapping = THREE.NoToneMapping;
+
+    this._introScene = new THREE.Scene();
+    const introEl = this._introRenderer.domElement;
+    this._introCamera = new THREE.PerspectiveCamera(
+      48,
+      introEl.width / Math.max(1, introEl.height),
+      0.05,
+      80,
+    );
+    this._introCamera.position.set(0.22, 0.2, 4.35);
+    this._introCamera.lookAt(0.02, 0.04, 0);
+
+    const amb = new THREE.AmbientLight(0xe8c4a8, 0.32);
+    const sun = new THREE.DirectionalLight(0xffd8b8, 0.68);
+    sun.position.set(-4.2, 6.5, 2.8);
+    this._introScene.add(amb, sun);
+
+    this._cruiserAnimGroup = new THREE.Group();
+    this._cruiserAnimGroup.visible = false;
+    this._introScene.add(this._cruiserAnimGroup);
+
+    this._warpExitFx = this._createWarpExitFx();
+    this._introScene.add(this._warpExitFx);
+    this._warpPoint = new THREE.PointLight(0x7aebff, 0, 18, 1.2);
+    this._warpPoint.decay = 2;
+    this._introScene.add(this._warpPoint);
+
+    this._warpPointCore = new THREE.PointLight(0xffffff, 0, 10, 0.6);
+    this._warpPointCore.decay = 2;
+    this._introScene.add(this._warpPointCore);
+
+    this._cruiserLoaded = false;
+    this._cruiserShipMat = null;
+
+    const atlas = new THREE.TextureLoader().load(
+      'assets/textures/PolygonSciFiCity_Texture_01_A.png',
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+      },
+    );
+    const shipMat = new THREE.MeshPhongMaterial({
+      map:       atlas,
+      specular:  0x111122,
+      shininess: 25,
+    });
+    shipMat.transparent = true;
+    shipMat.opacity = 1;
+    shipMat.depthWrite = false;
+    this._cruiserShipMat = shipMat;
+
+    const fbxLoader = new FBXLoader();
+    fbxLoader.setResourcePath('assets/textures/');
+    fbxLoader.load(
+      'assets/obj/SM_Ship_Cruiser_02.fbx',
+      (obj) => {
+        const embedded = [];
+        obj.traverse((child) => {
+          if (child.isLight) embedded.push(child);
+          if (child.isMesh) child.material = shipMat;
+        });
+        embedded.forEach((l) => l.parent?.remove(l));
+
+        obj.scale.setScalar(OBJ_SCALE);
+        obj.rotation.y = Math.PI;
+        this._cruiserAnimGroup.add(obj);
+        this._cruiserLoaded = true;
+        if (this._transitioning) {
+          this._cruiserAnimGroup.visible = true;
+        }
+      },
+      undefined,
+      (err) => console.error('MenuScreen: cruiser FBX load failed:', err),
+    );
+  }
+
+  /**
+   * Layered warp exit: fresnel bubble, bow torus, tunnel rings + streak lines, particle stream.
+   * @returns {THREE.Group}
+   */
+  _createWarpExitFx() {
+    const root = new THREE.Group();
+    root.name = 'warpExitFx';
+    root.visible = false;
+
+    this._warpBubbleUniforms = {
+      uPulse: { value: 1 },
+      uTime:  { value: 0 },
+    };
+    this._warpBubbleMat = new THREE.ShaderMaterial({
+      glslVersion:    THREE.GLSL1,
+      uniforms:       this._warpBubbleUniforms,
+      vertexShader:   WARP_BUBBLE_VERT,
+      fragmentShader: WARP_BUBBLE_FRAG,
+      transparent:    true,
+      depthWrite:     false,
+      side:           THREE.DoubleSide,
+      blending:       THREE.AdditiveBlending,
+    });
+    const bubble = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 3), this._warpBubbleMat);
+    bubble.name = 'warpBubble';
+    root.add(bubble);
+    this._warpBubbleMesh = bubble;
+
+    this._warpBowMat = new THREE.MeshBasicMaterial({
+      color: 0xe8fbff,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const bow = new THREE.Mesh(
+      new THREE.TorusGeometry(0.95, 0.036, 14, 72),
+      this._warpBowMat,
+    );
+    bow.rotation.y = Math.PI / 2;
+    bow.name = 'warpBow';
+    root.add(bow);
+    this._warpBowRing = bow;
+
+    this._warpFlashMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const flash = new THREE.Mesh(new THREE.CircleGeometry(1.12, 48), this._warpFlashMat);
+    flash.rotation.y = Math.PI / 2;
+    flash.position.x = 0.1;
+    root.add(flash);
+
+    const tunnel = new THREE.Group();
+    tunnel.name = 'warpTunnel';
+
+    this._warpRingMats = [];
+    const ringCount = 10;
+    for (let i = 0; i < ringCount; i++) {
+      const inner = 0.035 + i * 0.082;
+      const outer = inner + 0.068 + i * 0.008;
+      const geo = new THREE.RingGeometry(inner, outer, 56);
+      const hue = THREE.MathUtils.lerp(0.46, 0.84, i / Math.max(1, ringCount - 1));
+      const mat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color().setHSL(hue, 1, 0.58),
+        transparent: true,
+        opacity: 0.58,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      this._warpRingMats.push(mat);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.y = Math.PI / 2;
+      mesh.position.x = i * 0.165;
+      tunnel.add(mesh);
+    }
+
+    const streakPairs = 140;
+    const sPos = new Float32Array(streakPairs * 6);
+    for (let i = 0; i < streakPairs; i++) {
+      const y = (Math.random() - 0.5) * 2.8;
+      const z = (Math.random() - 0.5) * 2.5;
+      const x0 = 4.8 + Math.random() * 2.4;
+      const x1 = 0.05 + Math.random() * 0.55;
+      sPos[i * 6 + 0] = x0;
+      sPos[i * 6 + 1] = y * 0.32;
+      sPos[i * 6 + 2] = z * 0.28;
+      sPos[i * 6 + 3] = x1;
+      sPos[i * 6 + 4] = y;
+      sPos[i * 6 + 5] = z;
+    }
+    const streakGeo = new THREE.BufferGeometry();
+    streakGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+    this._warpStreakMat = new THREE.LineBasicMaterial({
+      color: 0xd8f8ff,
+      transparent: true,
+      opacity: 0.78,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    tunnel.add(new THREE.LineSegments(streakGeo, this._warpStreakMat));
+    this._warpStreakGeo = streakGeo;
+
+    tunnel.position.set(0.85, 0, -0.06);
+    root.add(tunnel);
+    this._warpTunnel = tunnel;
+
+    const PART = 720;
+    const pPos = new Float32Array(PART * 3);
+    this._warpParticleVel = new Float32Array(PART * 3);
+    for (let i = 0; i < PART; i++) {
+      pPos[i * 3 + 0] = 1.2 + Math.random() * 4.2;
+      pPos[i * 3 + 1] = (Math.random() - 0.5) * 2.0;
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 2.0;
+      this._warpParticleVel[i * 3 + 0] = -2.2 - Math.random() * 6.5;
+      this._warpParticleVel[i * 3 + 1] = (Math.random() - 0.5) * 2.0;
+      this._warpParticleVel[i * 3 + 2] = (Math.random() - 0.5) * 2.0;
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    this._warpParticleGeo = pGeo;
+    this._warpParticleMat = new THREE.PointsMaterial({
+      color:           0xb5ecff,
+      size:            0.12,
+      transparent:     true,
+      opacity:         0.92,
+      blending:        THREE.AdditiveBlending,
+      depthWrite:      false,
+      sizeAttenuation: true,
+    });
+    const pts = new THREE.Points(pGeo, this._warpParticleMat);
+    pts.name = 'warpParticles';
+    root.add(pts);
+    this._warpParticles = pts;
+
+    return root;
+  }
+
+  _resetWarpParticles() {
+    if (!this._warpParticleGeo || !this._warpParticleVel) return;
+    const pos = this._warpParticleGeo.attributes.position.array;
+    const n = pos.length / 3;
+    for (let i = 0; i < n; i++) {
+      pos[i * 3 + 0] = 1.0 + Math.random() * 4.4;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 2.0;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 2.0;
+      this._warpParticleVel[i * 3 + 0] = -2.4 - Math.random() * 6.2;
+      this._warpParticleVel[i * 3 + 1] = (Math.random() - 0.5) * 2.0;
+      this._warpParticleVel[i * 3 + 2] = (Math.random() - 0.5) * 2.0;
+    }
+    this._warpParticleGeo.attributes.position.needsUpdate = true;
+  }
+
+  /**
+   * @param {number} zoomT   Eased 0..1, same as planet `uZoomT`.
+   * @param {number} elapsed ms since transition start.
+   * @param {number} blackout 0..1
+   */
+  _updateCruiserPose(zoomT, elapsed, blackout) {
+    if (!this._cruiserAnimGroup || !this._introCamera) return;
+
+    const t = Math.max(0, Math.min(1, zoomT));
+    const shipReveal = THREE.MathUtils.smoothstep(elapsed, 0, SHIP_FADEIN_MS);
+    const pathT = Math.max(0, Math.min(1, _shipIntroPathT(elapsed)));
+    const wobble = Math.sin(elapsed * 0.012) * 0.04 * (1 - pathT);
+
+    // Cinema pose (tuned): right entry x0, hero scale0 — edit these together.
+    const x0 = 4.4;
+    const x1 = -0.02;
+    const y0 = 0.38;
+    const y1 = -0.14;
+    const z0 = 0.22;
+    const z1 = -0.62;
+
+    this._cruiserAnimGroup.position.set(
+      THREE.MathUtils.lerp(x0, x1, pathT) + wobble * 0.35,
+      THREE.MathUtils.lerp(y0, y1, pathT) + wobble,
+      THREE.MathUtils.lerp(z0, z1, pathT),
+    );
+
+    const scale0 = 25.8;
+    const scale1 = 0.09;
+    const shipScale = THREE.MathUtils.lerp(scale0, scale1, Math.pow(pathT, 0.92));
+    this._cruiserAnimGroup.scale.setScalar(shipScale);
+
+    this._cruiserAnimGroup.rotation.set(
+      THREE.MathUtils.lerp(0.12, 0.78, pathT),
+      THREE.MathUtils.lerp(-0.35, -0.08, pathT),
+      THREE.MathUtils.lerp(-0.18, -0.52, pathT) + wobble * 0.5,
+    );
+
+    // Slight camera push-in follows the ship path (dash then planet-eased pull).
+    this._introCamera.position.x = 0.22 + pathT * 0.1;
+    this._introCamera.position.y = 0.2 - pathT * 0.06;
+    this._introCamera.position.z = 4.35 - pathT * 0.55;
+    this._introCamera.lookAt(
+      THREE.MathUtils.lerp(0.02, -0.08, pathT),
+      THREE.MathUtils.lerp(0.04, -0.02, pathT),
+      0,
+    );
+
+    // Warp exit: full strength from planet `t`; hull uses `shipReveal` so warp leads the fade-in.
+    const warpStrength = 1 - THREE.MathUtils.smoothstep(t, 0, 0.5);
+    const ship = this._cruiserAnimGroup.position;
+
+    if (this._warpExitFx) {
+      const pulse = 1 + 0.22 * Math.sin(elapsed * 0.072);
+      const dim = 1 - blackout * 0.9;
+      const entryFlash = 1 - THREE.MathUtils.smoothstep(elapsed, 0, 480);
+
+      const dt = this._introWarpPrevMs == null
+        ? 0.016
+        : Math.min(0.052, (elapsed - this._introWarpPrevMs) * 0.001);
+      this._introWarpPrevMs = elapsed;
+
+      if (warpStrength >= 0.018) {
+        this._warpExitFx.visible = true;
+        this._warpExitFx.position.copy(ship);
+        this._warpExitFx.quaternion.identity();
+
+        const bubbleScale = 2.35 + 1.1 * warpStrength * pulse + 0.5 * entryFlash;
+        if (this._warpBubbleMesh) {
+          this._warpBubbleMesh.scale.setScalar(bubbleScale);
+        }
+        if (this._warpBubbleUniforms) {
+          this._warpBubbleUniforms.uTime.value = elapsed * 0.001;
+          this._warpBubbleUniforms.uPulse.value =
+            dim * warpStrength * (0.88 + 0.52 * entryFlash);
+        }
+
+        if (this._warpBowRing) {
+          const bowS = (0.82 + (1 - warpStrength) * 2.35 + 0.75 * entryFlash) * pulse;
+          this._warpBowRing.scale.setScalar(bowS);
+          this._warpBowRing.rotation.z = elapsed * 0.0011;
+        }
+        if (this._warpBowMat) {
+          this._warpBowMat.opacity =
+            (0.52 + 0.48 * warpStrength + 0.58 * entryFlash) * dim;
+        }
+
+        if (this._warpTunnel) {
+          const tunnelX = 0.52 + 1.08 * warpStrength + 0.32 * pulse + 0.52 * entryFlash;
+          this._warpTunnel.position.set(tunnelX, 0, -0.05);
+          this._warpTunnel.rotation.z = elapsed * 0.00065;
+        }
+
+        const nR = this._warpRingMats?.length ?? 0;
+        for (let i = 0; i < nR; i++) {
+          const mat = this._warpRingMats[i];
+          const falloff = 1 - i / Math.max(1, nR - 1);
+          mat.opacity =
+            (0.44 + 0.22 * falloff) * warpStrength * dim * (0.8 + 0.2 * entryFlash);
+        }
+
+        if (this._warpFlashMat) {
+          this._warpFlashMat.opacity =
+            (0.5 + 0.38 * pulse + 0.55 * entryFlash) * warpStrength * warpStrength * dim;
+        }
+
+        if (this._warpStreakMat) {
+          this._warpStreakMat.opacity =
+            (0.64 + 0.32 * entryFlash) * warpStrength * dim;
+        }
+
+        if (this._warpParticleGeo && this._warpParticleVel) {
+          const pos = this._warpParticleGeo.attributes.position.array;
+          const nP = pos.length / 3;
+          const spdMul = warpStrength * (1.45 + 0.95 * (1 - warpStrength));
+          for (let i = 0; i < nP; i++) {
+            pos[i * 3 + 0] += this._warpParticleVel[i * 3 + 0] * dt * spdMul * 4.2;
+            pos[i * 3 + 1] += this._warpParticleVel[i * 3 + 1] * dt * spdMul * 2.2;
+            pos[i * 3 + 2] += this._warpParticleVel[i * 3 + 2] * dt * spdMul * 2.2;
+            if (pos[i * 3 + 0] < -0.55) {
+              pos[i * 3 + 0] = 1.4 + Math.random() * 4.0;
+              pos[i * 3 + 1] = (Math.random() - 0.5) * 2.0;
+              pos[i * 3 + 2] = (Math.random() - 0.5) * 2.0;
+            }
+          }
+          this._warpParticleGeo.attributes.position.needsUpdate = true;
+        }
+        if (this._warpParticleMat) {
+          this._warpParticleMat.opacity =
+            (0.58 + 0.42 * warpStrength + 0.38 * entryFlash) * dim;
+        }
+
+        if (this._warpPoint) {
+          this._warpPoint.position.copy(ship);
+          this._warpPoint.position.x += 0.38 * warpStrength;
+          this._warpPoint.intensity =
+            (9 + 24 * entryFlash + 7 * warpStrength) * warpStrength * dim;
+        }
+        if (this._warpPointCore) {
+          this._warpPointCore.position.copy(ship);
+          this._warpPointCore.intensity =
+            (16 * entryFlash * warpStrength + 5 * warpStrength) * dim;
+        }
+      } else {
+        this._warpExitFx.visible = false;
+        if (this._warpPoint) this._warpPoint.intensity = 0;
+        if (this._warpPointCore) this._warpPointCore.intensity = 0;
+      }
+    }
+
+    if (this._cruiserShipMat) {
+      this._cruiserShipMat.opacity = Math.max(0, shipReveal * (1 - blackout * 0.98));
+    }
+  }
+
   _loop() {
     if (!this._running) return;
     this._animFrameId = requestAnimationFrame(() => this._loop());
@@ -263,13 +755,10 @@ export class MenuScreen {
 
     if (this._transitioning && this._transitionStart > 0) {
       const elapsed = performance.now() - this._transitionStart;
-      const ZOOM_MS = 8000;
-      const BLACKOUT_START_MS = 6080;
-      const BLACKOUT_MS = 1200;
-      const END_MS = BLACKOUT_START_MS + BLACKOUT_MS + 350;
 
       const zoomPhase = Math.min(1, elapsed / ZOOM_MS);
-      this._uniforms.uZoomT.value = _easeInOutCubic(zoomPhase);
+      const zoomT = _easeInOutCubic(zoomPhase);
+      this._uniforms.uZoomT.value = zoomT;
 
       let bo = 0;
       if (elapsed >= BLACKOUT_START_MS) {
@@ -277,23 +766,63 @@ export class MenuScreen {
       }
       this._uniforms.uBlackout.value = bo;
 
+      if (this._cruiserAnimGroup && this._cruiserLoaded) {
+        this._updateCruiserPose(zoomT, elapsed, bo);
+        this._cruiserAnimGroup.visible = true;
+      }
+
       if (elapsed >= END_MS) {
         this._uniforms.uBlackout.value = 1;
         this._transitioning = false;
         this._transitionStart = 0;
+        if (this._cruiserAnimGroup) {
+          this._cruiserAnimGroup.visible = false;
+        }
+        if (this._warpExitFx) {
+          this._warpExitFx.visible = false;
+        }
+        if (this._warpPoint) {
+          this._warpPoint.intensity = 0;
+        }
+        if (this._warpPointCore) {
+          this._warpPointCore.intensity = 0;
+        }
+        if (this._cruiserShipMat) {
+          this._cruiserShipMat.opacity = 1;
+        }
         const done = this._transitionResolve;
         this._transitionResolve = null;
         done?.();
       }
+    } else if (this._cruiserAnimGroup) {
+      this._cruiserAnimGroup.visible = false;
+      if (this._warpExitFx) this._warpExitFx.visible = false;
+      if (this._warpPoint) this._warpPoint.intensity = 0;
+      if (this._warpPointCore) this._warpPointCore.intensity = 0;
     }
 
     this._renderer.render(this._scene, this._camera);
+
+    if (
+      this._introRenderer &&
+      this._introScene &&
+      this._introCamera &&
+      this._cruiserAnimGroup?.visible
+    ) {
+      this._introRenderer.render(this._introScene, this._introCamera);
+    }
   }
 
   _onResize() {
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     const canvas = this._renderer.domElement;
     this._uniforms.uResolution.value.set(canvas.width, canvas.height);
+    if (this._introRenderer && this._introCamera) {
+      this._introRenderer.setSize(window.innerWidth, window.innerHeight);
+      const el = this._introRenderer.domElement;
+      this._introCamera.aspect = el.width / Math.max(1, el.height);
+      this._introCamera.updateProjectionMatrix();
+    }
   }
 
   // ── Buttons ──────────────────────────────────────────────────────────────

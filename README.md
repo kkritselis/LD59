@@ -42,22 +42,9 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 
 ### Ship / ops (non-code or parallel)
 
-- [ ] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
-- [ ] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
+- [x] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
+- [x] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
 
-### Final 90-minute closeout plan (time-boxed)
-
-You have one short build window left before test lock:
-
-- **Next 30 min (implementation only):**
-  - [X] Fill **credits content** in `SettingsModal` system tab text (`#settings-info-text`) from a single source list.
-  - [ ] Decide ship state for enemy walk animation: exact clip-name map or accept fallback if visual motion is adequate.
-  - [ ] Re-enable base damage in `GameScreen.js` (currently intentionally commented for UI work) and quick sanity-check HP loss/game-over flow.
-  - [X] Quick smoke check that removing dock footer did not leave dead controls or hidden dependencies.
-- **Final 60 min (no new features):**
-  - [ ] Two full playthroughs with notes (open, midgame, win/lose edge cases).
-  - [ ] One focused economy/wave tuning pass only if a blocker appears.
-  - [ ] Build package + verify zip root layout + final README/credits proofread.
 
 ### Already true in repo (do not duplicate work)
 
@@ -78,7 +65,7 @@ You have one short build window left before test lock:
 - [x] Ship, hangar, transmission mast, defense tower pieces, resource pickups — FBX (`FBXLoader`, local `js/jsm` + `js/three.module.js`)
 - [x] Delta-time game loop; screen flow Loading → Menu → Game; settings modal
 - [x] WASD / arrow flight; ship banking and pitch; autopilot takeoff / landing; snap-to-pad when near base
-- [x] Geological cross-section; sky shader; menu with procedural background; intro briefing modal (“Begin”)
+- [x] Geological cross-section; sky shader; **main menu** — dual WebGL layers (`#menu-bg-canvas` planet shader + `#menu-intro-canvas` cruiser and warp exit VFX); staggered ship path and hull fade-in on Start; intro briefing modal (“Begin”)
 - [x] **Enemies** — `spider.glb` model integration with animation mixer support (walk/attack/death detection + fallback), flow-field movement, and scattered opening spawn support.
 - [x] **Waves** — ~**60 s** timer, count doubles each wave to cap (1 → 2 → 4 → … → 256) — *schedule itself is a tuning target for Fireside (see sprint goals)*
 - [x] **Ship laser** — dashed `Line2` / `LineMaterial`; SFX
@@ -104,29 +91,110 @@ You have one short build window left before test lock:
 
 Use the **Fireside sprint** section above as the live task list for the limited window. Week 2 backlog below is the longer arc; check items off there only when shipped.
 
-### Enemies
-
-- [ ] Creature FBX + spawn holes / emergence read (sprint)
-- [ ] Additional archetypes / death VFX (post–Fireside if no time)
-
 ### Combat and building
 
 - [x] Ship weapon; defense towers; resource economy in dock
-- [ ] Additional tower variants
 
 ### Feel
 
 - [x] Baseline SFX + music channel
-- [ ] Screen shake; fog-of-war treatment; wave callouts (game HUD frame + stats layout largely in place)
-- [ ] Game over screen
-- [ ] Credits **content** in Settings system tab (shell + scrollable panel shipped — **required for jam rules**)
-- [ ] Enemy spawn VFX/readability pass (optional if testing time is tight)
+- [x] Main menu **Start** handoff — dual-canvas planet zoom plus 3D cruiser + warp exit (`MenuScreen.js`, `#menu-intro-canvas`)
+- [x] Game over screen
+- [x] Credits **content** in Settings system tab (shell + scrollable panel shipped — **required for jam rules**)
+
+## Fireside sprint — goals for this session (~12–14 h)
+
+Ordered roughly by **jam compliance first**, then **player-facing impact**, then **deliverables**.
+
+### Must / should ship today
+
+- [X] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
+- [x] **Enemy creature model pass** — replaced torus placeholder with `assets/obj/spider.glb`; enemy scale tuned down; attack/death playback works; walk clip selection now auto-falls back by name matching and clip exclusion.
+- [x] **Wave pacing / opening pressure** — added a strong opening read by spawning **50 enemies at session start**, scattered over valid flow-field cells. Regular wave schedule remains the 60-second cadence.
+- [ ] **Spawn presentation** — stop enemies **materializing in a long line on the UV border**; add **spawn holes / surface portals** (mesh + short emerge animation or staged visibility) so spawns read as “emerging from the ground” at a small set of perimeter points.
+- [x] **UI pass (current sprint)** — dock store card layout retuned for manual positioning: card body de-flexed, ratio/cost decoupled via absolute positioning, ratio omitted when `store.json` `max` is null/empty, and dock footer actions removed from modal markup for a cleaner panel while polishing.
+- [ ] **Audio “attention” pass** — once clips exist: stronger sting for wave start / tension; **attack / impact SFX** when enemies **damage the base** or **pressure a tower** (distinct from generic ambience). *Asset discovery TBD; reserve hooks in `AudioManager` / game loop.*
+
+### Ship / ops (non-code or parallel)
+
+- [x] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
+- [x] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
+
+### Already true in repo (do not duplicate work)
+
+- [x] Dock **manage** loop — spend resources on repair, tower, transmission increments, weapon tier; distress win when funded.
+- [x] **Local Three** — `index.html` import map → `./js/three.module.js` + explicit `./js/jsm/...` paths; `FBXLoader` patched for r169 `ColorManagement.toWorkingColorSpace` API.
+- [x] **Core SFX pipeline** — `AudioManager` already plays pickup, ship blaster, tower blaster, BGM after Begin; new sounds plug into the same pattern.
+- [x] **100 resource nodes**, expanded flow field (`FLOW_FIELD_AREA_MULT`), radar (**F**), transmission + towers + win overlay (from LD weekend).
 
 ---
 
 ## Week 3 — GDFG (due Sunday May 3)
 
 *The Double Crisis theme earns its keep.*
+
+## Goal
+
+Increase early-game tension, enforce the double crisis, and improve clarity of combat + resource loops.
+
+---
+
+## 1. Opening Sequence (High Priority)
+
+**Objective:** Start with action, layer explanation after.
+
+- [ ] Ship crash → immediate player control (no delay)
+
+- [ ] Enemies already active when control begins
+
+- [ ] Delay AI messaging until after action starts
+
+- [ ] Trigger resource tutorial only after first pickup
+
+**Target Outcome:**
+
+Player is under pressure within the first 5–10 seconds.
+
+---
+
+## 2. Enforce Double Crisis (High Priority)
+
+**Objective:** Make rebuilding and defense happen simultaneously.
+
+- [ ] Base starts partially damaged
+
+- [ ] Base slowly degrades over time (light pressure)
+
+- [ ] Maintain low-level enemy trickle after initial clear
+
+- [ ] Place resources slightly outside safe zone
+
+**Target Outcome:**
+
+Player cannot focus on only one problem.
+
+---
+
+## 3. Resource System Adjustment (High Priority)
+
+**Objective:** Prevent rushing the signal tower.
+
+- [ ] Add second resource type
+
+```json
+
+{
+
+  "iron": 0,
+
+  "helion": 0
+
+}
+
+### Enemies
+
+- [ ] Creature FBX + spawn holes / emergence read (sprint)
+- [ ] Additional archetypes / death VFX (post–Fireside if no time)
 
 ### Depth
 
@@ -138,6 +206,18 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 ### World
 
 - [ ] Map events; environmental hazard layer; exploration caches
+- [ ] Creature FBX + spawn holes / emergence read (sprint)
+- [ ] Additional archetypes / death VFX (post–Fireside if no time)
+
+### Combat and building
+
+- [ ] Additional tower variants
+
+### Feel
+
+- [ ] Screen shake; fog-of-war treatment; wave callouts (game HUD frame + stats layout largely in place)
+- [ ] Better Game over screen
+- [ ] Enemy spawn VFX/readability pass (optional if testing time is tight)
 
 ---
 
@@ -157,8 +237,18 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 
 ## Architecture
 
+### Menu title sequence (`MenuScreen.js`, `index.html`, `css/style.css`)
+
+The main menu uses **two stacked canvases** on `#screen-menu`: the **raw GLSL planet** on `#menu-bg-canvas`, and a **transparent WebGL overlay** on `#menu-intro-canvas` (higher `z-index`, `pointer-events: none`) for the cinematic beat when the player hits **Start**.
+
+- **Cruiser** — `assets/obj/SM_Ship_Cruiser_02.fbx` via `FBXLoader`, `OBJ_SCALE`, and the same Polygon atlas Phong pattern as in `GameScreen.js` (textures under `assets/textures/`).
+- **Motion** — `_shipIntroPathT`: first **2 s** covers **half** the hand-tuned arc (ease-out); the rest of the **8 s** zoom uses the same **ease-in-out cubic** as planet `uZoomT`. Pose numbers (`x0`, `scale0`, etc.) are edited in `_updateCruiserPose`.
+- **Hull fade-in** — **500 ms** opacity ramp using `THREE.MathUtils.smoothstep(elapsed, 0, SHIP_FADEIN_MS)` (first argument is clock time). Intro hull material uses `depthWrite: false` so warp layers stay readable.
+- **Warp exit** — Additive rings, line streaks, `THREE.Points` stream, bow torus, fresnel-style bubble `ShaderMaterial`, and two point lights; strength follows **planet** `zoomT`, not hull opacity, so VFX can precede the ship.
+- **Renderer** — Intro `WebGLRenderer` uses **`NoToneMapping`** so additive passes stay bright.
+
 ```
-index.html                — import map: `three` → ./js/three.module.js; explicit ./js/jsm/... addon paths; optional ./js/browser.js (fflate) if needed
+index.html                — import map: `three` → ./js/three.module.js; explicit ./js/jsm/... addon paths; optional ./js/browser.js (fflate) if needed; menu stack: `#menu-bg-canvas` + `#menu-intro-canvas`
 store.json                — Dock store catalog (items: id, action, name, description, cost, image; optional tower max); loaded by GameScreen
 js/
   three.module.js         — Three r169 bundle (keep in sync with js/jsm addon versions)
@@ -168,7 +258,7 @@ js/
   EnemyManager.js         — Flow field, spawn, update, kill; shared enemy geometry + material
   GameScreen.js           — Scene, loop, ship, weapons, dock store UI, transmission, win, HUD, base backdrop
   LoadingScreen.js
-  MenuScreen.js
+  MenuScreen.js           — Planet fullscreen shader (`#menu-bg-canvas`); intro 3D pass (`#menu-intro-canvas`): `SM_Ship_Cruiser_02.fbx`, layered warp VFX, start-transition handoff to game
   ResourceManager.js
   ScreenManager.js
   SettingsModal.js        — Audio volumes; header toggles system tab (credits placeholder); persist on dismiss
