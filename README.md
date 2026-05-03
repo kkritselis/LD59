@@ -29,31 +29,47 @@ Rather than burning out on a single 72-hour jam, this project runs across four o
 
 ---
 
-## Fireside sprint — goals for this session (~12–14 h)
+## GDFG sprint — goals for this session (~12–14 h)
 
 Ordered roughly by **jam compliance first**, then **player-facing impact**, then **deliverables**.
 
 ### Must / should ship today
 
-- [X] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
-- [x] **Enemy creature model pass** — replaced torus placeholder with `assets/obj/spider.glb`; enemy scale tuned down; attack/death playback works; walk clip selection now auto-falls back by name matching and clip exclusion.
-- [x] **Wave pacing / opening pressure** — added a strong opening read by spawning **50 enemies at session start**, scattered over valid flow-field cells. Regular wave schedule remains the 60-second cadence.
-- [ ] **Spawn presentation** — stop enemies **materializing in a long line on the UV border**; add **spawn holes / surface portals** (mesh + short emerge animation or staged visibility) so spawns read as “emerging from the ground” at a small set of perimeter points.
-- [x] **UI pass (current sprint)** — dock store card layout retuned for manual positioning: card body de-flexed, ratio/cost decoupled via absolute positioning, ratio omitted when `store.json` `max` is null/empty, and dock footer actions removed from modal markup for a cleaner panel while polishing.
-- [ ] **Audio “attention” pass** — klaxon loop while base armor &lt; max (`AudioManager` + `assets/audio/klaxon.mp3`); first-resource sting (`ironOre.mp3`); VO at game start (`hostilesInbound` → `takeTheFighter`). Still wanted: wave sting; attack/impact when enemies hit towers.
+**Objective:** Prevent rushing the signal tower.
 
-### Ship / ops (non-code or parallel)
+- [ ] Add second resource type
 
-- [x] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
-- [x] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
+```json
+{
+  "iron": 0,
+  "helion": 0
+}
+```
 
+### Enemies
 
-### Already true in repo (do not duplicate work)
+- [ ] Creature FBX + spawn holes / emergence read (sprint)
 
-- [x] Dock **manage** loop — spend resources on repair, tower, transmission increments, weapon tier; distress win when funded.
-- [x] **Local Three** — `index.html` import map → `./js/three.module.js` + explicit `./js/jsm/...` paths; `FBXLoader` patched for r169 `ColorManagement.toWorkingColorSpace` API.
-- [x] **Core SFX pipeline** — `AudioManager`: BGM, VO chain, warp sting (`introCutScene.mp3`), klaxon (armor-scaled loop), `ironOre` first pickup, blasters, resource pickup; buffers decode after `init()` with pending-play flush for async loads.
-- [x] **100 resource nodes**, expanded flow field (`FLOW_FIELD_AREA_MULT`), radar (**F**), transmission + towers + win overlay (from LD weekend).
+### Depth
+
+- [ ] **Double crisis** mechanic
+- [ ] Ship upgrade meta between sorties
+
+### World
+
+- [ ] Map events; environmental hazard layer; exploration caches
+- [ ] Creature FBX + spawn holes / emergence read (sprint)
+- [ ] Additional archetypes / death VFX (post–Fireside if no time)
+
+### Combat and building
+
+- [ ] Additional tower variants
+
+### Feel
+
+- [ ] Screen shake; fog-of-war treatment; wave callouts (game HUD frame + stats layout largely in place)
+- [ ] Better Game over screen
+- [ ] Enemy spawn VFX/readability pass (optional if testing time is tight)
 
 ---
 
@@ -103,6 +119,26 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 - [x] Main menu **Start** handoff — dual-canvas planet zoom plus 3D cruiser + warp exit (`MenuScreen.js`, `#menu-intro-canvas`)
 - [x] Game over screen
 - [x] Credits **content** in Settings system tab (shell + scrollable panel shipped — **required for jam rules**)
+
+- [X] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
+- [x] **Enemy creature model pass** — replaced torus placeholder with `assets/obj/spider.glb`; enemy scale tuned down; attack/death playback works; walk clip selection now auto-falls back by name matching and clip exclusion.
+- [x] **Wave pacing / opening pressure** — added a strong opening read by spawning **50 enemies at session start**, scattered over valid flow-field cells. Regular wave schedule remains the 60-second cadence.
+- [ ] **Spawn presentation** — stop enemies **materializing in a long line on the UV border**; add **spawn holes / surface portals** (mesh + short emerge animation or staged visibility) so spawns read as “emerging from the ground” at a small set of perimeter points.
+- [x] **UI pass (current sprint)** — dock store card layout retuned for manual positioning: card body de-flexed, ratio/cost decoupled via absolute positioning, ratio omitted when `store.json` `max` is null/empty, and dock footer actions removed from modal markup for a cleaner panel while polishing.
+- [ ] **Audio “attention” pass** — klaxon loop while base armor &lt; max (`AudioManager` + `assets/audio/klaxon.mp3`); first-resource sting (`ironOre.mp3`); VO at game start (`hostilesInbound` → `takeTheFighter`). Still wanted: wave sting; attack/impact when enemies hit towers.
+
+### Ship / ops (non-code or parallel)
+
+- [x] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
+- [x] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
+
+
+### Already true in repo (do not duplicate work)
+
+- [x] Dock **manage** loop — spend resources on repair, tower, transmission increments, weapon tier; distress win when funded.
+- [x] **Local Three** — `index.html` import map → `./js/three.module.js` + explicit `./js/jsm/...` paths; `FBXLoader` patched for r169 `ColorManagement.toWorkingColorSpace` API.
+- [x] **Core SFX pipeline** — `AudioManager`: BGM, VO chain, warp sting (`introCutScene.mp3`), klaxon (armor-scaled loop), `ironOre` first pickup, blasters, resource pickup; buffers decode after `init()` with pending-play flush for async loads.
+- [x] **100 resource nodes**, expanded flow field (`FLOW_FIELD_AREA_MULT`), radar (**F**), transmission + towers + win overlay (from LD weekend).
 
 ---
 
