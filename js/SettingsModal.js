@@ -6,15 +6,20 @@
  * (X, overlay, Escape) persists levels via `saveSettings()`.
  *
  * Usage:
- *   const settings = new SettingsModal(audioManager);
+ *   const settings = new SettingsModal(audioManager, translationManager);
  *   settings.open();
  */
 
 const CHANNELS = ['master', 'sfx', 'music', 'ambient'];
 
 export class SettingsModal {
-  constructor(audioManager) {
-    this.audio = audioManager;
+  /**
+   * @param {import('./AudioManager.js').AudioManager} audioManager
+   * @param {import('./TranslationManager.js').TranslationManager} [translationManager]
+   */
+  constructor(audioManager, translationManager = null) {
+    this.audio       = audioManager;
+    this.translations = translationManager;
     /** @type {null | (() => void | Promise<void>)} */
     this._onAbandonRun = null;
 
@@ -29,6 +34,7 @@ export class SettingsModal {
     this._bindOverlayClick();
     this._bindEscapeKey();
     this._syncAbandonButton();
+    // LANGUAGE SELECTOR: this._initLanguageSelect();
   }
 
   // ------------------------------------------------------------------
@@ -38,6 +44,7 @@ export class SettingsModal {
   open() {
     this._setSystemTab(false);
     this._syncSlidersFromAudio();
+    // LANGUAGE SELECTOR: this._syncLanguageSelect();
     this._syncAbandonButton();
     this._overlay.classList.remove('hidden');
     document.getElementById('btn-close-settings')?.focus();
@@ -164,5 +171,39 @@ export class SettingsModal {
       if (this._sliders[ch]) this._sliders[ch].value = value;
     }
   }
+
+  /* LANGUAGE SELECTOR: commented out for later
+  _initLanguageSelect() {
+    const select = document.getElementById('settings-language-select');
+    if (!select || !this.translations) return;
+
+    select.innerHTML = '';
+    for (const lang of this.translations.languages) {
+      const opt = document.createElement('option');
+      opt.value       = lang.key;
+      opt.textContent = lang.name;
+      select.appendChild(opt);
+    }
+
+    if (this.translations.selectedLanguage) {
+      select.value = this.translations.selectedLanguage;
+    }
+
+    select.addEventListener('change', () => {
+      if (select.value) {
+        this.translations.setLanguage(select.value);
+      }
+    });
+
+    this._langSelect = select;
+  }
+
+  _syncLanguageSelect() {
+    if (!this._langSelect || !this.translations) return;
+    if (this.translations.selectedLanguage) {
+      this._langSelect.value = this.translations.selectedLanguage;
+    }
+  }
+  END LANGUAGE SELECTOR */
 
 }

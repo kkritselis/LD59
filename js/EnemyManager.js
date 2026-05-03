@@ -35,6 +35,8 @@ const CONTACT_DIST = 0.025; // UV distance from base centre to trigger a hit
 const ENEMY_MODEL_PATH = 'assets/obj/spider.glb';
 const ENEMY_TARGET_HEIGHT = 0.04;
 const ENEMY_DEATH_SECONDS = 0.7;
+/** Added to atan2 facing if the GLB’s forward axis is not +world Z (try `Math.PI` if it runs backward). */
+const ENEMY_FACING_YAW_OFFSET = 0;
 
 // ── MinHeap (for Dijkstra) ─────────────────────────────────────────────────
 
@@ -423,6 +425,14 @@ export class EnemyManager {
       const wz = -(e.uvy - 0.5) * US + off.y;
       e.mesh.position.set(wx, sampleHeight(e.uvx, e.uvy) * HS + 0.045, wz);
 
+      // Face world travel direction: UV flow (dirX, dirY) -> world xz velocity ~(dirX, -dirY).
+      if (canMove) {
+        const sq = f.dirX * f.dirX + f.dirY * f.dirY;
+        if (sq > 1e-16) {
+          e.mesh.rotation.y = Math.atan2(f.dirX, -f.dirY) + ENEMY_FACING_YAW_OFFSET;
+        }
+      }
+
       // Hide enemies that have scrolled beyond the terrain tile boundary
       const HALF = US * 0.5;
       e.mesh.visible = Math.abs(wx) < HALF && Math.abs(wz) < HALF;
@@ -435,7 +445,8 @@ export class EnemyManager {
         else this._playClip(e, this._clipWalk, false);
       }
 
-      if (d2 < CONTACT_DIST * CONTACT_DIST) {
+      // One hit per enemy: deal damage once, then death animation / removal (do not repeat while dying inside radius).
+      if (!e.dying && d2 < CONTACT_DIST * CONTACT_DIST) {
         damage++;
         if (e.mixer && this._clipDeath) {
           e.dying = true;

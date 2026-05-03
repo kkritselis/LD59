@@ -3,7 +3,7 @@
  *
  * Drives the loading progress bar and status label.
  * Call run() to simulate or drive real asset loading,
- * then resolve() to signal completion to main.js.
+ * then promptLanguage() to gate the transition on a language selection.
  */
 
 export class LoadingScreen {
@@ -11,6 +11,11 @@ export class LoadingScreen {
     this.bar   = document.getElementById('loading-bar-fill');
     this.label = document.getElementById('loading-label');
     this._progress = 0;
+
+    // LANGUAGE SELECTOR:
+    // this._langOverlay  = document.getElementById('language-modal');
+    // this._langSelect   = document.getElementById('language-select');
+    // this._langContinue = document.getElementById('btn-language-continue');
   }
 
   /**
@@ -45,6 +50,63 @@ export class LoadingScreen {
 
     await this._delay(400);
   }
+
+  /* LANGUAGE SELECTOR: commented out for later
+  promptLanguage(translationManager) {
+    return new Promise((resolve) => {
+      const overlay  = this._langOverlay;
+      const select   = this._langSelect;
+      const continueBtn = this._langContinue;
+      if (!overlay || !select || !continueBtn) {
+        resolve();
+        return;
+      }
+
+      select.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value    = '';
+      placeholder.disabled = true;
+      placeholder.textContent = 'Select a language';
+      select.appendChild(placeholder);
+
+      for (const lang of translationManager.languages) {
+        const opt = document.createElement('option');
+        opt.value       = lang.key;
+        opt.textContent = lang.name;
+        select.appendChild(opt);
+      }
+
+      if (translationManager.selectedLanguage) {
+        select.value = translationManager.selectedLanguage;
+        continueBtn.disabled = false;
+      } else {
+        select.value = '';
+        continueBtn.disabled = true;
+      }
+
+      overlay.classList.remove('hidden');
+      overlay.setAttribute('aria-hidden', 'false');
+      select.focus();
+
+      const onSelectChange = () => {
+        continueBtn.disabled = select.value === '';
+      };
+
+      const onContinue = () => {
+        if (!select.value) return;
+        translationManager.setLanguage(select.value);
+        select.removeEventListener('change', onSelectChange);
+        continueBtn.removeEventListener('click', onContinue);
+        overlay.classList.add('hidden');
+        overlay.setAttribute('aria-hidden', 'true');
+        resolve();
+      };
+
+      select.addEventListener('change', onSelectChange);
+      continueBtn.addEventListener('click', onContinue);
+    });
+  }
+  END LANGUAGE SELECTOR */
 
   _delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

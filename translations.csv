@@ -1,0 +1,644 @@
+STRING ID,ENGLISH,SIMPLIFIED CHINESE / 简体中文,RUSSIAN / РУССКИЙ,SPANISH / ESPAÑOL,PORTUGUESE / PORTUGUÊS (BR),GERMAN / DEUTSCH,KOREAN / 한국어,JAPANESE / 日本語,FRENCH / FRANÇAIS,POLISH / POLSKI,TRADITIONAL CHINESE / 繁体中文,TURKISH / TÜRKÇE
+LANGUAGE_CODE,enUS enGB,zhCN zhSG,ruRU,esES esAR esMX,ptBR,deDE deCH deAT,koKR,jaJP,frFR,plPL,zhTW zhHK zhMO,trTR
+LANGUAGE_EN,English,Simplified Chinese,Russian,Spanish,Portuguese (Brazil),German,Korean,Japanese,French,Polish,Traditional Chinese,Turkish
+LANGUAGE_DIRECTION,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr
+,,,,,,,,,,,,
+CONTEXT_CHARACTER_CLASS,Class,角色种类,Класс,Clase,Classe,Klasse,직업,クラス,Classe,Klasa,角色類,Sınıf
+CONTEXT_CHARACTER_DELETE,Delete Character,删除角色,Удалить персонажа,Eliminar personaje,Deletar Personagem,Character löschen,캐릭터 지우기,キャラクター削除,Supprimer personnage,Usuń Postać,刪除角色,Karakteri Sil
+CONTEXT_CHARACTER_NEW,New Character,创新角色,Новый персонаж,Nuevo personaje,Novo Personagem,Neuer Charakter,캐릭터 만들기,新規キャラクター,Nouveau personnage,Nowa Postać,創新角色,Yeni Karakter
+CONTEXT_CLASS_AI,Artificial Intelligence,人工智能,Искусственный интеллект,Inteligencia Artificial,Inteligência Artificial,Künstliche Intelligenz,인공지능,人工知能,Intelligence Artificielle,Sztuczna Inteligencja,人工智能,Yapay Zekâ
+CONTEXT_CLASS_ALIEN,Alien,外星人,Пришелец,Alienígena,Extraterrestre,Alien,외계인,エイリアン,Extraterrestre,Kosmita,外星人,Uzaylı
+CONTEXT_CLASS_CLONE,Clone,复制,Клон,Clon,Clone,Klon,복제 인간,クローン,Clone,Klon,複製人,Klon
+CONTEXT_CLASS_CYBORG,Cyborg,机器人,Киборг,Cyborg,Ciborgue,Cyborg,사이보그,サイボーグ,Cyborg,Cyborg,機器人,Siber
+CONTEXT_CLASS_DEITY,Deity,神灵,Божество,Deidad,Divindade,Gottheit,신,神,Divinité,Bóstwo,神靈,Tanrısal Varlık
+CONTEXT_CLASS_DEMON,Demon,魔鬼,Демон,Demonio,Demônio,Dämon,악마,悪魔,Démon,Demon,魔鬼,Şeytan
+CONTEXT_CLASS_DEMONNESS,Demoness,女魔,Демонесса,Súcubo,Demônia,Teuflin,악마,女悪魔,Démone ,Demon,女魔,Şeytaniçe
+CONTEXT_CLASS_DRAGON,Dragon,龙,Дракон,Dragón,Dragão,Drache,드래곤,ドラゴン,Dragon,Smok,龍,Ejderha
+CONTEXT_CLASS_DRAGON_PLURAL,Dragons,龙,Драконы,Dragones,Dragões,Drachen,드래곤,ドラゴン,Dragons,Smoki,龍,Ejderhalar
+CONTEXT_CLASS_GHOST,Ghost,鬼,Призрак,Fantasma,Fantasma,Geist,유령,幽霊,Fantôme,Duch,鬼,Hayalet
+CONTEXT_CLASS_GOD,God,神,Бог,Dios,Deus,Gott,신,神,Dieu,Bóg,神,Tanrı
+CONTEXT_CLASS_GOD_PLURAL,Gods,神,Боги,Dioses,Deuses,Götter,신,神々,Dieux,Bogowie,神,Tanrılar
+CONTEXT_CLASS_GODDESS,Goddess,女神,Богиня,Diosa,Deusa,Göttin,여신,女神,Déesse,Bogini,女神,Tanrıça
+CONTEXT_CLASS_MAGE,Mage,魔法师,Маг,Mago,Mago,Magier,마법사,魔法使い,Mage,Mag,魔法師,Büyücü
+CONTEXT_CLASS_MEDIC,Medic,军医,Медик,Médico,Médico,Mediziner,의무관,メディック,Medic,Medyk,軍醫,Doktor
+CONTEXT_CLASS_MONSTER,Monster,怪兽,Монстр,Monstruo,Monstro,Monster,괴물,モンスター,Monstre,Potwór,怪獸,Canavar
+CONTEXT_CLASS_NINJA,Ninja,忍者,Ниндзя,Ninja,Ninja,Ninja,닌자,忍者,Ninja,Ninja,忍者,Ninja
+CONTEXT_CLASS_PIRATE,Pirate,海贼,Пират,Pirata,Pirata,Pirat,해적,海賊,Pirate,Pirat,海賊,Korsan
+CONTEXT_CLASS_PRIEST,Priest,祭士,Жрец,Sacerdote,Padre,Priester,사제,僧侶,Prêtre,Kapłan,祭士,Rahip
+CONTEXT_CLASS_PRINCE,Prince,王子,Принц,Príncipe,Príncipe,Prinz,왕자,王子,Prince,Książę,王子,Prens
+CONTEXT_CLASS_PRINCESS,Princess,公主,Принцесса,Princesa,Princesa,Prinzessin,공주,姫,Princesse,Księżniczka,公主,Prenses
+CONTEXT_CLASS_ROBOT,Robot,机器人,Робот,Robot,Robô,Roboter,로봇,ロボット,Robot,Robot,機器人,Robot
+CONTEXT_CLASS_SKELETON,Skeleton,尸骨,Скелет,Esqueleto,Esqueleto,Skelett,스켈레톤,スケルトン,Squelette,Szkielet,屍骨,İskelet
+CONTEXT_CLASS_SNIPER,Sniper,狙击射手,Снайпер,Francotirador,Franco-atirador,Scharfschütze,저격수,狙撃手,Sniper,Snajper,狙擊手,Keskin Nişancı
+CONTEXT_CLASS_SOLDIER,Soldier,战士,Солдат,Soldado,Soldado,Soldat,군인,ソルジャー,Soldat,Żołnierz,戰士,Asker
+CONTEXT_CLASS_THIEF,Thief,盗贼,Вор,Ladrón,Ladrão,Dieb,도둑,盗賊,Voleur,Złodziej,盜賊,Hırsız
+CONTEXT_CLASS_WARRIOR,Warrior,武士,Воин,Guerrero,Guerreiro,Krieger,전사,戦士,Guerrier,Wojownik,武士,Savaşçı
+CONTEXT_CLASS_WIZARD,Wizard,巫师,Колдун,Hechicero,Feiticeiro,Zauberer,마법사,魔術師,Magicier,Czarnoksiężnik,巫師,Sihirbaz
+CONTEXT_CLASS_ZOMBIE,Zombie,僵尸,Зомби,Zombi,Zumbi,Zombie,좀비,ゾンビ,Zombie,Zombie,僵尸,Zombi
+CONTEXT_CLASS_ZOMBIE_PLURAL,Zombies,僵尸,Зомби,Zombis,Zumbis,Zombies,좀비,ゾンビ,Zombies,Zombie,僵尸,Zombiler
+CONTEXT_COMPETITION_FIRST,First place,第一名,1-е место,Primer puesto,Primeiro Lugar,Erster Platz,일등,一位,Première place,Pierwsze miejsce,第一名,Birinci
+CONTEXT_COMPETITION_PLACE_NOUN,Place,名次,Место,Puesto,Lugar,Platz,등수,順位,Place,Miejsce,名次,Sıra
+CONTEXT_COMPETITION_SECOND,Second place,第二名,2-е место,Segundo puesto,Segundo Lugar,Zweiter Platz,이등,二位,Deuxième place,Drugie miejsce,第二名,İkinci
+CONTEXT_COMPETITION_THIRD,Third place,第三名,3-е место,Tercer puesto,Terceiro Lugar,Dritter Platz,삼등,三位,Troisième place,Trzecie miejsce,第三名,Üçüncü
+CONTEXT_CONDITION_BURNING,Burning,燃烧,Горящий,En llamas,Queimando,Brennender,화상,炎上,En feu,Popażony,燃燒中,Yanan
+CONTEXT_CONDITION_CRITICAL,Critical,瀕死,В критическом состоянии,Crítico,Estado grave,Kritischer,치명상,瀕死,Critique,Krytyczny,瀕死,Kritik
+CONTEXT_CONDITION_DEAD,Dead,死亡,Мёртв,Muerto,Morto,Toter,사망,死亡,Mort,Martwy,死亡,Ölü
+CONTEXT_CONDITION_FROZEN,Frozen,凍結,Заморожен,Congelado,Congelado,Gefrohrener,동결,凍結,Gelé,Zamrożony,凍結,Donmuş
+CONTEXT_CONDITION_POISONED,Poisoned,毒,Отравлен,Envenenado,Envenenado,Vergifteter,중독,毒,Empoisonné,Otruty,中毒,Zehirlenmiş
+CONTEXT_CONDITION_SLOWED,Slowed,減速,Замедлен,Ralentizado,Lento,Verlangsamter,감속,減速,Ralenti,Spowolniony,減速,Yavaşlamış
+CONTEXT_CONDITION_STUNNED,Stunned,眩晕,Оглушен,Aturdido,Atordoado,Erstarrter,스턴,スタン,Étourdi,Ogłuszony,眩晕,Sersemlemiş
+CONTEXT_CONDITION_UNCONSCIOUS,Unconscious,失去知觉,Без сознания,Inconsciente,Desmaiado,Bewusstloser,기절,気絶,Inconscient,Nieprzytomny,失去知覺,Şuursuz
+CONTEXT_CONDITION_UNHURT,Unhurt,未受伤,Невредимый,Ileso,Ileso,Unverletzter,정상,無傷,Indemne,Zdrowy,未受傷,Yaralanmamış
+CONTEXT_CONDITION_WET,Wet,.湿,Мокрый,Mojado,Molhado,Nasser,젖음,濡れている,Trempé,Przemoczony,.濕,Islak
+CONTEXT_CONDITION_WOUNDED,Wounded,受伤,Раненый,Herido,Ferido,Verwundeter,부상,負傷,Blessé,Ranny,受傷,Yaralı
+CONTEXT_DESCRIPTION_BIG,Big,大,Большой,Grande,Grande,Groß,대,大,Gros,Duży,大,Büyük
+CONTEXT_DESCRIPTION_HUGE,Huge,极大,Огромный,Enorme,Enorme,Riesig,특대,巨大,Énorme,Ogromny,極大,Devasa
+CONTEXT_DESCRIPTION_SMALL,Small,小,Маленький,Pequeño,Pequeno,Klein,소,小,Petit,Mały,小,Küçük
+CONTEXT_DESCRIPTION_TINY,Tiny,极小,Крошечный,Diminuto,Muito pequeno,Winzig,특소,極小,Minuscule,Malutki,極小,Minik
+CONTEXT_ELEMENT_AIR,Air,风,Воздух,Aire,Ar,Luft,공기,風,Air,Powietrze,風,Hava
+CONTEXT_ELEMENT_EARTH,Earth,地,Земля,Tierra,Terra,Erde,땅,地,Terre,Ziemia,地,Toprak
+CONTEXT_ELEMENT_FIRE,Fire,火,Огонь,Fuego,Fogo,Feuer,불,火,Feu,Ogień,火,Ateş
+CONTEXT_ELEMENT_METAL,Metal,金,Металл,Metal,Metal,Metall,쇠,金,Métal,Metal,金,Metal
+CONTEXT_ELEMENT_WATER,Water,水,Вода,Agua,Água,Wasser,물,水,Eau,Woda,水,Su
+CONTEXT_GAMBLING_BET,Bet,赌,Сбросить,Apostar,Apostar,Wette,베팅하기,ベット,Miser,Zakład,賭,Bahis
+CONTEXT_GAMBLING_DISCARD,Discard,抛弃,Отклонить,Descartar,Descartar,Abbrechen,포기하기,捨てる,Défausser,Odrzuć,拋棄,Elden Çıkar
+CONTEXT_GAMBLING_JACKPOT,Jackpot,头奖,Джекпот,Premio gordo,Bolada,Höchstgewinn,잭팟,ジャックポット,Jackpot,Jackpot,頭獎,Bingo
+CONTEXT_GAMBLING_MAX,Max,最高限度,Макс,Máx.,Máx.,Max,최대,最大,Max,Maksymum,最高限度,Maks.
+CONTEXT_GAMBLING_MIN,Min,最少限度,Мин,Mín.,Mín.,Min,최소,最低,Min,Minimum,最低限度,Min.
+CONTEXT_ITEM_ARMOR,Armor,护甲,Броня,Armadura,Armadura,Rüstung,갑옷,鎧,Armure,Zbroja,護甲,Zırh
+CONTEXT_ITEM_ARROW,Arrow,箭,Стрела,Flecha,Flecha,Pfeil,화살,矢,Flèche,Strzała,箭,Ok
+CONTEXT_ITEM_ARROW_PLURAL,Arrows,箭,Стрелы,Flechas,Flechas,Pfeile,화살,矢,Flèches,Strzały,箭,Oklar
+CONTEXT_ITEM_BOARD,Board,盘,Доска,Tablero,Tabuleiro,Brett,판,盤,Plateau de jeu,Plansza,遊戲盤,Tahta
+CONTEXT_ITEM_BOMB,Bomb,炸弹,Бомба,Bomba,Bomba,Bombe,폭탄,爆弾,Bombe,Bomba,炸彈,Bomba
+CONTEXT_ITEM_BOOK,Book,书,Книга,Libro,Livro,Buch,책,本,Livre,Książka,書,Kitap
+CONTEXT_ITEM_BOOTS,Boots,靴,Ботинки,Botas,Botas,Stiefel,신발,靴,Bottes,Buty,靴,Bot
+CONTEXT_ITEM_BOW,Bow,弓,Лук,Arco,Arco,Bogen,활,弓,Arc,Łuk,弓,Yay
+CONTEXT_ITEM_CARD,Card,卡片,Карта,Carta,Carta,Karte,카드,カード,Carte,Karta,卡片,Kart
+CONTEXT_ITEM_CARD_PLURAL,Cards,卡片,Карты,Cartas,Cartas,Karten,카드,カード,Cartes,Karty,卡片,Kartlar
+CONTEXT_ITEM_CHEST,Chest,箱,Сундук,Cofre,Baú,Truhe,상자,箱,Coffre,Skrzynia,箱,Sandık
+CONTEXT_ITEM_COND_MAGICAL,Magic,魔法的,Магический,Mágico,Mágico,Magischer,마법,魔法の,Magique,Magiczny,魔法的,Büyülü
+CONTEXT_ITEM_COND_RUSTY,Rusty,生锈的,Ржавый,Oxidado,Enferrujado,Rostig,녹슨,錆びた,Rouillé,Zardzewiały,生銹的,Paslı
+CONTEXT_ITEM_DAGGER,Dagger,短剑,Кинжал,Daga,Adaga,Dolch,단검,短刀,Dague,Sztylet,短劍,Hançer
+CONTEXT_ITEM_DIE_NOUN,Die,骰子,Кубик,Dado,Dado,Würfel,주사위,サイコロ,Dé,Kość,骰子,Zar
+CONTEXT_ITEM_DIE_PLURAL,Dice,骰子,Кубика,Dados,Dados,Würfel,주사위,サイコロ,Dés,Kości,骰子,Zarlar
+CONTEXT_ITEM_DOOR,Door,门,Дверь,Puerta,Porta,Tür,문,扉,Porte,Drzwi,門,Kapı
+CONTEXT_ITEM_GAUNTLETS,Gauntlets,铁手套,Рукавицы,Guanteletes,Manopla,Panzerhandschuh,건틀릿,籠手,Gantelets,Rękawica,鐵手套,Zırh Eldiveni
+CONTEXT_ITEM_GEM,Gem,宝石,Самоцвет,Gema,Jóia,Juwel,보석,ジェム,Gemme,Klejnot,寶石,Mücevher
+CONTEXT_ITEM_GIFT_NOUN,Gift,赠品,Подарок,Regalo,Presente,Geschenk,선물,ギフト,Cadeau,Prezent,贈品,Hediye
+CONTEXT_ITEM_GIFT_PLURAL,Gifts,赠品,Подарки,Regalos,Presentes,Geschenke,선물,ギフト,Cadeaux,Prezenty,贈品,Hediyeler
+CONTEXT_ITEM_GLOVE,Gloves,手套,Перчатки,Guantes,Luvas,Handschuhe,장갑,手袋,Gants,Rękawiczki,手套,Eldiven
+CONTEXT_ITEM_GUN,Gun,枪,Огнестрельное оружие,Arma,Arma de fogo,Pistole,총,銃,Arme,Broń,槍,Siah
+CONTEXT_ITEM_HAMMER,Hammer,铁锤,Молот,Mazo,Martelo,Hammer,망치,戦鎚,Marteau,Młot,鐵錘,Çekiç
+CONTEXT_ITEM_HELMET,Helmet,钢盔,Шлем,Casco,Elmo,Helm,투구,兜,Heaume,Hełm,鋼盔,Kafalık
+CONTEXT_ITEM_KEY,Key,钥匙,Ключ,Llave,Chave,Schlüssel,열쇠,鍵,Clé,Klucz,鑰匙,Anahtar
+CONTEXT_ITEM_KNIFE,Knife,小刀,Нож,Cuchillo,Faca,Messer,칼,ナイフ,Couteau,Nóż,小刀,Bıçak
+CONTEXT_ITEM_LOCK,Lock,锁,Замок,Cerradura,Fechadura,Schloss,자물쇠,鍵,Verrou,Zamek,鎖,Kilit
+CONTEXT_ITEM_LOVE,Love,爱,Любовь,Amor,Amor,Liebe,사랑,愛,Amour,Miłość,愛,Aşk
+CONTEXT_ITEM_MACHINE_ITEM_GUN,Machine Gun,机关枪,Пулемёт,Ametralladora,Metralhadora,Maschinengewehr,기관총,マシンガン,Mitraillette,Karabin Maszynowy,機關槍,Makineli Tüfek
+CONTEXT_ITEM_MAGIC,Magic,魔法,Магия,Magia,Magia,Magie,마법,魔法,Magie,Magia,魔法,Büyü
+CONTEXT_ITEM_PISTOL,Pistol,手枪,Пистолет,Pistola,Pistola,Pistole,권총,ピストル,Pistolet,Pistolet,手槍,Tabanca
+CONTEXT_ITEM_QUEST_NOUN,Quest,任务,Задание,Misión,Missão,Auftrag,퀘스트,クエスト,Quête,Wyprawa,任务,Görev
+CONTEXT_ITEM_RANK_NOUN,Rank,行列,Ранг,Rango,Patente,Platz,계급,ランク,Rang,Ranga,軍階,Sıra
+CONTEXT_ITEM_RIFLE,Rifle,步枪,Винтовка,Rifle,Rifle,Gewehr,소총,ライフル,Fusil,Karabin,步槍,Tüfek
+CONTEXT_ITEM_ROCKET_ITEM_LAUNCHER,Rocket Launcher,火箭炮,Ракетница,Lanzacohetes,Lança-Foguetes,Raketenwerfer,로켓 런처,ロケットランチャー,Lance-roquette,Wyrzutnia Rakiet,火箭炮,Roketatar
+CONTEXT_ITEM_RPG,RPG,RPG,РПГ,Lanzagranadas,RPG,Raketenwerfer,RPG,RPG,LRAC,RPG,RPG,Roketatar
+CONTEXT_ITEM_SCROLL,Scroll,卷,Свиток,Pergamino,Pergaminho,Schriftrolle,두루마리,巻物,Parchemin,Zwój,卷,Parşömen
+CONTEXT_ITEM_SHIELD,Shield,盾,Щит,Escudo,Escudo,Schild,방패,盾,Bouclier,Tarcza,盾,Kalkan
+CONTEXT_ITEM_SHIELD_PLURAL,Shields,盾,Щиты,Escudos,Escudos,Schilder,방패,盾,Boucliers,Tarcze,盾,Kalkanlar
+CONTEXT_ITEM_SHIELD_SCIFI,Energy shield,能量罩,Энергетический щит,Escudo de energía,Escudo de energia,Schutzschild,에너지 방어막,エネルギーシールド,Bouclier,Pole siłowe,能量罩,Enerji Kalkanı
+CONTEXT_ITEM_SHIELD_SCIFI_PLURAL,Energy shields,能量罩,Энергетичкеские щиты,Escudos de energía,Escudos de energia,Schutzschilde,에너지 방어막,エネルギーシールド,Boucliers,Pola siłowe,能量罩,Enerji Kalkanları
+CONTEXT_ITEM_SHOTGUN,Shotgun,散弹枪,Дробовик,Escopeta,Espingarda,Schrotflinte,산탄총,ショットガン,Fusil à pompe,Strzelba,散彈槍,Av Tüfeği
+CONTEXT_ITEM_SNIPER_ITEM_RIFLE,Sniper rifle,狙击步枪,Снайперская винтовка,Rifle francotirador,Rifle furtivo,Scharfschützengewehr,저격총,スナイパーライフル,Fusil de sniper,Karabin Snajperski,狙擊步槍,Dürbünlü Tüfek
+CONTEXT_ITEM_SPELL,Spell,咒语,Заклинание,Hechizo,Feitiço,Zauberspruch,주문,呪文,Sort,Zaklęcie,咒語,Büyü
+CONTEXT_ITEM_STAFF,Staff,杖,Посох,Bastón,Cajado,Gehstock,봉,杖,Bâton,Laska,杖,Baston
+CONTEXT_ITEM_SWORD,Sword,剑,Меч,Espada,Espada,Schwert,검,剣,Épée,Miecz,劍,Kılıç
+CONTEXT_ITEM_TREASURE,Treasure,财宝,Сокровище,Tesoro,Tesouro,Schatz,보물,財宝,Trésor,Skarb,財寶,Hazine
+CONTEXT_ITEM_TYPE_EPIC,Epic,史诗的,Эпичный,Épico,Épico,Epischer,뛰어난,壮麗な,Épique,Epicki,特級的,Epik
+CONTEXT_ITEM_TYPE_JUNK,Junk,废物,Мусорный,Basura,Lixo,Schrott,저질,がらくたの,Bazar,Śmieć,沒用的,Çöp
+CONTEXT_ITEM_WAND,Wand,魔杖,Волшебная палочка,Varita,Varinha Mágica,Stab,마법봉,魔法の杖,Baguette,Różdżka,魔杖,Değnek
+CONTEXT_ITEM_WOOD,Wood,木,Дерево,Madera,Madeira,Holz,목재,木,Bois,Drewno,木,Tahta
+CONTEXT_MACHINE_ALTITUDE,Altitude,高度,Высота,Altitud,Altitude,Höhe,고도,高度,Altitude,Wysokość,高度,Yükseklik
+CONTEXT_MACHINE_BRAKES,Brakes,煞车闸,Тормоза,Frenos,Freios,Bremsen,브레이크,ブレーキ,Freins,Hamulce,煞車閘,Fren
+CONTEXT_MACHINE_CHASSIS,Chassis,马车,Шасси,Chasis,Chassi,Chassis,섀시,シャシ,Chassis,Podwozie,馬車,Şasi
+CONTEXT_MACHINE_DEPTH,Depth,深度,Глубина,Profundidad,Profundidade,Tiefe,깊이,深度,Profondeur,Głębokość,深度,Derinlik
+CONTEXT_MACHINE_FUEL,Fuel,燃料,Топливо,Combustible,Combustível,Kraftstoff,연료,燃料,Carburant,Paliwo,燃料,Yakıt
+CONTEXT_MACHINE_GEAR,Gear,档,Передача,Caja de cambios,Marcha,Gang,변속기,ギア,Transmission,Zębatka,檔,Dişli
+CONTEXT_MACHINE_HANDLING,Handling,操纵,Манёвренность,Manejo,Manejo,Handling,핸들링,ハンドリング,Tenue de route,Zwrotność,操縱,Yol Tutuşu
+CONTEXT_MACHINE_SPEED,Speed,速度,Скорость,Velocidad,Velocidade,Geschwindigkeit,속도,速度,Vitesse,Prędkość,速度,Hız
+CONTEXT_MACHINE_STEERING,Steering,转向,Отзывчивость руля,Volante,Condução,Lenkung,핸들 반응,ステアリング,Volant,Sterowanie,轉向,Direksiyon Hakimiyeti
+CONTEXT_MACHINE_SUSPENSION,Suspension,悬挂,Подвеска,Suspensión,Suspensão,Übersetzung,서스펜션,サスペンション,Suspension,Zawieszenie,懸挂,Süspansiyon
+CONTEXT_MACHINE_WHEELS,Wheels,轮子,Колёса,Ruedas,Rodas,Räder,바퀴,乗り物,Roues,Koła,輪,Tekerler
+CONTEXT_MACHINE_WINGS,Wings,机翼,Крылья,Alas,Asas,Flügel,날개,ウィング,Ailes,Skrzydła,翼,Kanatlar
+CONTEXT_MEDAL,Medal,徽章,Медаль,Medalla,Medalha,Medallie,메달,メダル,Médaille,Medal,徽章,Madalya
+CONTEXT_MEDAL_BRONZE,Bronze medal,铜徽章,Бронзовая медаль,Medalla de bronce,Medalha de Bronze,Bronzemedallie,동메달,ブロンズメダル,Médaille de bronze,Brązowy medal,銅徽章,Bronz madalya
+CONTEXT_MEDAL_GOLD,Gold medal,金徽章,Золотая медаль,Medalla de oro,Medalha de Ouro,Goldmedallie,금메달,ゴールドメダル,Médaille d'or,Złoty medal,金徽章,Altın madalya
+CONTEXT_MEDAL_SILVER,Silver medal,银徽章,Серебряная медаль,Medalla de plata,Medalha de Prata,Silbermedallie,은메달,シルバーメダル,Médaille d'argent,Srebrny medal,銀徽章,Hümüş madalya
+CONTEXT_METAL_BRONZE,Bronze,銅,Бронза,Bronce,Bronze,Bronze,동,銅,Bronze,Brąz,青铜,Bronz
+CONTEXT_METAL_COIN,Coin,硬币,Монета,Moneda,Moeda,Münze,동전,硬貨,Pièce,Moneta,硬幣,Para
+CONTEXT_METAL_GOLD,Gold,金,Золото,Oro,Ouro,Gold,금,金,Or,Złoto,金,Altın
+CONTEXT_METAL_INGOT,Ingot,铁块,Слиток,Lingote,Barra,Barren,주괴,延べ棒,Lingot,Sztabka,金屬塊,Külçe
+CONTEXT_METAL_PLATINUM,Platinum,白金,Платина,Platino,Platina,Platin,백금,白金,Platine,Platyna,白金,Platin
+CONTEXT_METAL_SILVER,Silver,銀,Серебро,Plata,Prata,Silber,은,銀,Argent,Srebro,銀,Gümüş
+CONTEXT_PLACE_CASTLE,Castle,城,Замок,Castillo,Castelo,Schloss,성,城,Château,Zamek,城堡,Kale
+CONTEXT_PLACE_CAVE,Cave,洞穴,Пещера,Cueva,Gruta,Höhle,동굴,洞窟,Caverne,Jaskinia,洞穴,Mağara
+CONTEXT_PLACE_DUNGEON,Dungeon,地下城,Подземелье,Calabozo,Masmorra,Kerker,던전,ダンジョン,Donjon,Loch,地下城,Zindan
+CONTEXT_PLACE_INN,Inn,客栈,Постоялый двор,Posada,Albergue,Herberge,여관,宿,Auberge,Zajazd,客棧,Han
+CONTEXT_PLACE_PLANET,Planet,行星,Планета,Planeta,Planeta,Planet,행성,惑星,Planète,Planeta,行星,Gezegen
+CONTEXT_PLACE_PLANET_EARTH,Earth,地球,Земля,Tierra,Terra,Erde,지구,地球,Planète Terre,Ziemia,地球,Dünya
+CONTEXT_PLACE_SPACE,Space,太空,Космос,Espacio,Espaço,Raum,우주,宇宙,Espace,Kosmos,太空,Uzay
+CONTEXT_PLACE_SPACESHIP,Spaceship,太空船,Космический корабль,Nave espacial,Nave espacial,Raumschiff,우주선,宇宙船,Vaisseau spatial,Statek kosmiczny,太空船,Uzay Gemisi
+CONTEXT_STORY,Story,故事,История,Historia,História,Geschichte,이야기,ストーリー,Histoire,Historia,故事,Hikaye
+CONTEXT_STORY_ADVENTURE,Adventure,冒险,Приключение,Aventura,Aventura,Abenteuer,모험,アドベンチャー,Aventure,Przygoda,冒險,Macera
+CONTEXT_STORY_CHAPTER,Chapter,章,Глава,Capítulo,Capítulo,Kapitel,장,チャプター,Chapitre,Rozdział,章,Bölüm
+CONTEXT_STORY_PAGE,Page,页,Страница,Página,Página,Seite,쪽,ページ,Page,Strona,頁,Sayfa
+CREDITS_GAME,Game,游戏,Игра,Juego,Jogo,Spiel,게임,ゲーム,Jeu,Gra,游戲,Oyun
+CREDITS_GAME_DEVELOPMENT,Game development,游戏开发 ,Разработка игры,Desarrollo de juegos,Desenvolvimento do jogo,Spielentwicklung,게임 개발,ゲーム開発,Développement de jeu,Tworzenie gry,游戲開發,Oyun Geliştirme
+CREDITS_GAME_DEVELOPER,Game developer,游戏开发者  ,Игровой разработчик,Desarrollador de juegos,Desenvolvedor de jogo,Spielentwickler,게임 개발자,ゲーム開発者,Développeur de jeu,Twórca gry,遊戲開發者,Oyun Geliştirici
+CREDITS_DEVELOPED_BY,Developed by,游戏开发由  ,Разработано,Desarrollado por,Desenvolvido por,Entwickelt von,개발자,開発,Développé par,Stworzono przez,游戲開發由,Geliştiren
+CREDITS_PRODUCTION,Production,制作  ,Производство,Producción,Produção,Produktion,제작,製作,Production,Produkcja,制作,Prodüksiyon
+CREDITS_PRODUCER,Producer,监制  ,Продюсер,Productor,Produtor,Produzent,제작자,プロデューサー,Producteur,Producent,監制,Yapımcı
+CREDITS_PUBLISHER,Publisher,出版商,Издатель,Editor,Publicadora,Publisher,배급,著作,Éditeur,Wydawca,出版商,Yayıncı
+CREDITS_DIRECTOR,Director,总监,Режиссёр,Director,Diretor,Regisseur,감독,監督,Directeur,Kierownik projektu,導演,Yönetmen
+CREDITS_LEAD,Lead,领导,Руководитель,Jefe,Líder,Chef,총책임자,リード,Chef,Główny,領頭,Baş
+CREDITS_ASSISTANT,Assistant,助理  ,Заместитель,Asistente,Assistente,Assistenz,보조,アシスタント,Assistant,Asystent,助理,Asistan
+CREDITS_ASSOCIATE,Associate,副,Партнёр,Asociado,Associado,Mitarbeiter,협력,協力,Associé,Współpracownik,副,Yardımcı
+CREDITS_SENIOR,Senior,高级,Старший,Senior,Sênior,Senior,시니어,シニア,Senior,Starszy,高級,Kıdemli
+CREDITS_JUNIOR,Junior,初级,Младший,Junior,Júnior,Junior,주니어,ジュニア,Junior,Młodszy,初級,Kıdemsiz
+CREDITS_CHIEF_TECH_OFFICER,Chief Technical Officer,首席技术官,Главный технический директор,Director de tecnología,Diretor-Chefe de Tecnologia,Technischer Direktor,최고 기술 책임자,最高技術責任者,Directeur de la technologie,Dyrektor działu technicznego,首席技術官,Teknoloji Yöneticisi
+CREDITS_TECHNICAL_DIRECTOR,Technical Director,技术主任 ,Технический директор,Director técnico,Diretor Técnico,Technischer Direktor,기술 감독,技術監督,Directeur Technique,Dyrektor techniczny,技術主任,Teknik Yönetici
+CREDITS_CREATIVE_DIRECTOR,Creative Director,创意总监,Креативный директор,Director creativo,Diretor Criativo,Kreativdirektor,크리에이티브 감독,クリエイティブディレクター,Directeur Créatif,Dyrektor kreatywny,創意總監,Yaratıcı Yönetmen
+CREDITS_ANIMATION_DIRECTOR,Animation Director,动画总监,Режиссёр анимации,Director de animación,Diretor de Animação,Animationsdirektor,애니메이션 감독,アニメーション監督,Directeur d'Animation,Dyrektor animacji,動畫總監,Animasyon Yönetmeni
+CREDITS_ART_DIRECTOR,Art Director,美术总监 ,Арт-директор,Director artístico,Diretor de Arte,Kunstdirektor,아트 감독,美術監督,Directeur Artistique,Dyrektor artystyczny,美術總監,Sanat Yönetmeni
+CREDITS_AUDIO_DIRECTOR,Audio Director,音乐总监 ,Аудио-директор,Director de sonido,Diretor de Som,Audiodirektor,오디오 감독,音響監督,Directeur Sonore,Dyrektor udźwiękowienia,音樂總監,Ses Yönetmeni
+CREDITS_DESIGN DIRECTOR,Design Director,设计总监 ,Дизайн-директор,Director de diseño,Diretor de Design,Designdirektor,디자인 감독,デザイン監督,Directeur Conception,Dyrektor projektu,設計總監,Dizayn Yönetmeni
+CREDITS_PROGRAM_MANAGER,Program Manager,规划经理,Руководитель программы,Director de programa,Gerente de Programa,Programmmanager,프로그램 관리자,番組担当,Gestionnaire de programme,Kierownik programowania,規劃經理,Program Yöneticisi
+CREDITS_PROJECT_MANAGER,Project Manager,项目经理,Руководитель проекта,Gerente de proyecto,Gerente de Projeto,Projektmanager,프로젝트 관리자,企画担当,Gestionnaire de projet,Kierownik projektu,項目經理,Proje Yöneticisi
+CREDITS_GAME_DESIGN,Game design,游戏设计,Гейм-дизайн,Diseño de juego,Design de Jogo,Gamedesign,게임 디자인,ゲームデザイン,Conception de jeu,Mechanika gry,遊戲設計,Oyun Tasarımı
+CREDITS_GAME_DESIGNER,Game designer,游戏设计师,Гейм-дизайнер,Diseñador de juego,Designer de Jogo,Gamedesigner,게임 디자이너,ゲームデザイナー,Concepteur de jeu,Projektant,遊戲設計師,Oyun Tasarımcısı
+CREDITS_CODE,Code,代码  ,Код,Código,Código,Code,코드,コード,Code,Kod,程序,Kod
+CREDITS_PROGRAMMING,Programming,编程,Программирование,Programación,Programação,Programmierung,프로그래밍,プログラミング,Programmation,Programowanie,編程,Programlama
+CREDITS_PROGRAMMER,Programmer,程序员,Программисты,Programador,Programador,Programmierer,프로그래머,プログラマー,Programmeur,Programista,程序員,Programcı
+CREDITS_PROGRAMMER_PLURAL,Programmers,程序员,Программисты,Programadores,Programadores,Programmierer,프로그래머,プログラマー,Programmeurs,Programiści,程序員,Programcılar
+CREDITS_LEAD_PROGRAMMER,Lead programmer,程序组长,Ведущий программист,Programador jefe,Programador Líder,Chefprogrammierer,리드 프로그래머,リードプログラマー,Chef programmeur,Główny programista,程序組長,Programlama Lideri
+CREDITS_GRAPHIC_DESIGNER,Graphic designer,图像设计,Графический дизайнер,Diseñador gráfico,Designer Gráfico,Grafikdesigner,그래픽 디자이너,グラフィックデザイナー,Concepteur graphique,Projektant graficzny,圖像設計,Grafik Tasarımcı
+CREDITS_TECHNICAL_ARTIST,Technical artist,技术美术,Технический художник,Artista técnico,Artista Técnico,Technischer Künstler,테크니컬 아티스트,テクニカルアーティスト,Artiste technique,Artysta techniczny,技術設計,Teknik Tasarımcı
+CREDITS_CONCEPT_ARTIST,Concept artist,概念美术,Концепт-художник,Artista conceptual,Artista Conceitual,Konzeptkünstler,컨셉트 아티스트,コンセプトアーティスト,Artiste conceptuel,Artysta koncepcyjny,觀念美術,Konsept Tasarımcı
+CREDITS_CHARACTER_DESIGNER,Character Designer,角色设计,Дизайнер персонажей,Diseñador de personajes,Designer de Personagens,Charakterdesigner,캐릭터 디자이너,キャラクターデザイナー,Créateur de personnage,Projektant postaci,角色設計,Karakter Tasarımcı
+CREDITS_ART,Art,美术,Графика,Arte,Arte,Kunst,아트,アート,Art,Oprawa graficzna,美術,Sanat
+CREDITS_ARTIST,Artist,美术师,Художник,Artista,Artista,Künstler,아티스트,アーティスト,Artiste,Artysta,美術師,Sanatçı
+CREDITS_ARTIST_PLURAL,Artists,美术师,Художники,Artistas,Artistas,Künstler,아티스트,アーティスト,Artistes,Artyści,美術師,Sanatçılar
+CREDITS_LEVEL_DESIGN,Level design,关卡设计,Дизайн уровней,Diseño de niveles,Design de Níveis,Leveldesign,레벨 디자인,レベルデザイン,Conception de niveaux,Projekt poziomów,關卡設計,Seviye Tasarımı
+CREDITS_LEVEL_DESIGNER,Level designer,关卡设计师,Дизайнер уровней,Diseñador de niveles,Designer de Níveis,Leveldesigner,레벨 디자이너,レベルデザイナー,Concepteur de niveaux,Projektant poziomów,關卡設計師,Seviye Tasarımcısı
+CREDITS_CINEMATICS_DIRECTOR,Cinematics Director,影片导演,Кинематографический директор,Director cinematográfico,Diretor Cinematográfico,Zwischensequenzregisseur,영상 감독,シネマティックディレクター,Directeur des cinématiques,Dyrektor filmowy,影片導演,Sinematik Yönetmeni
+CREDITS_CINEMATIC_ANIMATOR,Cinematic Animator,影片动画,Кинематографический художник,Animador cinematográfico,Animador Cinematográfico,Zwischensequenzanimator,영상 애니메이터,シネマティックアニメーター,Animateur de cinématiques,Animator filmowy,影片動畫,Sinematik Animasyoncusu
+CREDITS_INTERFACE_ARTIST,Interface Artist,影片美术,Художник интерфейса,Artista de interfaz,Artista de Interface,Interfacekünstler,인터페이스 아티스트,インターフェイスアーティスト,Artiste d'interfaces,Grafik interfejsu,影片美術,Arayüz Tasarımcısı
+CREDITS_COMPOSER,Composer,作曲,Композитор,Compositor,Compositor,Komponist,작곡,編曲,Compositeur,Kompozytor,作曲家,Bestekar
+CREDITS_MUSICIAN,Musician,音乐师,Музыкант,Músico,Músico,Musiker,연주,演奏,Musicien,Muzyk,音樂家,Müzisyen
+CREDITS_SPECIAL_THANKS,Special thanks,特别感谢 ,Особая благодарность,Agradecimientos,Agradecimentos,Besonderer Dank,특별 감사,謝辞,Remerciements,Szczególne podziękowania,特別感謝,Teşekkürler
+CREDITS_SPECIAL_THANKS_TO,Special thanks to,特别感谢 ,Особая благодарность,Agradecimientos a,Agradecimentos a,Besonderen Dank an,특별 감사:,謝辞,Remerciements à,Szczególne podziękowania dla,特別感謝,Teşekkürler
+CREDITS_IMAGE,Image,图像  ,Изображение,Imagen,Imagem,Bild,이미지,画像,Image,Zdjęcie,圖像,Resim
+CREDITS_IMAGE_PLURAL,Images,图像  ,Изображения,Imágenes,Imagens,Bilder,이미지,画像,Images,Zdjęcia,圖像,Resimler
+CREDITS_FONT,Font,字体  ,Шрифт,Tipografía,Fonte,Schriftart,글꼴,フォント,Police,Font,字型,Font
+CREDITS_FONT_PLURAL,Fonts,字体  ,Шрифты,Tipografías,Fontes,Schriftarten,글꼴,フォント,Polices,Fonty,字型,Fontlar
+CREDITS_SOUNDTRACK,Soundtrack,原声音乐 ,Саундтрек,Banda sonora,Trilha sonora,Soundtrack,사운드트랙,サウンドトラック,Bande sonore,Ścieżka dźwiękowa,原聲音樂,Oyun Müziği
+CREDITS_WRITER,Writer,文案  ,Автор,Escritor,Escritor,Schriftsteller,대본가,脚本家,Écrivain,Pisarz,寫作人,Yazar
+CREDITS_MANUSCRIPT,Manuscript,手稿,Рукопись,Manuscrito,Manuscrito,Handschrift,대본,脚本,Manuscrit,Manuskrypt,原稿,Taslak
+CREDITS_SCRIPT_WRITER,Script writer,剧本  ,Сценарист,Guionista,Roteirista,Drehbuch,대본가,脚本家,Scénariste,Scenarzysta,劇本寫作人,Senaryo Yazarı
+CREDITS_ANIMATION,Animation,动画  ,Анимация,Animación,Animação,Animation,애니메이션,アニメーション,Animation,Animacja,動畫,Animasyon
+CREDITS_ANIMATOR,Animator,动画师,Аниматор,Animador,Animador,Animator,애니메이터,アニメーター,Animateur,Animator,動畫師,Animatör
+CREDITS_VOICE_ACTING,Voice acting,配音,Озвучивание,Doblaje,Dublagem,Sprecher,성우,声優,Doublage,Aktorstwo głosowe,配音員,Seslendirme
+CREDITS_VOICE_ACTOR,Voice actor,配音演员 ,Актёр озвучивания,Actor de doblaje,Dublador,Sprecher,성우,声優,Doubleur,Aktor głosowy,配音演員,Ses Sanatçısı
+CREDITS_SOUND_DESIGNER,Sound designer,音响设计  ,Саунд-дизайнер,Diseñador de sonido,Designer de Som,Sounddesigner,음향 디자이너,サウンドデザイナー,Concepteur sonore,Dźwięk,音響設計師,Ses Tasarımcısı
+CREDITS_SOUND_ENGINEER,Sound engineer,音响工程师,Звукорежиссёр,Técnico de sonido,Engenheiro Sonoro,Toningenieur,음향 엔지니어,サウンドエンジニア,Ingénieur du son,Inżynier dźwięku,錄音師,Ses Mühendisi
+CREDITS_SFX,Sound Effects,音响效果 ,Звуковые эффекты,Efectos de sonido,Efeitos Sonoros,Soundeffekte,음향 효과,SE,Effets sonores,Efekty dźwiękowe,音響效果,Ses Efektleri
+CREDITS_VFX,Visual Effects,视觉效果 ,Визуальные эффекты,Efectos visuales,Efeitos Visuais,Spezialeffekte,시각 효과,特殊効果,Effets visuels,Efekty wizualne,視覺效果,Görsel Efektler
+CREDITS_RECORDIST,Recordist,录音师,Звукооператор,Grabador,Recordista,Aufnahmeleiter,녹음,録音,Opérateur du son,Operator dźwięku,錄音師,Ses Kayıtçısı
+CREDITS_FOLEY_ARTIST,Foley artist,音效师  ,Шумовик,Editor sonoro,Artista de ruído,Geräuschemacher,효과음 아티스트,フォーリーアーティスト,Bruiteur,Imitator dźwięku,擬音藝術家,Foley Sanatçısı
+CREDITS_TEST_MANAGER,Test Manager,测试经理 ,Тест-менеджер,Gerente de pruebas,Gerente de Testes,Testmanager,테스트 관리자,テスト管理者,Responsable de tests,Menadżer testów,測試經理,Test Yöneticisi
+CREDITS_TEST_LEAD,Test Lead,测试组长 ,Руководитель тестирования,Jefe de pruebas,Líder de Testes,Testleiter,테스트 관리 총지휘,テスト管理総指揮,Chef testeur,Główny tester,測試領導,Test Yöneticisi
+CREDITS_TESTER,Tester,测试员,Тестер,Probador de videojuegos,Testador,Tester,테스터,テスター,Testeur,Tester,測試儀,Testçi
+CREDITS_DATABASE_ADMIN,Database Admin,三维建模 ,Администратор базы данных,Administrador de base de datos,Administrador de Banco de Dados,Datenbankadministrator,데이터베이스 관리자,データベースアドミン,Administrateur de base de données,Administracja bazy danych,數據庫管理員,Veritabanı Yöneticisi
+CREDITS_3D_MODELING,3D Modeling,三维建模,3D моделирование,Modelado 3D,Modelagem 3D,3D-Modellierung,3D 모델링,3Dモデリング,Modélisation 3D,Modelowanie 3D,三維建模,3D Tasarım
+CREDITS_MODELS,Models,模型  ,Модели,Modelos,Modelos,Modelle,모델,モデル,Modèles,Modele,模型,Modeller
+CREDITS_LOCALIZATION,Localization,本地化,Локализация,Localización,Localização,Lokalisierung,지역화,ローカリゼーション,Localisation,Lokalizacja,本土化,Lokalizasyon
+CREDITS_TRANSLATION,Translation,翻译  ,Перевод,Traducción,Tradução,Übersetzung,번역,翻訳,Traduction,Tłumaczenia,翻譯,Çeviri
+CREDITS_POLYGLOT,Translated by the Polyglot Project.,Polyglot 项目提供翻译,Перевод от проекта Polyglot,Traducido por el proyecto Polyglot.,Traduzido pelo projeto Polyglot.,Übersetzt von Polyglot Project.,번역 제공: Polyglot Project.,翻訳提供：Polyglotプロジェクト,Traduit par le Polyglot Projet.,Przetłumaczono za pomocą Polyglot Project.,翻譯由Polyglot Project 提供,Polyglot Projesi ile çevrilmiştir.
+GAME_GENRE_ACTION,Action game,动作游戏,Экшен,Juego de acción,Jogo de ação,Action-Spiel,액션 게임,アクションゲーム,Jeu d'action,Gra akcji,動作游戲,Aksiyon oyunu
+GAME_GENRE_ADVENTURE,Adventure game,冒险游戏,Приключенческая игра,Juego de aventura,Jogo de aventura,Adventure,어드벤처 게임,アドベンチャーゲーム,Jeu d'aventure,Gra przygodowa,冒險游戲,Macera oyunu
+GAME_GENRE_CARD,Card,卡牌游戏,Карточная игра,Cartas,Cartas,Karten,카드 게임,カード,Carte,Karciana,卡牌遊戲,Kart
+GAME_GENRE_CASUAL,Casual game,休闲游戏,Казуальная игра,Juego casual,Jogo casual,Casual-Spiel,캐주얼 게임,カジュアルゲーム,Jeu casual,Gra zwyczajna,休閑游戲,Çerezlik oyun
+GAME_GENRE_FANTASY,Fantasy game,魔幻游戏,Фэнтези,Juego de fantasía,Jogo de fantasia,Fantasy-Spiel,판타지 게임,ファンタジーゲーム,Jeu fantastique,Gra fantasy,魔幻遊戲,Fantastik oyun
+GAME_GENRE_HARDCORE,Hardcore game,硬核游戏,Хардкорная игра,Juego difícil,Jogo hardcore,Hardcore-Spiel,하드코어 게임,ハードコアゲーム,Jeu hardcore,Gra hardkorowa,硬核游戲,Hardcore oyun
+GAME_GENRE_INDIE,Indie,独立游戏,Инди,Indie,Indie,Indie,인디,独立系開発会社,Indépendant,Indie,獨立製作,Bağımsız Yapımcı
+GAME_GENRE_MEDIEVAL,Medieval game,中世纪式游戏,Средневековье,Juego medieval,Jogo medieval,Mittlealter-Spiel,중세 게임,中世風ゲーム,Jeu médiéval,Gra w średniowieczu,中世紀式游戲,Orta çağ oyunu
+GAME_GENRE_MISC,Misc.,其它,Разное,Otros,Diversos,Verschiedene,기타,その他,Divers,Różne,其它,Çeşitli
+GAME_GENRE_MULTIPLAYER,Multiplayer,多人游戏,Многопользовательская игра,Multijugador,Multi jogadores,Mehrspieler,멀티플레이어,マルチプレイヤー,Multijoueur,Gra wieloosobowa,多人游戲,Çok oyunculu oyun
+GAME_GENRE_NAME,Genre,类型,Жанр,Género,Gênero,Genre,장르,ジャンル,Genre,Gatunek,類型,Tür
+GAME_GENRE_PLATFORMER,Platformer game,平台游戏,Платформер,Juego de plataformas,Jogo de plataforma,Platformer,플랫폼 게임,プラットフォームゲーム,Jeu de plateformes,Gra platformowa,平台游戲,Platform oyunu
+GAME_GENRE_PUZZLE,Puzzle game,益智游戏,Головоломка,Juego de rompecabezas,Quebra-cabeça,Puzzle-Spiel,퍼즐 게임,パズルゲーム,Jeu d'énigmes,Gra logiczna,智力遊戲,Puzzle
+GAME_GENRE_QUIZ,Quiz game,问答游戏,Викторина,Juego de preguntas y respuestas,Jogo de perguntas e respostas,Quiz,퀴즈 게임,クイズゲーム,Jeu de quizz,Teleturniej,問答游戲,Bilgi yarışı
+GAME_GENRE_RACING,Racing,竞速游戏,Гонки,Carreras,Corrida,Rennspiele,레이싱,レース,Course automobile,Wyścigi,競速遊戲,Yarış
+GAME_GENRE_RETRO,Retro game,复古游戏,Ретро-игра,Juego retro,Jogo retrô,Retrospiel,레트로 게임,レトロゲーム,Jeu rétro,Gra retro,復古游戲,Retro oyun
+GAME_GENRE_RPG,Roleplaying game,角色扮演游戏,Ролевая игра (RPG),Juego de rol,Jogo de RPG,Rollenspiel,롤플레잉 게임,ロールプレイングゲーム,Jeu de rôles,RPG,角色扮演游戲,Rol yapma oyunu
+GAME_GENRE_RTS,Real-time strategy,即时战略,Стратегия в реальном времени,Estrategia en tiempo real,Estratégia em tempo real,Echtzeitstrategie,실시간 전략,リアルタイムシミュレーション,Stratégie en temps réel,Strategie czasu rzeczywistego,即時戰略遊戲,Gerçek Zamanlı Strateji
+GAME_GENRE_SCIFI,Science fiction game,科幻游戏,Научно-фантастическая игра,Juego de ciencia ficción,Jogo de ficção científica,Science-Fiction-Spiel,SF 게임,SFゲーム,Jeu de Science-Fiction,Gra science-fiction,科幻游戲,Bilim kurgu oyunu
+GAME_GENRE_SHOOTER,Shooter game,射击游戏,Шутер,Juego de disparos,Jogo de tiro,Shooter,슈팅 게임,シューティングゲーム,Jeu de tir,Strzelanka,射擊游戲,Atış oyunu
+GAME_GENRE_SIMULATION,Simulation game,模拟游戏,Симулятор,Juego de simulación,Jogo de simulação,Simulation,시뮬레이션 게임,シミュレーションゲーム,Jeu de simulation,Symulator,模擬游戲,Simulasyon
+GAME_GENRE_SINGLEPLAYER,Singleplayer,单人游戏,Одиночная игра,Un único jugador,Um jogador,Einzelspieler,싱글플레이어,シングルプレイヤー,Un joueur,Gra jednoosobowa,單式游人,Tek oyunculu oyun
+GAME_GENRE_SPORTS,Sports game,体育游戏,Спортивный симулятор,Juego de deportes,Jogo de esportes,Sport-Spiel,스포츠 게임,スポーツゲーム,Jeu de sports,Gra sportowa,體育游戲,Spor oyunu
+GAME_GENRE_STRATEGY,Strategy game,战略游戏,Стратегия,Juego de estrategia,Jogo de estratégia,Strategiespiel,전략 게임,ストラテジーゲーム,Jeu de stratégie,Gra strategiczna,戰略游戲,Strateji oyunu
+GAME_GENRE_TBS,Turn-based strategy,回合战略,Пошаговая стратегия,Estrategia por turnos,Estratégia baseada em turnos,Rundenbasierte Strategie,턴제 전략,ターン制シミュレーション,Stratégie au tour par tour,Strategia turowa,回合戰略遊戲,Sıra Tabanlı Strateji
+GAME_GENRE_TOWER_DEFENSE,Tower defence game,塔防游戏,Башенная защита (TD),Juego de defensa de torres,Jogo de torres de defesa,Verteidigungsspiel,타워 디펜스 게임,タワーディフェンスゲーム,Tower Defense,Tower defence,塔防游戲,Kule savunma oyunu
+ERROR_DEVICE_NOT_FOUND,No {0} detected.,未检测到{0}。,{0} не обнаружен.,No se detectó {0}.,{0} não encontrado.,{0} nicht erkannt.,{0}을(를) 찾을 수 없습니다.,{0} が接続されていません。,Aucun {0} détecté.,Nie wykryto {0}.,未檢測到{0}。,{0} aygıt algılanamadı.
+ERROR_DEVICE_VR_LEAVING_TRACKAREA,Leaving tracking area.,无信号。,За пределами зоны отслеживания.,Saliendo del area de seguimiento.,Deixando área de rastreamento.,Außerhalb des Tracking-Bereichs.,인식 범위 밖입니다.,通信圏外です。,Vous quittez la zone de détection.,Opuszczanie strefy śledzenia.,無信號。,Takip alanı terkediliyor.
+ERROR_DEVICE_VR_NO_HMD,No HMD detected.,未检测到HMD。,VR-шлем не обнаружен.,No se detectó ningún HMD.,HMD não encontrado.,Kein HMD erkannt.,HMD를 찾을 수 없습니다.,HMDが接続されていません。,Aucun HDM détecté.,Nie wykryto HMD.,未檢測到HMD。,Görüş Ünitesi algılanamadı.
+ERROR_GENERIC_ERRCODE,Error code:,错误代码：,Код ошибки:,Código de error:,Código do erro:,Fehlercode:,오류 코드:,エラーコード：,Code d'erreur :,Kod błędu:,錯誤代碼：,Hata kodu:
+ERROR_GENERIC_TEXT,An error has occured.,发生了错误。,Произошла ошибка.,Ha ocurrido un error.,Ocorreu um erro.,Ein Fehler ist aufgetreten.,오류가 발생했습니다.,エラーが発生しました。,Une erreur s'est produite.,Wystąpił jakiś błąd.,發生了錯誤。,Bir hata oluştu.
+ERROR_GENERIC_INVALID_NAME,Invalid name.,名称无效。,Недопустимое название.,El nombre no es válido.,Nome inválido.,Ungültiger Name.,이름이 잘못되었습니다.,無効な名前です。,Nom incorrect.,Błędna nazwa.,名稱無效。,Geçersiz İsim.
+ERROR_GENERIC_INVALID_CD_KEY,Invalid CD Key.,序列号无效。,Неверный цифровой ключ.,La clave de producto no es válida.,Código de produto (CD Key) inválido.,Ungültiger Produktschlüssel.,잘못된 CD키입니다.,無効なCDキーです。,Clé CD incorrecte.,Nieprawidłowy numer seryjny.,無效的遊戲序號。,Geçersiz CD Anahtarı.
+ERROR_GENERIC_CHEATING,Cheats detected!,检测到作弊！,Используются читы!,¡Trampas detectadas!,Trapaças detectadas!,Cheats entdeckt!,치트 발견!,チート検出！,Codes triche détectés !,Wykryto użycie kodów!,已偵測到作弊！,Hile Algılandı!
+ERROR_NETWORK_CONNECTION_LOST,Connection lost.,网络连接失败。,Соединение потеряно.,Conexión perdida.,Conexão perdida.,Verbindung verloren.,연결이 끊어졌습니다.,接続が切断されました。,Connexion perdue.,Stracono połączenie.,網絡連接失敗。,Bağlantı kesildi.
+ERROR_NETWORK_DISCONNECTED_YOUR_OPPONENT,Your opponent has disconnected.,你的对手断开连接。,Ваш соперник отключился.,Tu oponente se ha desconectado.,Seu oponente foi desconectado.,Dein Gegner hat die Verbindung getrennt.,상대가 연결을 끊었습니다.,相手プレイヤーが接続を切断しました。,Votre adversaire s'est déconnecté.,Twój przeciwnik się rozłączył.,你的對手斷線。,Rakibinizin bağlantısı kesildi.
+ERROR_NETWORK_DISCONNECTED_YOUR_PLAYER,The other player has disconnected.,另一个玩家断开了连接。,Другой игрок отключился.,El otro jugador se ha desconectado.,O outro jogador foi desconectado.,Der andere Spieler hat die Verbindung getrennt.,다른 플레이어가 연결을 끊었습니다.,他のプレイヤーが接続を切断しました。,L'autre joueur s'est déconnecté.,Gracz się rozłączył.,另一個玩家斷線。,Diğer oyuncunun bağlantısı kesildi.
+ERROR_NETWORK_DISCONNECTED_YOUR_TEAMMATE,Your teammate has disconnected.,你的队友断开了连接。,Ваш союзник отключился.,Tu compañero se ha desconectado.,Seu colega de equipe foi desconectado.,Dein Mitspieler hat die Verbindung getrennt.,팀원이 연결을 끊었습니다.,味方プレイヤーが接続を切断しました。,Votre coéquipier s'est déconnecté.,Członek Twojej drużyny się rozłączył.,你的隊友斷線。,Takım arkadaşınızın bağlantısı kesildi.
+ERROR_NETWORK_SERVER,Cannot connect to server.,不能连接至服务器。,Не удалось подключиться к серверу.,No se pudo conectar con el servidor.,Não foi possível conectar-se ao servidor.,Es konnte keine Verbindung zum Server hergestellt werden.,서버에 연결할 수 없습니다.,サーバーに接続できません。,Impossible de se connecter au serveur.,Nie można połączyć się z serwerem.,不能連接至服務器。,Sunucuya bağlanılamıyor.
+ERROR_SAVE_CORRUPTED,Save file corrupted.,存档文件已被破坏。,Файл сохранения повреждён.,Archivo de guardado corrupto.,Arquivo de jogo salvo corrompido.,Speicherstand beschädigt.,저장된 게임에 오류가 있습니다.,セーブデータが破損しています。,Fichier de sauvegarde corrompu.,Uszkodzony plik zapisu gry.,存檔文件已被破壞。,Kayıt dosyası bozuk.
+ERROR_SAVE_NO_GAMES_FOUND,No games found.,找不到游戏。,Сохранения не найдены.,No se encontraron partidas.,Nenhum jogo encontrado.,Keine Speicherstände gefunden.,저장된 게임이 없습니다.,セーブデータが見つかりません。,Aucune sauvegarde trouvée.,Nie znaleziono zapisanych gier.,找不到游戲。,Oyun bulunamadı.
+ERROR_SAVE_NO_OPEN_GAMES,No open games.,没有招募中的游戏。,Нет свободных игр.,No hay partidas abiertas.,Nenhum jogo ativo.,Keine Spiele gefunden.,현재 열린 방이 없습니다.,参加可能なゲームがありません。,Aucune partie trouvée.,Brak gier.,沒有招募中的游戲。,Açık oyun yok.
+GAME_ACTION_ATTACK,Attack,攻击,Атаковать,Atacar,Atacar,Attackiere,공격,攻める,Attaquer,Atakuj,攻擊,Saldır
+GAME_ACTION_BOOST,Boost,提升,Ускориться,Potenciar,Impulsionar,Boost,가속하기,ブーストする,Booster,Szybciej,提升,Yükselt
+GAME_ACTION_BUILD,Build,建设,Построить,Construir,Construir,Bauen,짓기,建築,Construire,Budować,建設,İnşa Et
+GAME_ACTION_CAST_FISHING,Cast,投,Закинуть,Recoger,Lançar,Werfe,던지기,釣り糸を投げる,Lancer,Zarzuć,投,At
+GAME_ACTION_CAST_SPELL,Cast,施咒语,Заколдовать,Lanzar,Lançar,Beschwöre,사용하기,詠唱する,Lancer,Rzuć,施咒語,Yap
+GAME_ACTION_CLAIM,Claim,索取,Взять,Reclamar,Reivindicar,Beanspruchen,갖기,入手する,Obtenir,Weź,索取,Al
+GAME_ACTION_CLIMB,Climb,爬上,Лезть,Escalar,Escalar,Klettern,오르기,登る,Escalader,Wspinaj się,爬上,Tırman
+GAME_ACTION_CLOSE,Close,关闭,Закрыть,Cerrar,Fechar,Schließen,닫기,閉じる,Fermer,Zamknij,關閉,Kapat
+GAME_ACTION_COLLECT,Collect,收取,Собирать,Recoger,Coletar,Sammle,모으기,集める,Collecter,Zbierz,收取,Topla
+GAME_ACTION_COOK,Cook,煮,Приготовить,Cocinar,Cozinhar,Kochen,요리하기,調理,Cuisiner,Gotować,煮,Pişir
+GAME_ACTION_CRAFT,Craft,制造,Создать,Crear,Fabricar,Herstellen,만들기,作成,Fabriquer,Tworzyć,制造,Yap
+GAME_ACTION_CROUCH,Crouch,蹲,Присесть,Agacharse,Agachar,Ducken,조용히 걷기,しゃがむ,S'accroupir,Kucnij,蹲,Eğil
+GAME_ACTION_DODGE,Dodge,闪避,Уклониться,Esquivar,Desviar,Ausweichen,피하기,避ける,Esquiver,Unik,閃避,Atlat
+GAME_ACTION_DRIVE,Drive,驱动,Ехать,Conducir,Dirigir,Fahren,운전하기,運転する,Conduire,Prowadź,駕駛,Sür
+GAME_ACTION_FLY,Fly,飞,Летать,Volar,Voar,Fliegen,비행하기,飛ぶ,Voler,Leć,飛,Uç
+GAME_ACTION_FULL_SPEED,Full Speed,全速,Макс. скорость,Máxima velocidad,Velocidade máxima,Höchstgeschwindigkeit,최고 속도,全速力,Vitesse Max,Pełna Prędkość,急速,Tam Hız
+GAME_ACTION_GO,Go,前往,Отправиться,Ir,Ir,Gehen,가기,移動する,Aller,Idź,前往,Git
+GAME_ACTION_GO_TO_PLACE,Go to,去,Отправиться к,Ir a,Vá para,Hierher gehen,(으)로 가기,へ移動する,Aller à,Idź do,去,Git
+GAME_ACTION_HALF_SPEED,Half Speed,半速度,Половинная скорость,Media velocidad,Metade da velocidade,Halbe Geschwindigkeit,중간 속도,半速力,Mi-Vitesse,Pół Prędkości,半速,Yarım Hız
+GAME_ACTION_HEAL,Heal,治疗,Залечить,Curar,Curar,Heile,치료,回復する,Soigner,Ulecz,治疗,İyileştir
+GAME_ACTION_JUMP,Jump,跳,Прыгать,Saltar,Pular,Springen,점프,ジャンプする,Sauter,Skacz,跳,Zıpla
+GAME_ACTION_LAND,Landing,降落,Приземлиться,Aterrizar,Aterrissar,Landen,착륙,着陸する,Atterrir,Wyląduj,降落,Yere İn
+GAME_ACTION_LOOK,Look,看,Смотреть,Mirar,Olhar,Gucken,보기,見る,Regarder,Patrz,看,Bak
+GAME_ACTION_MIX,Mix,混合,Смешать,Mezclar,Misturar,Mixen,섞기,調合,Mélanger,Mieszać,混合,Karıştır
+GAME_ACTION_OPEN,Open,开,Открыть,Abrir,Abrir,Öffnen,열기,開く,Ouvrir,Otwórz,開,Aç
+GAME_ACTION_PICK_UP,Pick up,拾起,Взять,Recoger,Pegar,Aufnehmen,줍기,拾う,Prendre,Podnieś,拾起,Al
+GAME_ACTION_RACE,Race,竞赛,Гнать,Correr,Correr,Rase,경주하기,競争する,Faire la course,Wyścig,競賽,Yarış
+GAME_ACTION_READ,Read,读,Читать,Leer,Ler,Lesen,읽기,読む,Lire,Czytaj,讀,Oku
+GAME_ACTION_REPLACE,Replace,更换,Заменить,Reemplazar,Trocar,Ersetze,대치하기,入れ替え,Remplacer,Zamień,更換,Değiştir
+GAME_ACTION_RUN,Run,奔跑,Бежать,Correr,Correr,Rennen,달리기,走る,Courir,Biegnij,奔跑,Koş
+GAME_ACTION_RUN_AWAY,Run away,逃跑,Сбежать,Salir corriendo,Fugir,Lauf weg,도망치기,逃げる,S'enfuir,Uciekaj,逃跑,Uzaklaş
+GAME_ACTION_SHOOT,Shoot,射击,Стрелять,Disparar,Atirar,Schieße,쏘기,撃つ,Tirer,Strzelaj,射擊,Ateş Et
+GAME_ACTION_SNEAK,Sneak,潜行,Красться,Afanar,Infiltrar,Schleichen,몰래 가기,忍ぶ,Se faufiler,Skradaj się,潛行,Gizlice Sokul
+GAME_ACTION_SPIN,Spin,旋转,Крутить,Girar,Girar,Drehen,회전시키기,回転させる,Tourner,Obróć,旋轉,Dön
+GAME_ACTION_SPRINT,Sprint,冲刺,Пробежать,Esprintar,Arrancada,Sprinten,달리기,走る,Sprinter,Truchtem,沖刺,Depar At
+GAME_ACTION_STEER,Steer,转向,Вращать,Dirigir,Conduzir,Lenken,조종하기,操舵する,Tourner,Steruj,转向,Yönlen
+GAME_ACTION_TAKE_OFF,Takeoff,起飞,Взлететь,Despegar,Decolar,Abheben,이륙하기,離陸する,Décoller,Wystartuj,起飛,Havalan
+GAME_ACTION_TALK,Talk,谈话,Говорить,Hablar,Falar,Reden,대화하기,話す,Parler,Rozmawiaj,談話,Konuş
+GAME_ACTION_THROW,Throw,扔,Бросить,Arrojar,Arremessar,Werfe,던지기,投げる,Jeter,Rzuć,扔,Fırlat
+GAME_ACTION_WALK,Walk,步行,Идти,Caminar,Andar,Laufen,걷기,歩く,Marcher,Idź,步行,Yürü
+GAME_CHARACTER_ENDURANCE,Endurance,耐力,Выносливость,Aguante,Resistência,Ausdauer,지구력,生命力,Endurance,Wytrzymałość,耐力,Dayanıklılık
+GAME_CHARACTER_EXP,Experience points,经验值,Очки опыта,Puntos de experiencia,Pontos de experiência,Erfahrungspunkte,경험치,経験値,Points d'expérience,Punkty doświadczenia,經驗值,Tecrübe puanı
+GAME_CHARACTER_FEMALE,Female,女性,Женщина,Femenino,Feminino,Weiblich,여성,女,Féminin,Żeński,女性,Kadın
+GAME_CHARACTER_HEALTH,Health,健康值,Здоровье,Salud,Vida,Gesundheit,체력,ヘルス,Santé,Życie,健康值,Can
+GAME_CHARACTER_HEART,Heart,心,Сердце,Corazón,Coração,Herz,하트,ハート,Coeur,Serce,心,Kalp
+GAME_CHARACTER_HEART_PLURAL,Hearts,心,Сердца,Corazones,Corações,Herzen,하트,ハート,Coeurs,Serca,心,Kalp
+GAME_CHARACTER_LEVEL,Level,等级,Уровень,Nivel,Nível,Level,레벨,レベル,Niveau,Poziom,等級,Seviye
+GAME_CHARACTER_LEVEL_UP,Level up!,升级,След. уровень!,¡Subida de nivel!,Subiu de nível!,Level up!,레벨 업!,レベルアップ！,Niveau suivant !,Następny poziom!,升級,Seviye Atladın!
+GAME_CHARACTER_LIVES,Lives,生命,Жизни,Vidas,Vidas,Leben,라이프,ライフ,Vies,Życia,生命,Hayat
+GAME_CHARACTER_MALE,Male,男性,Мужчина,Masculino,Masculino,Männlich,남성,男,Masculin,Męski,男性,Erkek
+GAME_CHARACTER_MAN,Man,男人,Мужчина,Hombre,Homem,Mann,남자,男,Homme,Mężczyzna,男人,Erkek
+GAME_CHARACTER_MAN_PLURAL,Men,男人,Мужчины,Hombres,Homens,Männer,남자,男,Hommes,Mężczyźni,男人,Erkek
+GAME_CHARACTER_RESPAWN,Respawn,重生,Возрождение,Reaparecer,Renascer,Wiederbelebung,부활,復活,Réapparaître,Odródź,重生,Canlanma
+GAME_CHARACTER_RESPAWN_IN,Respawn in:,于此之后重生：,Возрождение через:,Reaparecer en:,Renascimento em:,Wiederbelebung in:,부활 장소:,復活まで：,Réapparition dans :,Odrodzenie za:,於此之后重生：,Canlanma: 
+GAME_CHARACTER_RESPAWN_QUESTION,Respawn?,重生？,Возродиться?,¿Reaparecer?,Renascer,Wiederbeleben?,부활하시겠습니까?,復活しますか？,Réapparaître ?,Odrodzić?,重生？,Canlan?
+GAME_CHARACTER_RESPAWNING,Respawning,重生中,Возрождение,Reapareciendo,Renascendo,Wiederbeleben,부활하는 중,復活中,Réapparition,Odradzanie,重生中,Canlanıyor
+GAME_CHARACTER_SKILL,Skill,技能,Навык,Habilidad,Habilidade,Fähigkeiten,기술,スキル,Compétence,Umiejętność,技能,Yetenek
+GAME_CHARACTER_SPAWN_POINT,Spawn Point,重生点,Точка возрождения,Punto de aparición,Ponto de Renascimento,Spawn-Punkt,스폰 지점,復活ポイント,Point d'Apparition,Punkt Odrodzenia,重生點,Canlanma Noktası
+GAME_CHARACTER_TRANSGENDER,Transgender,跨性别,Трансгендер,Transgénero,Transgênero,Transsexuell,성전환자,トランスジェンダー,Transgenre,Transpłciowy,跨性別,Travesti
+GAME_CHARACTER_WOMAN,Woman,女人,Женщина,Mujer,Mulher,Frau,여자,女,Femme,Kobieta,女人,Kadın
+GAME_CHARACTER_WOMAN_PLURAL,Women,女人,Женщины,Mujeres,Mulheres,Frauen,여자,女,Femmes,Kobiety,女人,Kadın
+GAME_DAMAGE,Damage,伤害,Повреждение,Daño,Dano,Schaden,손상,ダメージ,Dégâts,Obrażenia,伤害,Hasar
+GAME_DAMAGE_CRITICAL_HIT,Critical Hit,暴击,Критический удар,Golpe crítico,Dano crítico,Kritischer Treffer,일격,クリティカルヒット,Coup critique,Cios krytyczny,暴击,Kritik Vuruş
+GAME_DAMAGE_CRITICAL_MISS,Critical Miss,严重失误,Критический промах,Fallo crítico,Errou crítico,Kritischer Fehltreffer,일격 빗나감,クリティカルミス,Échec critique,Pudło krytyczne,嚴重失誤,Kritik Iska
+GAME_DAMAGE_HIT_NOUN,Hit,击中,Удар,Golpe,Acerto,Treffer,타격,ヒット,Coup,Cios,擊中,Vur
+GAME_DAMAGE_HIT_POINTS_PLURAL,Hit points,生命值,Очки здоровья,Puntos de salud,Pontos de vida,Kraftpunkte,체력,ヒットポイント,Points de vie,Punkty życia,生命值,Can puanı
+GAME_DAMAGE_MISS_NOUN,Miss,失误,Промах,Fallo,Errou,Verfehlt!,빗나감,ミス,Échec,Pudło,失誤,Iska
+GAME_DAMAGE_UNIT,Damage,破坏值,Урон,Punto de daño,Dano,Schaden,대미지,ダメージ,Dégât,Obrażenia,破壞值,Hasar
+GAME_DAMAGE_UNIT_PLURAL,Damage,破坏率,Урон,Daños,Danos,Schaden,대미지,ダメージ,Dégâts,Obrażenia,破壞率,Hasar
+GAME_ENEMY,Enemy,敌人,Враг,Enemigo,Inimigo,Gegner,적,敵,Ennemi,Przeciwnik,敵人,Düşman
+GAME_ENEMY_FEMALE,Enemy,敌人,Враг,Enemiga,Inimiga,Gegnerin,적,敵,Ennemie,Przeciwniczka,敵人,Düşman
+GAME_ENEMY_FEMALE_PLURAL,Enemies,敌人,Враги,Enemigas,Inimigas,Gegnerinnen,적들,敵,Ennemies,Przeciwniczki,敵人,Düşmanlar
+GAME_ENEMY_PLURAL,Enemies,敌人,Враги,Enemigos,Inimigos,Gegner,적들,敵,Ennemis,Przeciwnicy,敵人,Düşmanlar
+GAME_INVENTORY,Inventory,装备栏,Инвентарь,Inventario,Inventário,Inventar,인벤토리,インベントリ,Inventaire,Ekwipunek,裝備,Depo
+GAME_INVENTORY_AMMO,Ammo,弹药,Б/П,Munición,Munição,Munition,탄환,弾薬,Munitions,Amunicja,彈藥,Cephane
+GAME_INVENTORY_AMMUNITION,Ammunition,弹药值,Боеприпасы,Municiones,Munição,Munition,탄환,弾薬,Munitions,Amunicja,彈藥值,Cephane
+GAME_INVENTORY_BULLET,Bullet,子弹,Пуля,Bala,Bala,Patrone,탄,弾,Balle,Posik,子彈,Mermi
+GAME_INVENTORY_BULLET_PLURAL,Bullets,子弹,Пули,Balas,Balas,Patronen,탄,弾,Balles,Pociski,子彈,Mermiler
+GAME_INVENTORY_BUY,Buy,购买,Купить,Comprar,Comprar,Kaufen,사기,買う,Acheter,Kup,購買,Satın Al
+GAME_INVENTORY_CAPACITY,Inventory Capacity,装备容量,Вместимость инвентаря,Capacidad del inventario,Capacidade do Inventário,Inventarkapazität,인벤토리 용량,インベントリ容量,Capacité de l'inventaire,Pojemność Ekwipunku,裝備容量,Depo Kapasitesi
+GAME_INVENTORY_DROP,Drop,放下,Бросить,Soltar,Largar,wegwerfen,버리기,捨てる,Jeter,Upuść,放下,Yere At
+GAME_INVENTORY_ENCUMBRANCE,Encumbrance,负担,Макс. вес,Carga,Peso,Beladung,인벤토리 무게,持ち運べる量,Encombrement,Obciążenie,負擔,Yük
+GAME_INVENTORY_FULL,Inventory Full,装备已满,Инвентарь полон,Inventario lleno,Inventário Cheio,Inventar voll,인벤토리 꽉 참,インベントリがいっぱいです,Inventaire plein,Pełen Ekwipunek,裝備已滿,Depo Dolu
+GAME_INVENTORY_ITEM,Item,物品,Предмет,Objeto,Item,Gegenstand,아이템,アイテム,Objet,Przedmiot,物品,Eşya
+GAME_INVENTORY_KEY,Key,钥匙,Ключ,Llave,Chave,Schlüssel,열쇠,鍵,Clé,Klucz,鑰匙,Anahtar
+GAME_INVENTORY_POWERUP,Power-up,提升功率,Усиление,Potenciador,Powerup,Power-Up,파워 업,パワーアップ,Amélioration,Powerup,提升功率,Güçlendirme
+GAME_INVENTORY_SELL,Sell,销售,Продать,Vender,Vender,Verkaufen,팔기,売る,Vendre,Sprzedaj,銷售,Sat
+GAME_INVENTORY_USE,Use,使用,Использовать,Usar,Usar,Benutze,사용하기,使用する,Utiliser,Użyj,使用,Kullan
+GAME_INVENTORY_WEAPON,Weapon,武器,Оружие,Arma,Arma,Waffe,무기,武器,Arme,Broń,武器,Silah
+GAME_INVENTORY_WEAPONS,Weapons,武器,Оружие,Armas,Armas,Waffen,무기,武器,Armes,Bronie,武器,Silahlar
+GAME_INVENTORY_YOU_CANNOT_CARRY,You cannot carry any more.,你不能再拿起东西了。,Вы не можете нести больше.,No puedes llevar nada más.,Você não pode carregar mais nada.,Sie können nichts mehr tragen.,더 지닐 수 없습니다.,これ以上持てません。,Vous ne pouvez pas transporter plus,Nie możesz nieść więcej.,你拿不起了。,Daha fazla taşıyamazsın.
+GAME_LABEL_BE_CAREFUL,Be careful!,注意,Будьте осторожны!,¡Ten cuidado!,Tenha cuidado!,Sei vorsichtig!,주의하십시오.,気をつけて！,Faites attention !,Uważaj!,注意,Dikkatli Ol!
+GAME_LABEL_PLEASE_BE_CAREFUL,Please be careful.,请注意！,Просим быть осторожным!,Por favor ten cuidado.,Por favor tenha cuidado.,Bitte sei vorsichtig.,주의하여 주십시오.,気をつけてください。,S'il vous plaît soyez prudent.,Proszę uważaj.,請注意！,Lütfen dikkatli ol!
+GAME_LABEL_TACTICS,Tactics,战术,Тактика,Táctica,Tática,Taktiken,작전,作戦,Tactique,Taktyka,戰術,Taktik
+GAME_OBJECTIVE,Objective,目标,Цель,Objetivo,Objetivo,Ziel,목표,目標,Objectif,Cel,目標,Hedef
+GAME_OBJECTIVE_ASSIST,Assist,协助,Содействие,Asistencia,Assistência,Hilfe,보조,アシスト,Aide,Asysta,協助,Asist
+GAME_OBJECTIVE_ASSIST_PLURAL,Assists,协助,Содействия,Asistencias,Assistências,Hilfen,보조,アシスト,Aides,Asyst,協助,Asistler
+GAME_OBJECTIVE_ATTACK,Attack,攻击,Атаковать,Atacar,Atacar,Attackiere,공격,攻める,Attaquer,Atakuj,攻擊,Saldır
+GAME_OBJECTIVE_BONUS,Bonus,奖金,Бонус,Bonificación,Bônus,Bonus,보너스,ボーナス,Bonus,Bonus,獎金,Bonus
+GAME_OBJECTIVE_CAPTURE,Capture,捉取,Захватить,Capturar,Capturar,Fang,확보,確保する,Capturer,Przechwyć,捉取,Ele Geçir
+GAME_OBJECTIVE_COMPLETE,Complete,完成,Завершено,Completo,Completo,Vollständig,완성,完了済,Complet,Ukończona,完成,Tamamlanmış
+GAME_OBJECTIVE_DEATH,Death,死亡,Смерть,Muerte,Morte,Tod,사망,デス,Mort,Śmierć,死亡,Ölüm
+GAME_OBJECTIVE_DEATH_PLURAL,Deaths,死亡,Смерти,Muertes,Mortes,Tode,사망,デス,Morts,Śmierci,死亡,Ölümler
+GAME_OBJECTIVE_DEFEND,Defend,防守,Защищать,Defender,Defender,Verteidige,방어하기,守る,Défendre,Broń,防守,Savun
+GAME_OBJECTIVE_DESTROY,Destroy,破坏,Уничтожить,Destruir,Destruir,Zerstöre,파괴하기,破壊する,Détruire,Zniszcz,消滅,Yoket
+GAME_OBJECTIVE_ESCAPE,Escape,逃生,Спастись,Escapar,Escapar,Entkomme,탈출하기,逃走する,S'échapper,Uciekaj,逃生,Kaç
+GAME_OBJECTIVE_GAME_FINISHED,The End,结束,Конец,Fin,Fim,Ende,끝,終わり,Fin,Koniec,結束,Son
+GAME_OBJECTIVE_GAMEOVER,Game over!,游戏结束！,Конец игры!,Fin del juego,Fim de jogo!,Spiel vorbei!,게임 오버!,ゲームオーバー！,Game over !,Koniec gry,游戲結束！,Oyun bitti!
+GAME_OBJECTIVE_GAMEOVER_CAPS,GAME OVER!,游戏结束！,КОНЕЦ ИГРЫ!,FIN DEL JUEGO,FIM DE JOGO!,SPIEL VORBEI!,게임 오버,ゲームオーバー！,GAME OVER !,KONIEC GRY,游戲結束！,OYUN BİTTİ!
+GAME_OBJECTIVE_HIGH_SCORE,High score,最高评分,Рекорд,Puntuación máxima,Recorde,Höchstpunktzahl,최고 점수,ハイスコア,Meilleur score,Rekord,最高分,Yüksek Skor
+GAME_OBJECTIVE_INCOMPLETE,Incomplete,未完成,Не завершено,Incompleto,Incompleto,Unvollständig,미완료,未完了,Incomplet,Nieukończona,未完成,Tamamlanmamış
+GAME_OBJECTIVE_KILL,Kill,毁掉,Убить,Asesinar,Matar,Töten,살해하기,キル,Tuer,Zabij,殺,Öldür
+GAME_OBJECTIVE_KILL_ASSIST,Kill Assist,助杀,Помощь в убийстве,Asistencia,Morte Assistida,Assistiert,킬 보조,キルアシスト,Assistance,Asysta Zabicia,助殺,Öldürme Asisti
+GAME_OBJECTIVE_KILL_NOUN,Kill,击杀,Убийство,Asesinato,Morte,Kill,킬,キル,Meurtre,Zabity,擊殺,Leş
+GAME_OBJECTIVE_KILL_PLURAL,Kills,击杀,Убийства,Asesinatos,Mortes,Kills,킬,キル,Meurtres,Zabitych,擊殺,Leş
+GAME_OBJECTIVE_LOCKED,Locked,锁定,Закрыто,Cerrado,Bloqueado,Gesperrt,잠김,ロック中,Bloqué,Zamknięte,鎖定,Kilitli
+GAME_OBJECTIVE_LOSSES,Losses,失败,Поражения,Derrotas,Derrotas,Niederlagen,패배,敗北,Défaites,Przegranych,失敗,Mağlubiyet
+GAME_OBJECTIVE_MATCH,Match,比赛,Матч,Partida,Partida,Spiel,대전,マッチ,Match,Pojedynek,比賽,Maç
+GAME_OBJECTIVE_MISSION,Mission,任务,Миссия,Misión,Missão,Mission,임무,ミッション,Mission,Misja,任務,Hedef
+GAME_OBJECTIVE_MISSION_OBJECTIVE_PLURAL,Mission Objectives,任务目标,Цели миссии,Objetivos de la misión,Objetivos da missão,Missionsziele,임무의 목표,ミッション目標,Objectifs de la mission,Cele Misji,任務目標,Görev Hedefleri
+GAME_OBJECTIVE_MISSION_OBJECTIVE,Mission Objective,任务目标,Цель миссии,Objetivo de la misión,Objetivo da missão,Missionsziel,임무의 목표,ミッション目標,Objectif de la mission,Cel Misji,任務目標,Görev Hedefi
+GAME_OBJECTIVE_MULTIPLIER,Multiplier,倍,Множитель,Multiplicador,Multiplicador,Multiplikator,곱수,倍,Multiplicateur,Multiplayer,倍,Çarpan
+GAME_OBJECTIVE_PLURAL,Objectives,目标,Цели,Objetivos,Objetivos,Ziele,목표,目標,Objectifs,Cele,目標,Hedefler
+GAME_OBJECTIVE_POSITION,Position,位置,Позиция,Posición,Posição,Position,순위,ポジション,Position,Pozycja,位置,Pozisyon
+GAME_OBJECTIVE_RACE_LAP,Lap,全程,Круг,Vuelta,Volta,Runde,랩,ラップ,Tour,Okrążenie,全程,Tur
+GAME_OBJECTIVE_RACE_LAP_PLURAL,Laps,圈数,Кругов,Vueltas,Voltas,Runden,랩,ラップ,Tours,Okrążenia,圈數,Tur
+GAME_OBJECTIVE_ROUND,Round,回合,Раунд,Ronda,Rodada,Runde,횟수,ラウンド,Tour,Runda,回合,Raund
+GAME_OBJECTIVE_SCORE,Score,评分,Счёт,Puntuación,Pontuação,Punktzahl,점수,スコア,Score,Punkty,評分,Skor
+GAME_OBJECTIVE_TIME,Time,时间,Время,Tiempo,Tempo,Zeit,시간,タイム,Temps,Czas,時間,Süre
+GAME_OBJECTIVE_TIME_LEFT,Time left,剩余时间,Оставшееся время,Tiempo restante,Tempo restante,Zeit übrig,남은 시간,残り時間,Temps restant,Pozostało czasu,剩余時間,Kalan Süre
+GAME_OBJECTIVE_TOURNAMENT,Tournament,比赛,Турнир,Torneo,Torneio,Wettkampf,토너먼트,トーナメント,Tournoi,Turniej,比賽,Turnuva
+GAME_OBJECTIVE_TOURNAMENT_PLURAL,Tournaments,比赛,Турниры,Torneos,Torneios,Wettkämpfe,토너먼트,トーナメント,Tournois,Turnieje,比賽,Turnuvalar
+GAME_OBJECTIVE_WINS,Wins,获胜,Победы,Victorias,Vitórias,Siege,승리,勝利,Victoires,Wygranych,獲勝,Galibiyet
+GAME_STATUS_DEFEAT,Defeat,失败,Поражение,Derrota,Derrota,Niederlage,패배,敗北,Défaite,Przegrana,失敗,Mağlubiyet
+GAME_STATUS_DEFEATED,You have been defeated.,你被击败了。,Вы потерпели поражение.,Has sido derrotado.,Você foi derrotado.,Du wurdest besiegt!,패배하였습니다.,敗北しました。,Vous avez été vaincu.,Pokonano Cię.,你被擊敗了。,Mağlup oldun.
+GAME_STATUS_LOSER,Loser,输家,Проигравший,Perdedor,Perdedor,Verlierer,패자,敗者,Perdant,Przegrywasz,輸家,Kaybeden
+GAME_STATUS_TEAM_LOST,Your team lost!,你的团队失败,Ваша команда проиграла!,¡Tu equipo ha perdido!,O seu time perdeu!,Team hat verloren,팀 패배,チームの敗北！,Votre équipe a perdu !,Twoja drużyna przegrała!,你的團隊失敗,Takımın kaybetti!
+GAME_STATUS_TEAM_WON,Your team won!,你的团队胜利,Ваша команда победила!,¡Tu equipo ha ganado!,O seu time ganhou!,Team hat gewonnen,팀 승리,チームの勝利！,Votre équipe a gagné !,Twoja drużyna wygrała!,你的團隊勝利,Takımın kazandı!
+GAME_STATUS_VICTORY,Victory,胜利,Победа,Victoria,Vitória,Sieg,우승,勝利,Victoire,Zwycięstwo,勝利,Galibiyet
+GAME_STATUS_WINNER,Winner,赢家,Победитель,Ganador,Vencedor,Gewinner,승자,勝者,Gagnant,Wygrywasz,贏家,Kazanan
+GAME_STATUS_YOU_ARE_DEAD,You are dead.,你死了。,Вы мертвы.,Estás muerto.,Você está morto.,Du bist tot.,사망하였습니다.,死にました。,Vous êtes mort.,Nie żyjesz.,你死了。,Ölüsün.
+GAME_STATUS_YOU_DIED,You died.,你死了。,Вы умерли.,Has muerto.,Você morreu.,Du bist gestorben.,사망하였습니다.,死にました。,Vous êtes mort.,Nie żyjesz.,你死了。,Öldün.
+GAME_STATUS_YOU_LOSE,You lose!,你输了！,Вы проиграли,¡Pierdes!,Você perdeu!,Verloren!,패배하였습니다!,敗北！,Perdu !,Przegrana!,你輸了！,Kaybettin!
+GAME_STATUS_YOU_LOST,You lost!,你输了！,Вы проиграли!,¡Perdiste!,Você perdeu!,Du hast verloren!,패배하였습니다!,敗北！,Tu as perdu !,Przegrana!,你輸了！,Kaybettin!
+GAME_STATUS_YOU_WIN,You win!,你赢了！,Вы выиграли!,¡Ganas!,Você venceu!,Gewonnen!,승리하였습니다!,勝利！,Gagné !,Wygrana!,你贏了！,Kazandın!
+GAME_STATUS_YOU_WON,You won!,你赢了！,Вы выиграли!,¡Ganaste!,Você ganhou!,Du hast gewonnen!,승리하였습니다!,勝利！,Tu as gagné !,Wygrana!,你贏了！,Kazandın!
+MENU_CAMERA,Camera,摄影机,Камера,Cámara,Câmera,Kamera,카메라,カメラ,Caméra,Kamera,攝影機,Kamera
+MENU_CAMERA_INVERTED,Inverted,反转,Перевёрнутая,Invertido,Invertido,Invertiert,반전,反転,Inversé,Odwrócona,反轉,Ters
+MENU_CAMERA_NORMAL,Normal,标准,Обычная,Normal,Normal,Normal,보통,通常,Normal,Normalna,標准,Normal
+MENU_CAMERA_XAXIS,Camera X-Axis,摄影机X坐标轴,Камера по оси X,Eje X de la cámara,Eixo X da Câmera,Kamera X-Achse,카메라 가로축,カメラ操作：左右,Axe de Caméra X,Oś X Kamery,攝影機X坐標軸,Kamera X Ekseni
+MENU_CAMERA_YAXIS,Camera Y-Axis,摄影机Y坐标轴,Камера по оси Y,Eje Y de la cámara,Eixo Y da Câmera,Kamera Y-Achse,카메라 세로축,カメラ操作：上下,Axe de Caméra Y,Oś Y Kamery,攝影機Y坐標軸,Kamera Y Ekseni
+MENU_CONTROLS_BUTTON,Button,按键,Кнопка,Botón,Botão,Knopf,버튼,ボタン,Bouton,Przycisk,按鍵,Buton
+MENU_CONTROLS_CLICK,Click,点击,Нажать,Hacer clic,Clique,Anklicken,클릭,クリック,Cliquer,Kliknij,點擊,Tıkla
+MENU_CONTROLS_DEADZONE,Dead zone,危险地区,Мёртвая зона,Zona muerta,Zona morta,Tote Zone,데드존,デッドゾーン,Zone morte,Martwa strefa,危險地區,Ölü Bölge
+MENU_CONTROLS_DOUBLE_CLICK,Double-click,双击,Двойное нажатие,Hacer doble clic,Clique Duplo,Doppelklick,이중 클릭,ダブルクリック,Double cliquer,Kliknij dwa razy,雙擊,Çift Tıkla
+MENU_CONTROLS_DRAG,Drag,拖,Перетащить,Arrastrar,Arrastar,Ziehen,끌기,ドラッグ,Faire glisser,Przeciągnij,拖,Sürükle
+MENU_CONTROLS_DRAG_DROP,Drag and drop,拖放,Перенести,Arrastrar y soltar,Arrastar e soltar,Klicken und ziehen,끌어다 놓기,ドラッグ・アンド・ドロップ,Glisser-déposer,Przeciągnij i upuść,拖放,Sürükle ve bırak
+MENU_CONTROLS_FINGER,Finger,手指,Палец,Dedo,Dedo,Finger,터치 조작,フィンガー,Doigt,Palec,手指,Parmak
+MENU_CONTROLS_GAMEPAD,Gamepad,游戏手柄,Геймпад,Mando,Controle,Gamepad,게임 패드,ゲームパッド,Manette,Kontroler,游戲手柄,Oyun Kumandası
+MENU_CONTROLS_GYROSCOPE,Gyroscope,回转仪,Гироскоп,Giroscopio,Giroscópio,Lagesensor,자이로스코프,ジャイロ,Gyroscope,Żyroskop,回轉儀,Jiroskop
+MENU_CONTROLS_KEY,Key,键,Клавиша,Tecla,Tecla,Taste,글쇠,キー,Touche,Klawisz,鍵,Tuş
+MENU_CONTROLS_KEYBOARD,Keyboard,键盘,Клавиатура,Teclado,Teclado,Tastatur,자판,キーボード,Clavier,Klawiatura,鍵盤,Klavye
+MENU_CONTROLS_MOUSE,Mouse,鼠标,Мышь,Ratón,Mouse,Maus,마우스,マウス,Souris,Mysz,鼠標,Fare
+MENU_CONTROLS_MOUSE_SENSITIVITY,Mouse sensitivity,鼠标灵敏度,Чувствительность мыши,Sensibilidad,Sensibilidade do mouse,Mausempfindlichkeit,마우스 감도,マウス感度,Sensibilité de la souris,Czułość myszy,鼠標靈敏度,Fare hassasiyeti
+MENU_CONTROLS_PINCH,Pinch,捏,Свести пальцы,Pellizcar,Espremer,Zusammenziehen,손가락 모으기,ピンチ,Pincer,Zwęź,捏,Sıkıştır
+MENU_CONTROLS_ROTATE,Rotate,环绕,Повернуть,Rotar,Rotacionar,Drehen,돌리기,回転,Pivoter,Obróć,環繞,Döndür
+MENU_CONTROLS_SCROLL,Scroll,滚动,Прокрутить,Desplazar,Rolar,Scrollen,스크롤,スクロール,Faire défiler,Przewiń,滾動,Kaydır
+MENU_CONTROLS_SHAKE,Shake,震动,Встряхнуть,Sacudir,Vibrar,Schütteln,흔들기,シェイク,Secouer,Potrząśnij,震動,Salla
+MENU_CONTROLS_SPREAD,Spread,扩,Раздвинуть пальцы,Extender,Esticar,Auseinanderziehen,손가락 펼치기,スプレッド,Écarter,Rozciągnij,擴,Ayır
+MENU_CONTROLS_SWIPE,Swipe,滑动,Провести пальцем,Barrer,Deslizar,Wischen,밀기,スワイプ,Faire glisser,Przejedź,滑動,Kaydır
+MENU_CONTROLS_TAP,Tap,点击,Коснуться пальцем,Tocar,Tocar,Antippen,터치하기,タップ,Tapoter,Dotknij,觸摸,Tıkla
+MENU_CONTROLS_THE_BUTTON,The button,按键,Кнопка,El botón,O botão,Der Knopf,버튼,ボタン,Le bouton,Przycisk,按鍵,Buton
+MENU_CONTROLS_THE_KEY,The key,关键,Клавиша,La tecla,A tecla,Die Taste,글쇠,キー,La touche,Klawisz,關鍵,Tuş
+MENU_CONTROLS_TILT,Tilt,倾斜,Наклонить,Rotar,Balançar,Kippen,기울이기,ティルト,Pencher,Przechyl,傾斜,Eğ
+MENU_CUSTOMIZE_ARM,Arm,臂,Рука,Brazo,Braço,Arm,팔,腕,Bras,Ramię,臂,Kol
+MENU_CUSTOMIZE_ARM_PLURAL,Arms,臂,Руки,Brazos,Braços,Arme,팔,腕,Bras,Ramiona,臂,Kollar
+MENU_CUSTOMIZE_CHEST,Chest,胸,Грудь,Pecho,Peito,Brust,가슴,胸,Torse,Pierś,胸,Gövde
+MENU_CUSTOMIZE_CHIN,Chin,下巴,Подбородок,Barbilla,Queixo,Kinn,턱,顎,Menton,Broda,下巴,Çene
+MENU_CUSTOMIZE_COLOR,Color,颜色,Цвет,Color,Cor,Farbe,색,色,Couleur,Kolor,顏色,Renk
+MENU_CUSTOMIZE_EAR,Ear,耳,Ухо,Oreja,Orelha,Ohr,귀,耳,Oreille,Ucho,耳,Kulak
+MENU_CUSTOMIZE_EAR_PLURAL,Ears,耳朵,Уши,Orejas,Orelhas,Ohren,귀,耳,Oreilles,Uszy,耳朵,Kulaklar
+MENU_CUSTOMIZE_EYE,Eye,眼,Глаз,Ojo,Olho,Auge,눈,目,Oeil,Oko,眼,Göz
+MENU_CUSTOMIZE_EYE_PLURAL,Eyes,眼睛,Глаза,Ojos,Olhos,Augen,눈,目,Yeux,Oczy,眼睛,Gözler
+MENU_CUSTOMIZE_FEET,Feet,双脚,Стопы,Pies,Pés,Füße,발,足,Pieds,Stopy,雙腳,Ayaklar
+MENU_CUSTOMIZE_FOOT,Foot,脚,Стопа,Pie,Pé,Fuß,발,足,Pied,Stopa,腳,Ayak
+MENU_CUSTOMIZE_HAIR,Hair,毛发,Волосы,Pelo,Pelo,Haare,털,毛,Poils,Włosy,毛,Saç
+MENU_CUSTOMIZE_HAIR_BEARD,Beard,胡子,Борода,Barba,Barba,Bart,수염,髭,Barbe,Zarost,胡子,Sakal
+MENU_CUSTOMIZE_HAIR_FUR,Fur,毛皮,Мех,Pelaje,Pelos,Fell,털,毛皮,Pelage,Owłosienie,毛皮,Post
+MENU_CUSTOMIZE_HAIR_HEAD,Hair,头发,Прическа,Cabello,Cabelo,Haare,머리카락,髪,Cheveux,Fryzura,頭發,Saç
+MENU_CUSTOMIZE_HAND,Hand,手,Кисть,Mano,Mão,Hand,손,手,Main,Ręka,手,El
+MENU_CUSTOMIZE_HAND_PLURAL,Hands,手,Кисти,Manos,Mãos,Hände,손,手,Mains,Ręce,手,Eller
+MENU_CUSTOMIZE_HEAD,Head,头,Голова,Cabeza,Cabeça,Kopf,머리,頭,Tête,Głowa,頭,Kafa
+MENU_CUSTOMIZE_HIPS,Hips,臀部,Бедра,Cadera,Cintura,Hüften,엉덩이,腰,Hanches,Biodra,臀部,Kalça
+MENU_CUSTOMIZE_LEG,Leg,腿,Нога,Pierna,Perna,Bein,다리,脚,Jambe,Noga,腿,Bacak
+MENU_CUSTOMIZE_LEG_PLURAL,Legs,双腿,Ноги,Piernas,Pernas,Beine,다리,脚,Jambes,Nogi,雙腿,Bacaklar
+MENU_CUSTOMIZE_MOUTH,Mouth,嘴巴,Рот,Boca,Boca,Mund,입,口,Bouche,Usta,嘴巴,Ağız
+MENU_CUSTOMIZE_NECK,Neck,颈,Шея,Cuello,Pescoço,Genick,목,首,Cou,Szyja,頸,Boyun
+MENU_CUSTOMIZE_NOSE,Nose,鼻子,Нос,Nariz,Nariz,Nase,코,鼻,Nez,Nos,鼻子,Burun
+MENU_CUSTOMIZE_SKIN,Skin,皮肤,Кожа,Piel,Pele,Haut,피부,肌,Peau,Skóra,皮膚,Deri
+MENU_CUSTOMIZE_THORAX,Thorax,胸部,Грудная клетка,Torax,Tórax,Brustkorb,상반신,胸郭,Thorax,Klatka piersiowa,胸部,Göğüs
+MENU_DIFFICULTY,Difficulty,难度,Сложность,Dificultad,Dificuldade,Schwierigkeitsgrad,난이도,難易度,Difficulté,Poziom trudności,難度,Zorluk
+MENU_DIFFICULTY_EASY,Easy,简单,Просто,Fácil,Fácil,Einfach,쉬움,易しい,Facile,Łatwy,簡單,Kolay
+MENU_DIFFICULTY_HARD,Hard,困难,Сложно,Difícil,Difícil,Schwer,어려움,難しい,Difficile,Trudny,困難,Zor
+MENU_DIFFICULTY_IMPOSSIBLE,Impossible,不可能,Невозможно,Imposible,Impossível,Unmöglich,불가능,クリア不可能,Impossible,Niemożliwy,不可能,İmkansız
+MENU_DIFFICULTY_INSANE,Insane,疯狂,Безумно,Enfermizo,Insano,Wahnsinn,매니악,マニアック,Dément,Szalony,瘋狂,Akıllara Zarar
+MENU_DIFFICULTY_MEDIUM,Medium,中等,Средне,Intermedio,Médio,Mittel,보통,普通,Moyen,Średni,中等,Orta
+MENU_DIFFICULTY_VERY_EASY,Very Easy,非常简单,Очень просто,Muy fácil,Muito Fácil,Sehr einfach,매우 쉬움,とても易しい,Très facile,Bardzo łatwy,非常簡單,Çok Kolay
+MENU_DIFFICULTY_VERY_HARD,Very Hard,非常困难,Очень сложно,Muy difícil,Muito Difícil,Sehr schwer,매우 어려움,とても難しい,Très difficile,Bardzo trudny,非常困難,Çok Zor
+MENU_DIR_DOWN,Down,下,Вниз,Abajo,Abaixo,Unten,아래,下,Bas,Dół,下,Aşağı
+MENU_DIR_LEFT,Left,左,Влево,Izquierda,Esquerda,Links,왼쪽,左,Gauche,Lewo,左,Sol
+MENU_DIR_RIGHT,Right,右,Вправо,Derecha,Direita,Rechts,오른쪽,右,Droite,Prawo,右,Sağ
+MENU_DIR_UP,Up,上,Вверх,Arriba,Acima,Oben,위,上,Haut,Góra,上,Yukarı
+MENU_IO_LOAD,Load,载入,Загрузить,Cargar,Carregar,Laden,불러오기,ロード,Charger,Wczytaj,載入,Yükle
+MENU_IO_LOAD_GAME,Load Game,载入游戏,Загрузить игру,Cargar juego,Carregar Jogo,Spiel laden,게임 불러오기,ゲームデータをロード,Charger partie,Wczytaj Grę,載入游戲,Oyunu Yükle
+MENU_IO_LOADING,Loading...,正在登录中...,Загрузка…,Cargando...,Carregando…,Lädt...,불러오는 중...,ローディング中…,Chargement...,Wczytywanie...,正在登錄中...,Yükleniyor...
+MENU_IO_PLEASE_WAIT,Please wait...,请等待...,Подождите немного...,Por favor espera...,Por favor aguarde…,Bitte warten,잠시만 기다려 주세요,お待ちください…,Veuillez patienter...,Proszę czekać...,請等待...,Lütfen bekleyiniz...
+MENU_IO_RESET_SAVE_DATA,Reset save data?,重设已保存数据,Сбросить сохранение?,¿Borrar los datos guardados?,Apagar progresso?,Spielstand zurücksetzen?,저장된 데이터를 초기화할까요?,セーブデータを消去しますか？,Réinitialiser les données ?,Zresetować zapisane dane ?,重設已保存數據,Verileri Sıfırla
+MENU_IO_SAVE,Save,保存,Сохранить,Guardar,Salvar,Speichern,저장,セーブ,Sauvegarder,Zapisz,保存,Kaydet
+MENU_IO_SAVE_DATA,Save data,保存数据,Сохранения,Guardar partida,Salvar progresso,Spiel speichern,저장된 데이터,セーブデータ,Sauvegarder les données,Zapisz dane,保存數據,Kaydet
+MENU_IO_SAVE_GAME,Save Game,保存游戏,Сохранить игру,Guardar juego,Salvar Jogo,Spiel speichern,게임 저장,ゲームデータをセーブ,Sauvegarder partie,Zapisz Grę,保存游戏,Oyunu Kaydet
+MENU_IO_SAVING,Saving...,保存中…,Сохранение…,Guardando...,Salvando…,Spiel wird gespeichert...,저장하는 중,セーブ中…,Sauvegarde en cours...,Zapisywanie...,保存中…,Kaydediliyor...
+MENU_LABEL_ALL,All,全部,Все,Todos,Todos,Alle,모두,すべて,Tous,Wszystkie,全部,Tümü
+MENU_LABEL_AGE,Age,年龄,Возраст,Edad,Idade,Alter,나이,年齢,Âge,Wiek,年齡,Yaş
+MENU_LABEL_ARE_YOU_REALLY_SURE,Are you really sure?,你是否确认？,Вы точно уверены?,¿Estás totalmente seguro?,Você tem certeza absoluta?,Bist du wirklich sicher?,정말로 확실합니까?,本当によろしいですか？,Êtes-vous vraiment sûr ?,Naprawdę?,你是否確認？,Gerçekten emin misiniz?
+MENU_LABEL_ARE_YOU_SURE,Are you sure?,你确定吗？,Вы уверены?,¿Estás seguro?,Você tem certeza?,Bist du sicher?,확실합니까?,よろしいですか？,Êtes-vous certain ?,Na pewno?,你確定嗎？,Emin misiniz?
+MENU_LABEL_BACK,Back,返回,Назад,Volver,Voltar,Zurück,뒤로,戻る,Retour,Wstecz,返回,Geri
+MENU_LABEL_BACKGROUND_MUSIC,Background music,背景音乐,Музыка,Música de fondo,Música de fundo,Hintergrundmusik,배경 음악,BGM,Volume du fond sonore,Podkład muzyczny,背景音樂,Arkafon Müziği
+MENU_LABEL_CANCEL,Cancel,取消,Отмена,Cancelar,Cancelar,Abbrechen,취소,キャンセル,Annuler,Anuluj,取消,İptal
+MENU_LABEL_CLOSE,Close,关闭,Закрыть,Cerrar,Fechar,Schließen,닫기,閉じる,Fermer,Zamknij,關閉,Kapat
+MENU_LABEL_CONFIRM_BUTTON,Confirm,确认,Принять,Confirmar,Confirmar,Bestätigen,확인,決定,Confirmer,Zatwierdź,確認,Onayla
+MENU_LABEL_CONTINUE,Continue,继续,Продолжить игру,Continuar,Continuar,Fortsetzen,계속,続ける,Continuer,Kontynuuj,繼續,Devam Et
+MENU_LABEL_CONTINUE_QUESTION,Continue?,继续？,Продолжить игру?,¿Continuar?,Continuar?,Fortfahren?,계속할까요?,続けますか？,Continuer ?,Kontynuować?,繼續？,Devam edilsin mi?
+MENU_LABEL_CREDITS,Credits,致谢,Авторы,Créditos,Créditos,Credits,제작진,クレジット,Remerciements,Twórcy,製作群,Künye
+MENU_LABEL_DESKTOP,Exit to Desktop,退出至桌面,Выйти на рабочий стол,Salir al escritorio,Sair para a área de trabalho,Zurück zum Desktop,바탕화면으로 나가기,終了してデスクトップへ戻る,Retourner sur le bureau,Wyjdź do Pulpitu,退出至桌面,Masaüstüne Çıkış
+MENU_LABEL_DESKTOP_QUESTION,Exit to Desktop?,退出至桌面？,Выйти на рабочий стол?,¿Salir al escritorio?,Sair para a área de trabalho?,Zum Desktop zurückkehren?,바탕화면으로 나가겠습니까?,終了してデスクトップへ戻りますか？,Retourner sur le bureau ?,Wyjść do Pulpitu?,退出至桌面？,Masaüstüne çıkılsın mı?
+MENU_LABEL_DLC,DLC,DLC,Дополнения,DLC,DLC,DLC,DLC,DLC,DLC,DLC,DLC,DLC
+MENU_LABEL_DOWNLOAD,Download,下载,Загрузить,Descargar,Baixar,Herunterladen,내려받기,ダウンロード,Télécharger,Pobierz,下載,İndir
+MENU_LABEL_DOWNLOADABLE,Downloadable content,下载包,Загружаемый контент,Contenido descargable,Conteúdo adicional,Inhalte zum Herunterladen,다운로드 콘텐츠,ダウンロードコンテンツ,Contenu téléchargeable,Zawartość do pobrania,下載內容,İndirilebilir İçerik
+MENU_LABEL_EXIT,Exit,退出,Покинуть,Salir,Sair,Beenden,나가기,終了する,Sortir,Wyjdź,退出,Çıkış
+MENU_LABEL_EXIT_QUESTION,Exit?,退出？,Выйти?,¿Salir?,Sair?,Beenden?,나가겠습니까?,終了しますか？,Sortir ?,Wyjść?,退出？,Oyundan çıkılsın mı?
+MENU_LABEL_EXTRAS,Extras,演员,Дополнительно,Extras,Extras,Extras,추가 컨텐츠,エキストラ,Extras,Dodatki,演員,Ekstra
+MENU_LABEL_FRAMESPERSEC,FPS,FPS,Кадровая частота,FPS,FPS,FPS,FPS,FPS,IPS,FPS,FPS,FPS
+MENU_LABEL_GALLERY,Art gallery,艺术馆,Галерея,Galería de arte,Galeria,Kunstgalerie,아트 갤러리,アートギャラリー,Galerie d'art,Galeria,藝術館,Sanat Galerisi
+MENU_LABEL_GOODBYE,Goodbye!,再见！,До свидания!,¡Adiós!,Adeus!,Auf Wiedersehen!,안녕히 가세요!,さようなら！,Au revoir !,Do zobaczenia!,再見！,Güle güle!
+MENU_LABEL_GRAPHICS,Graphics,图形设置,Графика,Gráficos,Gráficos,Grafik,그래픽,グラフィック,Graphismes,Grafika,圖形設置,Grafikler
+MENU_LABEL_IAP,In-app purchase,在应用程序内购买,Внутриигровая покупка,Compra integrada,Compra no aplicativo,In-App-Verkäufe,앱 내 구매,アプリ内購入,Achats intégré,Zakup wewnątrz aplikacji,在應用程序內購買,Oyun içi satın alım
+MENU_LABEL_LANGUAGE,Language,语言,Язык,Idioma,Idioma,Sprache,언어,言語,Langue,Jezyk,語言,Dil
+MENU_LABEL_LEVEL,Level,级别,Уровень,Nivel,Fase,Level,레벨,ステージ,Niveau,Poziom,級別,Seviye
+MENU_LABEL_MAIL,Mail,邮件,Почта,Correo,Correio,Mailbox,메일,メール,Mail,Poczta,郵件,Posta Kutusu
+MENU_LABEL_MAINMENU,Main Menu,主界面,Главное меню,Menú principal,Menu Principal,Hauptmenü,메뉴,メインメニュー,Menu principal,Menu Główne,主界面,Ana Menü
+MENU_LABEL_MORE,More,更多,Ещё,Más,Mais,Mehr,더 보기,詳細,Plus,Więcej,更多,Daha Fazla
+MENU_LABEL_MUSIC,Music,音乐,Музыка,Música,Música,Musik,음악,音楽,Musique,Muzyka,音樂,Müzik
+MENU_LABEL_MUSIC_PLAYER,Music Player,音乐播放器,Музыкальный плеер,Reproductor de música,Reprodutor de Música,Musikspieler,음악 재생기,音楽プレーヤー,Lecteur de musique,Odtwarzacz Muzyki,音樂播放器,Müzik Oynatıcı
+MENU_LABEL_NEW_GAME,New Game,新游戏,Новая игра,Juego nuevo,Novo Jogo,Neues Spiel,새 게임,新しいゲーム,Nouvelle partie,Nowa Gra,新游戲,Yeni Oyun
+MENU_LABEL_NEXT,Next,下一个,След.,Siguiente,Próximo,Weiter,다음,次へ,Suivant,Dalej,下一個,Sonraki
+MENU_LABEL_NEXT_TRACK,Next track,下一个曲目,След. трек,Siguiente canción,Próxima música,Nächster Titel,다음 곡,次の曲,Piste suivante,Nastepny utwór,下一個曲目,Sonraki parça
+MENU_LABEL_NO,No,否,Нет,No,Não,Nein,아니요,いいえ,Non,Nie,否,Hayır
+MENU_LABEL_NO_CAPS,NO,否,НЕТ,NO,NÃO,NEIN,아니요,いいえ,NON,NIE,否,HAYIR
+MENU_LABEL_NOPE,Nope,不行,Неа,Nah,Nah,Nö,아니,だめ,Nan,Nie,不行,Yoo
+MENU_LABEL_OK,OK,OK,ОК,Ok,Ok,OK,확인,OK,OK,OK,OK,TAMAM
+MENU_LABEL_PAUSE,Pause,暂停,Пауза,Pausa,Pausar,Pause,일시 정지,ポーズ,Pause,Pauza,暫停,Durdur
+MENU_LABEL_PAUSED,Paused,暂停中,Приостановлено,Pausado,Pausado,Pausiert,일시 정지됨,ポーズ中,En pause,Pauza,暫停中,Durduruldu
+MENU_LABEL_PLAY,Play,开始,Играть,Jugar,Jogar,Spielen,플레이,プレイ,Jouer,Zagraj,開始,Oyna
+MENU_LABEL_PLAY_AGAIN,Play again,再玩一次,Играть заново,Jugar otra vez,Jogar novamente,Noch einmal spielen,다시 하기,再プレイ,Rejouer,Zagraj jeszcze raz,再玩一次,Tekrar Oyna
+MENU_LABEL_PRESS_ANYKEY,Press any key,按下任意键,Нажмите любую клавишу,Pulsa cualquier tecla,Pressione qualquer botão,Drücke eine beliebige Taste,아무 키나 누르세요,いずれかのキーを押す,Appuyez sur une touche,Naciśnij dowolny klawisz,按下任意鍵,Herhangi bir tuşa bas
+MENU_LABEL_PRESS_ANYKEY_CONTINUE,Press any key to continue,按下任意键以继续,Нажмите любую клавишу для продолжения,Pulsa cualquier tecla para continuar,Pressione qualquer botão para continuar,Drücke eine beliebige Taste um fortzufahren,계속하려면 아무 키나 누르세요,続けるにはいずれかのキーを押す,Appuyez sur une touche pour continuer,Aby kontynuować naciśnij dowolny klawisz,按下任意鍵以繼續,Devam etmek için herhangi bir tuşa bas
+MENU_LABEL_PRESS_START,Press Start,按下开始,Нажмите Start,Pulsa Start,Pressione Start,Start drücken,‘시작’을 누르세요,STARTボタンを押す,Appuyez sur Start,Naciśnij Start,按下開始,Başla'ya bas
+MENU_LABEL_PRESS_START_CONTINUE,Press Start to continue,按下开始以继续,Нажмите Start для продолжения,Pulsa Start para continuar,Pressione Start para continuar,Drücke Start um fortzufahren,계속하려면 ‘시작’을 누르세요,続けるにはSTARTボタンを押す,Appuyez sur Start pour continuer,Aby kontynuować naciśnij Start,按下開始以繼續,Devam etmek için Başla'ya bas
+MENU_LABEL_PREVIOUS,Previous,返回,Пред.,Anterior,Anterior,Zurück,이전,前へ,Précédent,Wstecz,返回,Önceki
+MENU_LABEL_PREVIOUS_TRACK,Previous track,上一曲目,Пред. трек,Canción anterior,Música anterior,Vorheriger Titel,이전 곡,前の曲,Piste précedente,Poprzedni utwór,上一曲目,Önceki parça
+MENU_LABEL_PRICE,Price,价钱,Цена,Precio,Preço,Preis,가격,価格,Prix,Cena,價錢,Fiyat
+MENU_LABEL_PRICE_FREE,Free,免费,Бесплатно,Gratis,Grátis,Kostenlos,무료,無料,Gratuit,Darmowy,免費,Bedava
+MENU_LABEL_PURCHASE,Purchase,购买,Купить,Comprar,Comprar,Kaufen,구매하기,購入,Acheter,Kup,購買,Satın Al
+MENU_LABEL_QUIT,Quit,退出,Выход,Cerrar,Sair,Beenden,종료,終了する,Quitter,Wyjdź,退出,Oyunu Kapat
+MENU_LABEL_QUIT_CONFIRM,Are you sure you want to quit?,你确定你需要退出吗？,Вы точно хотите выйти?,¿Seguro que quieres salir?,Você tem certeza de que quer sair?,Wirklich beenden?,정말로 종료할까요?,本当に終了しますか？,Êtes-vous certain de vouloir quitter ?,Czy na pewno chcesz wyjść?,你確定你需要退出嗎？,Çıkmak istediğinize emin misiniz?
+MENU_LABEL_QUIT_QUESTION,Quit?,退出？,Выйти из игры?,¿Salir?,Sair?,Spiel beenden?,종료할까요?,終了しますか？,Quitter ?,Wyjść?,退出？,Oyun kapatılsın mı?
+MENU_LABEL_REPLAY,Replay,重播,Переиграть,Repetir,Replay,Replay,리플레이,リプレイ,Revoir,Replay,重播,Tekrarını İzle
+MENU_LABEL_RETURN,Return,返回,Назад,Volver,Retornar,Zurück,돌아가기,戻る,Retour,Powrót,返回,Geri Dön
+MENU_LABEL_RETURN_MAIN,Return to Main Menu,返回至主界面,Вернуться в главное меню,Volver al menú principal,Retornar ao Menu Principal,Zurück zum Hauptmenü,메인 메뉴로 돌아가기,メインメニューに戻る,Retourner au menu principal,Powrót do Menu Głównego,返回至主界面,Ana Menü'ye geri dön
+MENU_LABEL_RETURN_MAIN_QUESTION,Return to Main Menu?,返回至主界面？,Вернуться в главное меню?,¿Volver al menú principal?,Retornar ao Menu Principal?,Zum Hauptmenü zurückkehren?,메인 메뉴로 돌아갈까요?,メインメニューに戻りますか？,Retourner au menu principal ?,Wrócić do Menu Głównego?,返回至主界面？,Ana Menü'ye geri dönülsün mü?
+MENU_LABEL_SHARE,Share,分享,Поделиться,Compartir,Compartilhar,Teilen,공유하기,共有,Partager,Pochwal się,分享,Paylaş
+MENU_LABEL_SKIP,Skip,跳过,Пропустить,Saltar,Pular,Replay überspringen,건너뛰기,スキップ,Passer,Pomiń,跳過,Atla
+MENU_LABEL_SOUND,Sound,声音,Звук,Sonido,Som,Audio,음향,サウンド,Son,Dźwiek,聲音,Ses
+MENU_LABEL_THANK_YOU,Thank you!,谢谢！,Спасибо!,¡Gracias!,Obrigado!,Danke!,감사합니다!,ありがとう！,Merci !,Dziekuję!,謝謝！,Teşekkürler!
+MENU_LABEL_UNLOCK,Unlock,开锁,Открыть,Desbloquear,Desbloquear,Freischalten,잠김 해제,アンロック,Déverrouiller,Odblokuj,開鎖,Kilidini Aç
+MENU_LABEL_VIDEO,Video,视频设置,Видео,Vídeo,Vídeo,Video,영상,ビデオクオリティ,Vidéo,Jakość Wideo,視頻設置,Video
+MENU_LABEL_VOICES,Voices,声音,Голоса,Voces,Vozes,Stimmen,음성,ボイス,Voix,Mowa,聲音,Konuşmalar
+MENU_LABEL_WARNING,Warning,注意,Внимание!,Aviso,Aviso,Warnung,경고,警告,Avertissement,Uwaga,注意,Uyarı
+MENU_LABEL_WELCOME,Welcome,欢迎,Добро пожаловать,Bienvenido,Bem vindo,Willkommen,환영합니다,ようこそ,Bienvenue,Witaj,歡迎,Hoşgeldiniz
+MENU_LABEL_WORLD,World,世界,Мир,Mundo,Mundo,Welt,세계,ワールド,Monde,Świat,世界,Dünya
+MENU_LABEL_YEAH,Yeah,好的,Ага,Seh,Uhum,Jo,응,いいよ,Ouais,Tak,好的,Hee
+MENU_LABEL_YES,Yes,是,Да,Sí,Sim,Ja,예,はい,Oui,Tak,是,Evet
+MENU_LABEL_YES_CAPS,YES,是,ДА,SÍ,SIM,JA,예,はい,OUI,TAK,是,EVET
+MENU_LANGUAGE_DIRECTION,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr,ltr
+MENU_LANGUAGE_THIS,English,简体中文,Pусский,Español,Português Brasileiro,Deutsch,한국어,日本語,Français,Polski,繁體中文,Türkçe
+MENU_LANGUAGE_THIS_EN,English,Simplified Chinese,Russian,Spanish,Portuguese (Brazil),German,Korean,Japanese,French,Polish,Traditional Chinese,Turkish
+MENU_LOGIN,Login,登录,Вход,Iniciar sesión,Login,Login,로그인,ログイン,Se connecter,Logowanie,登錄,Giriş
+MENU_LOGIN_EMAIL,E-mail,电子邮件,E-Mail,E-mail,E-mail,E-Mail,이메일,Eメール,E-mail,E-mail,電子郵件,E-Mail
+MENU_LOGIN_FORGOT,Forgot password,忘记密码,Забыл пароль,Olvidé mi contraseña,Esqueceu sua senha?,Passwort vergessen?,비밀번호를 잊으셨나요?,パスワードを忘れた,Mot de passe oublié,Nie pamiętam hasła,忘記密碼,Şifremi Unuttum
+MENU_LOGIN_PASSWORD,Password,密码,Пароль,Contraseña,Senha,Passwort,비밀번호,パスワード,Mot de passe,Hasło,密碼,Şifre
+MENU_LOGIN_REGISTER,Register,注册,Регистрация,Registrarse,Registrar,Registrieren,회원 가입,登録,S'inscrire,Rejestracja,注冊,Kayıt Ol
+MENU_LOGIN_REMEMBER,Remember?,记住,Запомнить?,¿Recordarme en este dispositivo?,Lembrar?,Auf diesem Gerät merken?,입력 정보 저장,保存しますか？,Se rappeler de moi ?,Nie wylogowuj mnie,記住,Beni Hatırla
+MENU_MODE_CHALLENGE,Challenge,挑战,Испытание,Desafío,Desafio,Herausforderung,도전,チャレンジ,Défi,Wyzwanie,挑戰,Meydan Okuma
+MENU_MODE_CHALLENGE_MODE,Challenge mode,挑战模式,Режим испытаний,Modo desafío,Modo Desafio,Herausforderungsmodus,도전 모드,チャレンジモード,Mode défi,Wyzwania,挑戰模式,Zorlu Mod
+MENU_MODE_COOP,Co-op,合作,Co-op,Co-op,Co-op,Koop,협동,協力,Co-op,Kooperacja,團隊合作,Eşli Oyun
+MENU_MODE_COOPERATIVE,Cooperative,合作模式,Совместная игра,Cooperativo,Cooperativo,Koop-Modus,협동 플레이,協力モード,Coopération,Kooperacja,合作模式,Eşli Oyun
+MENU_MODE_DEATHMATCH,Deathmatch,死亡竞赛,Бой насмерть,Partida a muerte,Mata-mata,Deathmatch,데스매치,デスマッチ,Match à mort,Deathmatch,死亡競賽,Ölüm Maçı
+MENU_MODE_HELP,Help,帮助,Помощь,Ayuda,Ajuda,Hilfe,도움말,ヘルプ,Aide,Pomoc,幫助,Yardım
+MENU_MODE_INSTRUCTIONS,Instructions,说明,Инструкции,Instrucciones,Instruções,Anleitung,설명,説明,Instructions,Instrukcje,說明,Yönergeler
+MENU_MODE_MULTIPLAYER,Multiplayer,联机模式,Мультиплеер,Multijugador,Multijogador,Mehrspielermodus,멀티플레이,マルチプレイ,Multijoueur,Gra Wieloosobowa,聯機模式,Çok oyuncu
+MENU_MODE_MULTIPLAYER_LOCAL,Local Multiplayer,本地联机,Игра по локальной сети,Multijugador local,Multijogador local,Lokaler Mehrspielermodus,로컬 멀티플레이,ローカルマルチプレイ,Multijoueur local,Lokalna Gra Wieloosobowa,本地聯機,Lokal Ağ
+MENU_MODE_MULTIPLAYER_ONLINE,Online Multiplayer,在线联机,Сетевая игра (онлайн),Multijugador en línea,Multijogador em rede,Online Mehrspielermodus,온라인 멀티플레이,オンラインマルチプレイ,Multijoueur en ligne,Gra Online,在線聯機,Çevrimiçi
+MENU_MODE_PLAY_ONLINE,Play Online,在线游戏,Играть по сети,Jugar en línea,Jogar em rede,Online spielen,온라인으로 플레이,オンラインでプレイ,Jouer en ligne,Graj Online,在線游戲,Çevrimiçi Oyna
+MENU_MODE_SINGLEPLAYER,Singleplayer,单人模式,Одиночная игра,Solo,Um jogador,Einzelspielermodus,싱글플레이,シングルプレイ,Solo,Jeden gracz,單人模式,Tek oyuncu
+MENU_MODE_TRAINING,Training,训练,Тренировка,Entrenamiento,Treino,Training,트레이닝,トレーニング,Entrainement,Trening,訓練,Eğitim
+MENU_MODE_TUTORIAL,Tutorial,教程,Обучение,Tutorial,Tutorial,Tutorial,튜토리얼,チュートリアル,Didacticiel,Wprowadzenie,教程,Eğitim
+MENU_MODE_VERSUS,Versus,对抗模式,Поединок,Versus,Versus,Versus,대전 모드,対戦,Versus,Pojedynek,對抗模式,Vs.
+MENU_NAME,Name,名称,Имя,Nombre,Nome,Name,이름,名前,Nom,Imię,名稱,İsim
+MENU_NAME_FIRST,First Name,名字,Имя,Nombre,Nome,Vorname,이름,名前,Prénom,Imię,名字,Ad
+MENU_NAME_LAST,Last Name,姓,Фамилия,Apellidos,Sobrenome,Nachname,성,苗字,Nom de famille,Nazwisko,姓,Soyad
+MENU_NAME_USER,Username,用户名,Имя пользователя,Alias de usuario,Usuário,Nickname,아이디,ユーザーネーム,Nom d'utilisateur,Nazwa użytkownika,用戶名,Kullanıcı Adı
+MENU_OPTIONS,Options,设置,Настройки,Opciones,Opções,Optionen,설정,設定,Options,Ustawienia,設置,Ayarlar
+MENU_OPTIONS_ADVANCEDGRAPHICS,Advanced Graphics,高级图形,Расширенные настройки графики,Gráficos avanzados,Gráficos Avançados,Erweiterte Grafikeinstellungen,고급 그래픽 설정,グラフィック詳細設定,Options graphiques avancées,Zaawansowane Ustawienia Grafiki,高级圖形,Gelişmiş Grafikler
+MENU_OPTIONS_ANTIALIASING,Anti-aliasing,抗锯齿,Сглаживание,Anti-aliasing,Antisserrilhamento,Antialiasing,안티에일리어싱,アンチエイリアス,Antialiasing,Antyaliasing,抗锯齿,Kenar Yumuşatma
+MENU_OPTIONS_BLOOM,Bloom,高光,Свечение,Bloom,Bloom,Bloom,블룸 효과,ブルーム効果,Bloom,Światło (bloom),高光,Işık Kütlesi
+MENU_OPTIONS_CONTROLS,Controls,操作模式,Управление,Controles,Controles,Tastenbelegung,조작 방식,操作方法,Contrôles,Sterowanie,操作模式,Kontroller
+MENU_OPTIONS_DIFFICULTY,Difficulty Options,难度设置,Настройки сложности,Opciones de dificultad,Opções de Dificuldade,Schwierigkeitseinstellungen,난이도 설정,難易度設定,Options de difficulté,Ustawienia Trudności,難度設置,Zorluk Ayarları
+MENU_OPTIONS_DISPLAY,Display,显示,Экран,Pantalla,Tela,Anzeige,화면 설정,ディスプレイ,Écran,Obraz,顯示,Ekran
+MENU_OPTIONS_FIRST_PERSON_VIEW,First Person View,第一人称视角,Вид от 1-го лица,Primera persona,Visão em primeira pessoa,Egoperspektive,1인칭 시점,一人称視点,Vue à la première personne,Widok Pierwszej Osoby,第一人稱視角,Birinci Kişi Görüşü
+MENU_OPTIONS_FOV,FOV,视场角,Поле зрения,FOV,Campo de visão (FOV),Sichtfeld,시야각,視野角,Champ de vision,Pole Widzenia,視場角,Görüş Mesafesi
+MENU_OPTIONS_FULLSCREEN,Fullscreen,全屏,Во весь экран,Pantalla completa,Tela cheia,Vollbild,전체화면,フルスクリーン,Plein écran,Pełny ekran,全屏,Tam ekran
+MENU_OPTIONS_GAMEPLAY,Gameplay Options,游戏设置,Настройки игры,Opciones de juego,Opções de Jogo,Gameplay-Optionen,게임플레이 설정,ゲームプレイ設定,Options de jeu,Ustawienia Gry,游戲設置,Oyun Ayarları
+MENU_OPTIONS_GRAPHICS,Graphics Options,图形设置,Настройки графики,Ajustes de vídeo,Opções Gráficas,Grafikeinstellungen,그래픽 설정,グラフィック設定,Options graphiques,Ustawienia Grafiki,圖形設置,Grafik Ayarları
+MENU_OPTIONS_HUD,HUD,HUD,Интерфейс,HUD,HUD,Anzeige,HUD,HUD,HUD,HUD,HUD,Gösterge
+MENU_OPTIONS_MUSIC_VOLUME,Music volume,音乐音量,Громкость музыки,Volumen de la música,Volume da música,Musiklautstärke,음악 음량,BGM音量 ,Volume de la musique,Głośność muzyki,音樂音量,Müzik Şiddeti
+MENU_OPTIONS_NETWORK,Network Options,网络设置,Настройки сети,Opciones de red,Opções de Rede,Netzwerkoptionen,네트워크 설정,ネットワーク設定,Options de réseau,Ustawienia Sieciowe,網絡設置,Bağlantı Ayarları
+MENU_OPTIONS_QUALITY,Quality,质量,Качество,Calidad,Qualidade,Qualität,품질,クオリティ,Qualité,Jakość,質量,Kalite
+MENU_OPTIONS_RESOLUTION,Resolution,解析度,Разрешение экрана,Resolución,Resolução,Auflösung,해상도,解像度,Résolution,Rozdzielczość,解析度,Çözünürlük
+MENU_OPTIONS_SFX_VOLUME,Sound effect volume,音效音量,Громкость эффектов,Volumen de los efectos de sonido,Volume dos efeitos sonoros,Soundeffektlautstärke,효과음 음량,SE音量 ,Volume des effets sonores,Głośność efektów,音效音量,Ses Şiddeti
+MENU_OPTIONS_SHADOW,Shadow,影子,Тень,Sombra,Sombra,Schatten,그림자,シャドウ,Ombre,Cień,影子,Gölge
+MENU_OPTIONS_SHADOW_PLURAL,Shadows,阴影效果,Тени,Sombras,Sombras,Schatten,그림자,シャドウ,Ombres,Cienie,陰影效果,Gölgeler
+MENU_OPTIONS_SIZE,Size,大小,Размер,Tamaño,Tamanho,Größe,크기,サイズ,Taille,Rozmiar,大小,Boyut
+MENU_OPTIONS_SOUND,Sound Options,声音设置,Настройки звука,Opciones de sonido,Opções de Som,Audioeinstellungen,소리 설정,サウンド設定,Options sonores,Ustawienia Dźwieku,聲音設置,Ses Ayarları
+MENU_OPTIONS_SOUND_VOLUME,Volume,音量,Громкость,Volumen,Volume,Lautstärke,음량,ボリューム,Volume,Głośność,音量,Ses Şiddeti
+MENU_OPTIONS_SPLITSCREEN,Splitscreen,分屏,Игра с разделением экрана,Pantalla partida,Tela dividida,Geteilter Bildschirm,분할 화면,画面分割,Écran partagé,Podzielony ekran,分屏,Bölünmüş Ekran
+MENU_OPTIONS_THIRD_PERSON_VIEW,Third Person View,第三人称视角,Вид от 3-го лица,Tercera persona,Visão em terceira pessoa,Verfolgerperspektive,3인칭 시점,三人称視点,Vue à la troisième personne,Widok Trzeciej Osoby,第三人稱視角,Üçüncü Kişi Görüşü
+MENU_OPTIONS_VIDEO,Video Options,视频设置,Настройки видео,Opciones de vídeo,Opções de Vídeo,Videoeinstellungen,영상 설정,ビデオ設定,Options vidéo,Ustawienia Wideo,視頻設置,Video Ayarları
+MENU_OPTIONS_VIDEO_QUALITY,Video Quality,视频质量,Качество,Calidad,Qualidade de Video,Qualität,영상 화질,ビデオクオリティ,Qualité visuelle,Jakość,視頻質量,Video Kalitesi
+MENU_OPTIONS_VOICE_VOLUME,Voice volume,声音音量,Громкость голосов,Volumen de las voces,Volume das vozes,Stimmenlautstärke,음성 음량,ボイス音量 ,Volume des voix,Głośność mowy,聲音音量,Konuşma Şiddeti
+MENU_OPTIONS_VSYNC,V-sync,垂直同步,Вертикальная синхронизация,V-sync,Vsync,Bildschirmsynchronisation,수직 동기,垂直同期,VSync,Vsync,垂直同步,Dikey Senkronizasyon (Vsync)
+MENU_OPTIONS_WINDOWED,Windowed,窗口模式,Оконный режим,Ventana,Janela,Fenstermodus,창 모드,ウィンドウモード,Fenêtré,Okno,窗口模式,Pencere
+MENU_OPTIONS_SHADER_DETAIL,Shader detail,光影细节,Детализация шейдеров,Detalles de las sombras,Detalhe do shader,Shader-Detail,셰이더 세부 사항,シェーダーの詳細,Détail des shaders,Detale shadera,Shader 細節,Shader Detayı
+MENU_OPTIONS_TEXTURE_DETAIL,Texture detail,材质细节,Детализация текстур,Detalles de las texturas,Detalhe das texturas,Texturdetails,텍스처 세부 사항,テクスチャの詳細,Détail des textures,Detale tekstur,材質細節,Doku detayı
+MENU_OPTIONS_MULTICORE_RENDERING,Multicore rendering,多核渲染,Многоядерная обработка,Renderizado multinúcleo,Renderização multinuclear,Multicore-Rendering,다중 코어 렌더링,マルチコアレンダリング,Rendu multicœur,Renderowanie wielordzeniowe,多核心渲染,Çoklu CPU Kullanımı
+MENU_OPTIONS_MODEL_DETAIL,Model detail,模型细节,Детализация моделей,Detalles de los modelos,Detalhe dos modelos,Modelldetails,모델 세부 사항,モデルの詳細,Détail du modèle,Detale modeli,模型細節,Model detayı
+MENU_OPTIONS_WIDESCREEN,Widescreen,宽屏幕,Широкий экран,Pantalla panorámica,Widescreen,Breitbild,와이드 화면,ワイドスクリーン,Grand écran,Panoramiczny,寬螢幕,Geniş ekran
+MENU_OPTIONS_EFFECT_DETAIL,Effect detail,效果细节,Детализация эффектов,Detalles de los efectos,Detalhe dos efeitos,Effektdetails,효과 세부 묘사,エフェクト詳細設定,Détail des effets,Szczegóły efektów,效果細節,Efekt Detayı
+MENU_OPTIONS_FILTERING_ANISOTROPIC,Anisotropic,异向,Анизотропная,Anisotrópico,Anisotrópico,Anisotropisch,비등방성,異方性,Anisotrope,Anizotropowe,異向,Eşyönsüz Süzme
+MENU_OPTIONS_FILTERING_BILINEAR,Bilinear,双线性,Билинейная,Bilineal,Bilinear,Bilinear,쌍선형,バイリニア,Bilinéaire,Dwuliniowe,雙線性,İki Doğrusal Süzme
+MENU_OPTIONS_FILTERING_TRILINEAR,Trilinear,三线性,Трилинейная,Trilineal,Trilinear,Trilinear,삼선형,トライリニア,Trilinéaire,Trójliniowe,三線性,Üç Doğrusal Süzme
+MENU_OPTIONS_FILTERING_MODE,Filtering mode,过滤模式,Фильтрация,Modo de filtro,Modo de filtragem,Filtermodus,필터링 모드,フィルタリング モード,Mode filtrage,Tryb filtrowania,過濾模式,Filtre modu
+MENU_SETTING_ULTRA,Ultra,非常高,Ультра,Ultra,Ultra,Sehr hoch,매우 높음,ウルトラ,Très élevé,Poziom b. wysoki,最高,Çok Yüksek
+MENU_SETTING_VERY_HIGH,Very High,非常高,Очень высокое,Muy alta,Muito alto,Sehr hoch,매우 높음,最高,Très élevé,Bardzo wysoka,最高,Çok Yüksek
+MENU_SETTING_HIGH,High,高,Высокий,Alta,Alto,Hoch,높음,高,Haut,Wysokie,高,Yüksek
+MENU_SETTING_MEDIUM,Medium,中,Средний,Medio,Médio,Mittel,중간,中,Moyen,Srednie,中,Orta
+MENU_SETTING_LOW,Low,低,Низкий,Baja,Baixo,Niedrig,낮음,低,Bas,Niskie,低,Alçak
+MENU_VERSION,Version,版本,Версия,Versión,Versão,Version,버전,バージョン,Version,Wersja,版本,Versiyon
+MENU_VERSION_DEMO,Demo,试玩版,Демо,Demo,Demo,Demo,체험판,デモ,Démo,Demo,試玩版,Demo
+MENU_VERSION_FREE,Free,免费版,Бесплатная,Gratis,Grátis,Kostenlos,무료판,無料版,Gratuit,Darmowa,免費版,Bedava
+MENU_VERSION_FULL,Full,完整版,Полная,Completa,Completo,Komplett,완전판,完全版,Complet,Pełna wersja,完整版,Tam Sürüm
+MENU_VERSION_LITE,Lite,位版本,Урезанная,Reducida,Lite,Lite,라이트판,Lite版,Lite,Lite,位版本,Deneme
+MENU_VERSION_PREMIUM,Premium,超值版,Премиум,Premium,Premium,Premium,프리미엄판,プレミアム,Premium,Premium,超值版,Kaliteli
+MENU_VERSION_SHAREWARE,Shareware,共享软件,Условно-бесплатная,Shareware,Shareware,Shareware,셰어웨어,シェアウェア,Shareware,Shareware,共享軟件,Paylaşımlı Yazılım
+MENU_VERSION_TRIAL,Trial,试用版,Пробная,Prueba,Teste,Trial,시험판,体験版,Essai,Trial,試用版,Deneme
+MENU_VR_COMFORT_MODE,VR comfort mode,虚拟现实舒适模式,Комфортный режим VR,Modo de confort VR,Zona de Conforto RV,VR Comfort Mode,VR 효과 줄이기,VR向けモード,Mode de comfort VR,Tryb komfortu WR,虛擬現實舒適模式,VR konfor modu
+MENU_VR_HMD_ORIENT_RESET,HMD orientation reset,HMD方向重置,Сброс ориентации VR-шлема,Reiniciar orientación de HMD,Reiniciar orientação HMD,HMD-Orientierung zurücksetzen,HMD 방향 재설정,HMDの画面位置設定をリセット,Restaurer l'orientation du HDM,Resetuj orientację HMD,HMD方向重置,Görüş Ünitesi yön sıfırla.
+MENU_VR_VIRTUAL_REALITY,Virtual Reality,虚拟现实,Виртуальная реальность,Realidad Virtual,Realidade Virtual,Virtuelle Realität,가상현실,バーチャルリアリティ,Réalité virtuelle,Wirtualna Rzeczywistość,虛擬現實,Sanal Gerçeklik

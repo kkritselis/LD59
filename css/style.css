@@ -133,6 +133,99 @@ html, body {
 }
 
 /* ============================================================
+   LANGUAGE SELECTION OVERLAY (loading screen)
+   ============================================================ */
+.lang-select-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 7, 15, 0.72);
+  backdrop-filter: blur(4px);
+  animation: modalOverlayIn 0.25s ease;
+}
+
+.lang-select-overlay.hidden {
+  display: none;
+}
+
+.lang-select-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 48px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: min(360px, 86vw);
+  animation: modalSlideIn 0.25s ease;
+}
+
+.lang-select-prompt {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  align-self: flex-start;
+}
+
+.lang-select-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237878a0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.lang-select-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.lang-select-input option {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+/* Settings modal language row */
+.setting-row--language {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.setting-label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lang-select-input--settings {
+  flex: 1;
+  font-size: 13px;
+  padding: 7px 32px 7px 10px;
+}
+
+/* ============================================================
    MENU SCREEN
    ============================================================ */
 #screen-menu {
@@ -206,6 +299,31 @@ html, body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+/* Movement hint — fades after first WASD / arrow press */
+.controls-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 96;
+  margin: 0;
+  padding: 20px 36px;
+  font-family: var(--font-heading, system-ui, sans-serif);
+  font-size: clamp(26px, 4.4vw, 34px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 255, 0.94);
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.7s ease-out;
+}
+
+.controls-hint.controls-hint--dismissed {
+  opacity: 0;
 }
 
 /* Hangar interior while dock shop is open (after first departure) — below HUD frame art */
@@ -696,59 +814,6 @@ html, body {
    stays on-screen and "Close" appears broken). */
 #dock-shop-modal.dock-shop-overlay.hidden {
   display: none !important;
-}
-
-/* Game briefing — full dim; blocks input until Begin.
-   #screen-game uses pointer-events: none so the canvas receives input; overlays
-   that must capture clicks must re-enable explicitly (same pattern as .win-overlay). */
-.game-intro-overlay {
-  z-index: 108;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-  pointer-events: auto;
-}
-
-.game-intro-modal {
-  width: min(920px, 94vw);
-  max-height: min(88vh, 640px);
-  display: flex;
-  flex-direction: column;
-}
-
-.game-intro-body {
-  overflow-y: auto;
-  line-height: 1.55;
-}
-
-.game-intro-story {
-  margin: 0 0 16px;
-  font-size: 15px;
-  color: var(--color-text);
-}
-
-.game-intro-subhead {
-  margin: 0 0 8px;
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  font-family: var(--font-heading);
-}
-
-.game-intro-goals {
-  margin: 0;
-  padding-left: 1.15em;
-  font-size: 14px;
-  color: var(--color-text-muted);
-}
-
-.game-intro-goals li + li {
-  margin-top: 8px;
-}
-
-.game-intro-footer {
-  justify-content: flex-end;
 }
 
 #dock-shop-modal.dock-shop-overlay {

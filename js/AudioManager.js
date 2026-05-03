@@ -22,10 +22,15 @@ const DEFAULTS = {
 };
 
 const GAME_AUDIO = {
-  background:  'assets/audio/background.mp3',
-  resource:    'assets/audio/resource.wav',
-  blasterShip: 'assets/audio/Blaster_ship.wav',
-  blasterTower: 'assets/audio/Blaster_tower.wav',
+  background:       'assets/audio/background.mp3',
+  resource:         'assets/audio/resource.wav',
+  ironOre:          'assets/audio/ironOre.mp3',
+  blasterShip:      'assets/audio/Blaster_ship.wav',
+  blasterTower:     'assets/audio/Blaster_tower.wav',
+  warp:             'assets/audio/introCutScene.mp3',
+  hostilesInbound:  'assets/audio/hostilesInbound.mp3',
+  takeTheFighter:   'assets/audio/takeTheFighter.mp3',
+  klaxon:           'assets/audio/klaxon.mp3',
 };
 
 export class AudioManager {
@@ -39,8 +44,17 @@ export class AudioManager {
     this._buffers = null;
     this._buffersReady = false;
     this._pendingBgStart = false;
+    this._pendingWarpPlay = false;
+    this._pendingGameStartVoices = false;
     /** @type {AudioBufferSourceNode | null} */
     this._bgSource = null;
+    /** Klaxon alarm loop when base armor below max (dedicated gain for HP-scaled volume). */
+    this._klaxonSource = null;
+    /** @type {GainNode | null} */
+    this._klaxonGainNode = null;
+    this._pendingKlaxonPlay = false;
+    this._pendingKlaxonHp = 25;
+    this._pendingKlaxonMaxHp = 25;
   }
 
   /**
@@ -92,18 +106,25 @@ export class AudioManager {
 
   stopBackgroundLoop() {
     this._pendingBgStart = false;
-    if (!this._bgSource) return;
-    try {
-      this._bgSource.stop();
-    } catch (_) { /* already stopped */ }
-    try {
-      this._bgSource.disconnect();
-    } catch (_) { /* */ }
-    this._bgSource = null;
+    if (this._bgSource) {
+      try {
+        this._bgSource.stop();
+      } catch (_) { /* already stopped */ }
+      try {
+        this._bgSource.disconnect();
+      } catch (_) { /* */ }
+      this._bgSource = null;
+    }
+    this.stopKlaxonLoop();
   }
 
   playResourcePickup() {
     this._playOneShot('resource', 'sfx', 0.55);
+  }
+
+  /** First-ever resource grab this run (special sting). */
+  playIronOreFirstPickup() {
+    this._playOneShot('ironOre', 'sfx', 0.72);
   }
 
   playBlasterShip() {
@@ -112,6 +133,100 @@ export class AudioManager {
 
   playBlasterTower() {
     this._playOneShot('blasterTower', 'sfx', 0.4);
+  }
+
+  playWarp() {
+    if (!this._buffersReady) {
+      this._pendingWarpPlay = true;
+      return;
+    }
+    this._playOneShot('warp', 'sfx', 0.8);
+  }
+
+  /** Plays mission VO: hostilesInbound, then takeTheFighter (SFX bus). */
+  playGameStartVoiceLines() {
+    if (!this._initialized) return;
+    if (!this._buffersReady) {
+      this._pendingGameStartVoices = true;
+      return;
+    }
+    this._pendingGameStartVoices = false;
+    const buf1 = this._buffers.hostilesInbound;
+    const buf2 = this._buffers.takeTheFighter;
+    if (!buf1 || !buf2) return;
+    const bus = this.nodes.sfx;
+    if (!bus) return;
+    const gainLinear = 0.82;
+    const ctx = this.context;
+    const src = ctx.createBufferSource();
+    src.buffer = buf1;
+    const g = ctx.createGain();
+    g.gain.value = gainLinear;
+    src.connect(g);
+    g.connect(bus);
+    const detach = () => {
+      try { src.disconnect(); } catch (_) { /* */ }
+      try { g.disconnect(); } catch (_) { /* */ }
+    };
+    src.onended = () => {
+      detach();
+      this._playOneShot('takeTheFighter', 'sfx', gainLinear);
+    };
+    try {
+      src.start(0);
+    } catch (e) {
+      console.warn('[AudioManager] hostilesInbound failed:', e);
+      detach();
+      this._playOneShot('takeTheFighter', 'sfx', gainLinear);
+    }
+  }
+
+  /**
+   * Base armor klaxon: loops while hp below max; gain linear from 4% at (max-1) HP to 100% at 1 HP (SFX bus).
+   * Call each frame or whenever `_baseHP` changes.
+   */
+  syncKlaxonFromBaseHp(hp, maxHp) {
+    if (!this._initialized) return;
+    const max = Math.max(1, maxHp);
+    const h = Math.min(max, Math.max(0, hp));
+    if (h <= 0 || h >= max) {
+      this._pendingKlaxonPlay = false;
+      this.stopKlaxonLoop();
+      return;
+    }
+    if (!this._buffersReady) {
+      this._pendingKlaxonPlay = true;
+      this._pendingKlaxonHp = h;
+      this._pendingKlaxonMaxHp = max;
+      return;
+    }
+    this._pendingKlaxonPlay = false;
+    this._ensureKlaxonLoopPlaying();
+    const lin = this._klaxonLinearGain(h, max);
+    if (this._klaxonGainNode && this.context) {
+      const t = this.context.currentTime;
+      this._klaxonGainNode.gain.cancelScheduledValues(t);
+      this._klaxonGainNode.gain.setTargetAtTime(lin, t, 0.06);
+    }
+  }
+
+  stopKlaxonLoop() {
+    this._pendingKlaxonPlay = false;
+    if (this._klaxonSource) {
+      try {
+        this._klaxonSource.stop();
+      } catch (_) { /* */ }
+      try {
+        this._klaxonSource.disconnect();
+      } catch (_) { /* */ }
+      this._klaxonSource = null;
+    }
+    if (this._klaxonGainNode) {
+      try {
+        this._klaxonGainNode.disconnect();
+      } catch (_) { /* */ }
+      this._klaxonGainNode = null;
+    }
   }
 
   /** Returns the current 0-1 gain value for a channel. */
@@ -204,6 +319,51 @@ export class AudioManager {
     }
   }
 
+  _flushPendingKlaxon() {
+    if (!this._buffersReady || !this._pendingKlaxonPlay) return;
+    const h = this._pendingKlaxonHp;
+    const m = this._pendingKlaxonMaxHp;
+    this._pendingKlaxonPlay = false;
+    this.syncKlaxonFromBaseHp(h, m);
+  }
+
+  /**
+   * Linear klaxon trim: 4% at hp === max-1, 100% at hp <= 1.
+   */
+  _klaxonLinearGain(hp, maxHp) {
+    if (hp <= 1) return 1;
+    const hi = maxHp - 1;
+    if (hp >= hi) return 0.04;
+    const span = Math.max(1, hi - 1);
+    const t = (hi - hp) / span;
+    return 0.04 + 0.96 * Math.max(0, Math.min(1, t));
+  }
+
+  _ensureKlaxonLoopPlaying() {
+    if (this._klaxonSource || !this._buffers?.klaxon || !this.context) return;
+    const bus = this.nodes.sfx;
+    if (!bus) return;
+    if (!this._klaxonGainNode) {
+      this._klaxonGainNode = this.context.createGain();
+      this._klaxonGainNode.gain.value = 0.04;
+      this._klaxonGainNode.connect(bus);
+    }
+    const src = this.context.createBufferSource();
+    src.buffer = this._buffers.klaxon;
+    src.loop = true;
+    src.connect(this._klaxonGainNode);
+    try {
+      src.start(0);
+    } catch (e) {
+      console.warn('[AudioManager] Klaxon loop start failed:', e);
+      try {
+        src.disconnect();
+      } catch (_) { /* */ }
+      return;
+    }
+    this._klaxonSource = src;
+  }
+
   async _loadGameBuffers() {
     if (!this._initialized || !this.context) return;
     const out = {};
@@ -218,6 +378,14 @@ export class AudioManager {
         this._pendingBgStart = false;
         this.startBackgroundLoop();
       }
+      if (this._pendingWarpPlay) {
+        this._pendingWarpPlay = false;
+        this._playOneShot('warp', 'sfx', 0.8);
+      }
+      if (this._pendingGameStartVoices) {
+        this.playGameStartVoiceLines();
+      }
+      this._flushPendingKlaxon();
     } catch (e) {
       console.warn('[AudioManager] Game audio decode failed:', e);
     }

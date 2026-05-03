@@ -16,16 +16,16 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 const OBJ_SCALE = 0.0001;
 
 /** Start transition timing (must match `_loop`). */
-const ZOOM_MS = 8000;
-const BLACKOUT_START_MS = 6080;
-const BLACKOUT_MS = 1200;
-const END_MS = BLACKOUT_START_MS + BLACKOUT_MS + 350;
+const ZOOM_MS = 16000;
+const BLACKOUT_START_MS = 12160;
+const BLACKOUT_MS = 2400;
+const END_MS = BLACKOUT_START_MS + BLACKOUT_MS + 700;
 
 /** Ship covers the first half of its intro arc in this window, then eases with the planet zoom. */
-const SHIP_DASH_MS = 2000;
+const SHIP_DASH_MS = 4000;
 
 /** Hull fades in over this window; warp stays keyed to planet time so effects lead the ship. */
-const SHIP_FADEIN_MS = 500;
+const SHIP_FADEIN_MS = 1000;
 
 // ── GLSL source ────────────────────────────────────────────────────────────
 
@@ -249,8 +249,7 @@ export class MenuScreen {
   }
 
   /**
-   * Cinematic handoff: fade menu UI, ~8s zoom into the planet on the left, fade to black.
-   * Keeps the menu renderer running until resolved.
+   * Cinematic handoff: fade menu UI, planet zoom, fade to black.
    * @returns {Promise<void>}
    */
   playStartTransition() {
@@ -436,7 +435,7 @@ export class MenuScreen {
   }
 
   /**
-   * Layered warp exit: fresnel bubble, bow torus, tunnel rings + streak lines, particle stream.
+   * Layered warp exit: fresnel bubble, bow torus, flash disc, particle stream.
    * @returns {THREE.Group}
    */
   _createWarpExitFx() {
@@ -474,6 +473,7 @@ export class MenuScreen {
       new THREE.TorusGeometry(0.95, 0.036, 14, 72),
       this._warpBowMat,
     );
+    bow.rotation.x = Math.PI / 2;
     bow.rotation.y = Math.PI / 2;
     bow.name = 'warpBow';
     root.add(bow);
@@ -491,61 +491,7 @@ export class MenuScreen {
     flash.rotation.y = Math.PI / 2;
     flash.position.x = 0.1;
     root.add(flash);
-
-    const tunnel = new THREE.Group();
-    tunnel.name = 'warpTunnel';
-
-    this._warpRingMats = [];
-    const ringCount = 10;
-    for (let i = 0; i < ringCount; i++) {
-      const inner = 0.035 + i * 0.082;
-      const outer = inner + 0.068 + i * 0.008;
-      const geo = new THREE.RingGeometry(inner, outer, 56);
-      const hue = THREE.MathUtils.lerp(0.46, 0.84, i / Math.max(1, ringCount - 1));
-      const mat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color().setHSL(hue, 1, 0.58),
-        transparent: true,
-        opacity: 0.58,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      });
-      this._warpRingMats.push(mat);
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.rotation.y = Math.PI / 2;
-      mesh.position.x = i * 0.165;
-      tunnel.add(mesh);
-    }
-
-    const streakPairs = 140;
-    const sPos = new Float32Array(streakPairs * 6);
-    for (let i = 0; i < streakPairs; i++) {
-      const y = (Math.random() - 0.5) * 2.8;
-      const z = (Math.random() - 0.5) * 2.5;
-      const x0 = 4.8 + Math.random() * 2.4;
-      const x1 = 0.05 + Math.random() * 0.55;
-      sPos[i * 6 + 0] = x0;
-      sPos[i * 6 + 1] = y * 0.32;
-      sPos[i * 6 + 2] = z * 0.28;
-      sPos[i * 6 + 3] = x1;
-      sPos[i * 6 + 4] = y;
-      sPos[i * 6 + 5] = z;
-    }
-    const streakGeo = new THREE.BufferGeometry();
-    streakGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
-    this._warpStreakMat = new THREE.LineBasicMaterial({
-      color: 0xd8f8ff,
-      transparent: true,
-      opacity: 0.78,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    tunnel.add(new THREE.LineSegments(streakGeo, this._warpStreakMat));
-    this._warpStreakGeo = streakGeo;
-
-    tunnel.position.set(0.85, 0, -0.06);
-    root.add(tunnel);
-    this._warpTunnel = tunnel;
+    this._warpFlashMesh = flash;
 
     const PART = 720;
     const pPos = new Float32Array(PART * 3);
@@ -680,28 +626,9 @@ export class MenuScreen {
             (0.52 + 0.48 * warpStrength + 0.58 * entryFlash) * dim;
         }
 
-        if (this._warpTunnel) {
-          const tunnelX = 0.52 + 1.08 * warpStrength + 0.32 * pulse + 0.52 * entryFlash;
-          this._warpTunnel.position.set(tunnelX, 0, -0.05);
-          this._warpTunnel.rotation.z = elapsed * 0.00065;
-        }
-
-        const nR = this._warpRingMats?.length ?? 0;
-        for (let i = 0; i < nR; i++) {
-          const mat = this._warpRingMats[i];
-          const falloff = 1 - i / Math.max(1, nR - 1);
-          mat.opacity =
-            (0.44 + 0.22 * falloff) * warpStrength * dim * (0.8 + 0.2 * entryFlash);
-        }
-
         if (this._warpFlashMat) {
           this._warpFlashMat.opacity =
             (0.5 + 0.38 * pulse + 0.55 * entryFlash) * warpStrength * warpStrength * dim;
-        }
-
-        if (this._warpStreakMat) {
-          this._warpStreakMat.opacity =
-            (0.64 + 0.32 * entryFlash) * warpStrength * dim;
         }
 
         if (this._warpParticleGeo && this._warpParticleVel) {

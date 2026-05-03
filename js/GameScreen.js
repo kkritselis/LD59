@@ -20,9 +20,60 @@ import { ResourceManager }  from './ResourceManager.js';
 
 const OBJ_SCALE = 0.0001;  // uniform scale applied to all loaded FBX assets
 
-// Base HP at which the game ends
+/**
+ * Cruiser wreck is parented under the hangar, which already uses OBJ_SCALE on its root.
+ * Child scale must NOT multiply OBJ_SCALE again.
+ */
+const CRUISER_TARGET_VS_FIGHTER = 4.5;
+
+/** Used only if the fighter bbox is not ready yet when the cruiser finishes loading. */
+const CRUISER_FIGHTER_DIM_FALLBACK = 0.22;
+
+/** Locked-in wreck pose (see tweak panel removal — mesh bbox × CRUISER_TARGET_VS_FIGHTER × SCALE_MUL). */
+const CRUISER_WRECK_POS_WORLD = { x: 0, y: -0.1, z: 0.7 };
+const CRUISER_WRECK_ROT_DEG = { x: 12, y: 180, z: 6 };
+const CRUISER_WRECK_SCALE_MUL = 2.4;
+
+/** Billboard smoke on wreck: THREE.Points + soft alpha map; intensity keyed off base HP. */
+const CRUISER_SMOKE_COUNT = 1760;
+
+// Base HP at which the game ends (repair raises toward this max).
 const BASE_MAX_HP = 25;
+/** Armor when a run begins — hull damaged after crash. */
+const BASE_START_HP = 5;
 const INITIAL_ENEMY_COUNT = 50;
+
+/**
+ * 0 when base armor is full (25/25), 1 when at 1/25 — linear in between.
+ * Stays at 1 if armor hits 0 before lose modal.
+ */
+function _cruiserSmokeIntensityFromHp(hp) {
+  const h = Math.min(BASE_MAX_HP, Math.max(0, hp));
+  if (BASE_MAX_HP <= 1) return h >= BASE_MAX_HP ? 0 : 1;
+  if (h <= 0) return 1;
+  if (h >= BASE_MAX_HP) return 0;
+  return (BASE_MAX_HP - h) / (BASE_MAX_HP - 1);
+}
+
+/** Radial gradient for PointsMaterial.map — soft billboard smoke puff (standard Three.js particle texture approach). */
+function _makeSmokeParticleAlphaTexture() {
+  const s = 128;
+  const cnv = document.createElement('canvas');
+  cnv.width = s;
+  cnv.height = s;
+  const ctx = cnv.getContext('2d');
+  const cx = s / 2;
+  const grd = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx * 0.96);
+  grd.addColorStop(0, 'rgba(210, 198, 188, 0.42)');
+  grd.addColorStop(0.22, 'rgba(130, 118, 108, 0.26)');
+  grd.addColorStop(0.5, 'rgba(82, 74, 68, 0.11)');
+  grd.addColorStop(1, 'rgba(48, 44, 40, 0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(cnv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
 
 // Weapon
 const FIRE_RATE      = 0.12;  // seconds between shots
@@ -45,7 +96,7 @@ const TOWER_DROP_SEC        = 0.5;
 /** World +X offset from hangar root so the mast sits beside the pad, not on center. */
 const TRANSMISSION_PAD_OFFSET_X = 0.38;
 /** Transmission mast (`tower1.fbx`) target world height before funding scale. */
-const TRANSMISSION_VISUAL_HEIGHT = 1.55;
+const TRANSMISSION_VISUAL_HEIGHT = 0.775;
 /** Defense tower base / weapon pieces — world heights after OBJ_SCALE fit (single scale on clones). */
 const DEFENSE_BASE_TARGET_HEIGHT   = 0.04;
 const DEFENSE_WEAPON_TARGET_HEIGHT = 0.02;
@@ -179,17 +230,44 @@ export class GameScreen {
     this._fireTimer    = 0;
 
     // Base structures
-    this._hangar       = null;
+    this._hangar             = null;
+    /** Cruiser wreck FBX, parented under `_hangar` when loads finish (moves with the pad). */
+    this._cruiserWreckModel = null;
+    /** Max axis of fighter world AABB after OBJ_SCALE (for cruiser length fit). */
+    this._fighterModelMaxDim = 0;
+    /** Cruiser max axis at OBJ_SCALE only, measured before parenting under hangar. */
+    this._cruiserModelMaxDimAtObjScale = 0;
+
+    /**
+     * Damage smoke on cruiser: THREE.Points, BufferGeometry positions + parallel arrays.
+     * @type {null | {
+     *   points: THREE.Points,
+     *   geo: THREE.BufferGeometry,
+     *   mat: THREE.PointsMaterial,
+     *   tex: THREE.CanvasTexture,
+     *   emitMin: THREE.Vector3,
+     *   emitMax: THREE.Vector3,
+     *   emitDiag: number,
+     *   age: Float32Array,
+     *   maxAge: Float32Array,
+     *   vx: Float32Array,
+     *   vy: Float32Array,
+     *   vz: Float32Array,
+     * }}
+     */
+    this._cruiserSmoke = null;
 
     // Enemy / wave system
     this._enemyManager = null;
-    this._baseHP       = BASE_MAX_HP;
+    this._baseHP       = BASE_START_HP;
     this._wave         = 0;
     this._waveTimer    = 60.0;  // first wave spawns at 1:00
 
     // Resources
     this._resourceManager = null;
     this._resourceCount   = 0;
+    /** First ship pickup this session plays `ironOre`; later pickups use `resource.wav`. */
+    this._ironOreFirstPickupPlayed = false;
 
     // HUD element references (cached once)
     this._hudHPValue   = document.getElementById('hud-hp-value');
@@ -197,6 +275,7 @@ export class GameScreen {
     /** @type {HTMLSpanElement[]|null} */
     this._hudHPSegments = null;
     this._initHudHpBar();
+    this._syncBaseHpHud();
 
     this._hudResourcesValue = document.getElementById('hud-resources-value');
 
@@ -206,6 +285,8 @@ export class GameScreen {
     this._flowRadarHud  = document.getElementById('flow-radar-hud');
     this._flowCanvas    = document.getElementById('flow-canvas');
     this._showFlowField = true;
+
+    this._controlsHintEl = document.getElementById('wasd-controls-hint');
 
     // Windblown dust motes (Points) around the play volume
     this._dustPoints = null;
@@ -234,9 +315,6 @@ export class GameScreen {
     this._gameEndBodyEl     = document.getElementById('game-end-body');
     this._gameEndRateEl     = document.getElementById('game-end-rate');
     this._gameEnded         = false;
-    this._introModalEl      = document.getElementById('game-intro-modal');
-    /** When true, `update()` skips simulation (briefing modal). */
-    this._introBlocking     = false;
 
     /** @type {{ uvx: number, uvy: number, mesh: THREE.Object3D, state: string, dropT: number, fireTimer: number, useFbx?: boolean, weaponPivot?: THREE.Object3D, beamLocalY?: number }[]} */
     this._defenseTowers = [];
@@ -265,10 +343,12 @@ export class GameScreen {
   start() {
     if (this._running) return;
     this._resetSessionState();
+    this._resetControlsHint();
     this._running = true;
     this.clock.start();
     if (!this._dustPoints && this.scene) this._addDustMotes();
-    this._showGameIntro();
+    this.audioManager?.startBackgroundLoop();
+    this.audioManager?.playGameStartVoiceLines();
     this._loop();
   }
 
@@ -284,7 +364,6 @@ export class GameScreen {
     const hideEndModal = options.hideEndModal !== false;
     this._running = false;
     this.audioManager?.stopBackgroundLoop();
-    this._hideGameIntro();
     if (this._animFrameId) {
       cancelAnimationFrame(this._animFrameId);
       this._animFrameId = null;
@@ -308,14 +387,30 @@ export class GameScreen {
       L.mat.dispose();
     }
     this._lasers = [];
+    this._resetControlsHint();
+  }
+
+  _resetControlsHint() {
+    const el = this._controlsHintEl;
+    if (!el) return;
+    el.classList.remove('controls-hint--dismissed');
+    el.setAttribute('aria-hidden', 'false');
+  }
+
+  _dismissControlsHint() {
+    const el = this._controlsHintEl;
+    if (!el || el.classList.contains('controls-hint--dismissed')) return;
+    el.classList.add('controls-hint--dismissed');
+    el.setAttribute('aria-hidden', 'true');
   }
 
   _resetSessionState() {
     this._closeDockShop();
     this._dockLandingLatch = false;
     this._playerHasLeftPadOnce = false;
-    this._baseHP = BASE_MAX_HP;
+    this._baseHP = BASE_START_HP;
     this._resourceCount = 0;
+    this._ironOreFirstPickupPlayed = false;
     this._weaponTier = 0;
     this._weaponMult = 1.0;
     this._pendingTowerPlace = false;
@@ -695,6 +790,9 @@ export class GameScreen {
     const m = this._transmissionMesh;
     m.position.set(-off.x + TRANSMISSION_PAD_OFFSET_X, platformY, off.y);
     this._syncTransmissionTowerScale(m);
+    // Same terrain tile bounds as hangar — hide mast when base scrolls off the slab.
+    const TERRAIN_HALF = 1.9;
+    m.visible = Math.abs(off.x) < TERRAIN_HALF && Math.abs(off.y) < TERRAIN_HALF;
   }
 
   _hideGameEndModal() {
@@ -996,8 +1094,6 @@ export class GameScreen {
   }
 
   update(delta, elapsed) {
-    if (this._introBlocking) return;
-
     const keys = this._keys;
     const off  = this._offset;
 
@@ -1253,7 +1349,12 @@ export class GameScreen {
     if (this._resourceManager && this._ship) {
       const got = this._resourceManager.update(delta, elapsed, off, this._shipY);
       if (got > 0) {
-        this.audioManager?.playResourcePickup();
+        if (!this._ironOreFirstPickupPlayed) {
+          this._ironOreFirstPickupPlayed = true;
+          this.audioManager?.playIronOreFirstPickup();
+        } else {
+          this.audioManager?.playResourcePickup();
+        }
         this._resourceCount += got;
         this._syncResourceHud();
       }
@@ -1289,7 +1390,12 @@ export class GameScreen {
       this._hangar.visible = Math.abs(off.x) < TERRAIN_HALF && Math.abs(off.y) < TERRAIN_HALF;
     }
 
+    this._updateCruiserSmoke(delta, elapsed);
     this._updateTransmission(delta, off, platformY);
+
+    if (this._running) {
+      this.audioManager?.syncKlaxonFromBaseHp(this._baseHP, BASE_MAX_HP);
+    }
   }
 
   // ── Scene setup ────────────────────────────────────────────────────────────
@@ -1432,6 +1538,7 @@ export class GameScreen {
     // Models
     this._loadShip();
     this._loadHangar();
+    this._loadCruiserWreck();
     this._loadFbxBuildables();
 
     // Enemy system — flow field build happens here (one-time ~20–50 ms stutter)
@@ -1585,9 +1692,70 @@ export class GameScreen {
         obj.scale.setScalar(OBJ_SCALE);
         this._hangar = obj;
         this.scene.add(obj);
+        this._tryParentCruiserWreck();
       },
       undefined,
       (err) => console.error('Hangar load failed:', err)
+    );
+  }
+
+  _maxDimFromObject(root) {
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(root);
+    if (box.isEmpty()) return 0;
+    const sz = box.getSize(new THREE.Vector3());
+    return Math.max(sz.x, sz.y, sz.z);
+  }
+
+  /** Parents loaded cruiser wreck under hangar when both async loads have finished. */
+  _tryParentCruiserWreck() {
+    const wreck = this._cruiserWreckModel;
+    const hangar = this._hangar;
+    if (!wreck || !hangar || wreck.parent === hangar) return;
+    hangar.add(wreck);
+  }
+
+  /** Large cruiser hull half-buried behind the landing pad (same atlas as hangar / fighter). */
+  _loadCruiserWreck() {
+    const atlas = new THREE.TextureLoader().load('assets/textures/PolygonSciFiCity_Texture_01_A.png');
+    atlas.colorSpace = THREE.SRGBColorSpace;
+    const mat = new THREE.MeshPhongMaterial({
+      map:       atlas,
+      specular:  0x111122,
+      shininess: 25,
+    });
+
+    const fbxLoader = new FBXLoader();
+    fbxLoader.setResourcePath('assets/textures/');
+    fbxLoader.load(
+      'assets/obj/SM_Ship_Cruiser_02.fbx',
+      (obj) => {
+        const embedded = [];
+        obj.traverse((child) => {
+          if (child.isLight) embedded.push(child);
+          if (child.isMesh) {
+            child.material = mat;
+            child.visible = true;
+          }
+        });
+        embedded.forEach((l) => l.parent?.remove(l));
+
+        obj.position.set(0, 0, 0);
+        obj.rotation.set(0, 0, 0);
+        obj.rotation.order = 'XYZ';
+        obj.scale.setScalar(OBJ_SCALE);
+        obj.updateMatrixWorld(true);
+        this._cruiserModelMaxDimAtObjScale = this._maxDimFromObject(obj);
+        obj.scale.set(1, 1, 1);
+
+        obj.name = 'cruiserWreck';
+        this._cruiserWreckModel = obj;
+        this._tryParentCruiserWreck();
+        this._applyCruiserWreckPose();
+        this._attachCruiserSmoke();
+      },
+      undefined,
+      (err) => console.error('Cruiser wreck load failed:', err),
     );
   }
 
@@ -1627,10 +1795,200 @@ export class GameScreen {
         obj.rotation.y = Math.PI;
         this._ship = obj;
         this.scene.add(obj);
+        obj.updateMatrixWorld(true);
+        this._fighterModelMaxDim = this._maxDimFromObject(obj);
+        this._applyCruiserWreckPose();
       },
       undefined,
       (err) => console.error('Ship load failed:', err)
     );
+  }
+
+  /** Locked pose for `_cruiserWreckModel` under hangar (world offsets × 1/OBJ_SCALE → local). */
+  _applyCruiserWreckPose() {
+    const w = this._cruiserWreckModel;
+    if (!w) return;
+    const invHangar = 1 / OBJ_SCALE;
+    w.position.set(
+      CRUISER_WRECK_POS_WORLD.x * invHangar,
+      CRUISER_WRECK_POS_WORLD.y * invHangar,
+      CRUISER_WRECK_POS_WORLD.z * invHangar,
+    );
+    w.rotation.order = 'XYZ';
+    const d2r = Math.PI / 180;
+    w.rotation.set(
+      CRUISER_WRECK_ROT_DEG.x * d2r,
+      CRUISER_WRECK_ROT_DEG.y * d2r,
+      CRUISER_WRECK_ROT_DEG.z * d2r,
+    );
+    const c = this._cruiserModelMaxDimAtObjScale;
+    const fEff =
+      this._fighterModelMaxDim > 1e-8
+        ? this._fighterModelMaxDim
+        : CRUISER_FIGHTER_DIM_FALLBACK;
+    let scaleScalar;
+    if (c > 1e-8) {
+      scaleScalar =
+        CRUISER_TARGET_VS_FIGHTER * (fEff / c) * CRUISER_WRECK_SCALE_MUL;
+    } else {
+      scaleScalar = CRUISER_TARGET_VS_FIGHTER * CRUISER_WRECK_SCALE_MUL;
+    }
+    w.scale.setScalar(scaleScalar);
+    w.updateMatrixWorld(true);
+    this._refreshCruiserSmokeEmitter();
+  }
+
+  _attachCruiserSmoke() {
+    const wreck = this._cruiserWreckModel;
+    if (!wreck || this._cruiserSmoke) return;
+
+    const N = CRUISER_SMOKE_COUNT;
+    const pos = new Float32Array(N * 3);
+    const age = new Float32Array(N);
+    const maxAge = new Float32Array(N);
+    const vx = new Float32Array(N);
+    const vy = new Float32Array(N);
+    const vz = new Float32Array(N);
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+    const tex = _makeSmokeParticleAlphaTexture();
+    const mat = new THREE.PointsMaterial({
+      map:              tex,
+      color:            0xb8a898,
+      size:             0.045,
+      transparent:      true,
+      opacity:          0,
+      depthWrite:       false,
+      depthTest:        true,
+      sizeAttenuation:  true,
+      blending:         THREE.NormalBlending,
+      fog:              true,
+      vertexColors:     false,
+    });
+
+    const smoke = {
+      points: new THREE.Points(geo, mat),
+      geo,
+      mat,
+      tex,
+      emitMin: new THREE.Vector3(-1, 0, -1),
+      emitMax: new THREE.Vector3(1, 1, 1),
+      emitDiag: 1,
+      age,
+      maxAge,
+      vx,
+      vy,
+      vz,
+    };
+    this._cruiserSmoke = smoke;
+    wreck.add(smoke.points);
+
+    const st = _cruiserSmokeIntensityFromHp(this._baseHP);
+    for (let i = 0; i < N; i++) {
+      this._respawnCruiserSmokeParticle(i, Math.max(0.06, st));
+    }
+    geo.attributes.position.needsUpdate = true;
+
+    this._refreshCruiserSmokeEmitter();
+  }
+
+  _refreshCruiserSmokeEmitter() {
+    const smoke = this._cruiserSmoke;
+    const wreck = this._cruiserWreckModel;
+    if (!smoke || !wreck) return;
+
+    wreck.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(wreck);
+    if (box.isEmpty()) return;
+
+    const inv = new THREE.Matrix4().copy(wreck.matrixWorld).invert();
+    box.applyMatrix4(inv);
+
+    const ctr = new THREE.Vector3();
+    const half = new THREE.Vector3();
+    box.getCenter(ctr);
+    box.getSize(half).multiplyScalar(0.5);
+
+    const fx = 0.38;
+    const fz = 0.38;
+    const fyLo = 0.22;
+    const fyHi = 0.52;
+    smoke.emitMin.set(
+      ctr.x - half.x * fx,
+      ctr.y - half.y * fyLo,
+      ctr.z - half.z * fz,
+    );
+    smoke.emitMax.set(
+      ctr.x + half.x * fx,
+      ctr.y + half.y * fyHi,
+      ctr.z + half.z * fz,
+    );
+    smoke.emitDiag = Math.max(half.x, half.y, half.z, 1e-6);
+  }
+
+  /**
+   * @param {number} intensity 0..1 HP-driven smoke strength
+   */
+  _respawnCruiserSmokeParticle(i, intensity) {
+    const s = this._cruiserSmoke;
+    if (!s) return;
+    const pos = s.geo.attributes.position.array;
+    const r = Math.random;
+    const mn = s.emitMin;
+    const mx = s.emitMax;
+    const d = s.emitDiag;
+    pos[i * 3 + 0] = mn.x + r() * (mx.x - mn.x);
+    pos[i * 3 + 1] = mn.y + r() * (mx.y - mn.y);
+    pos[i * 3 + 2] = mn.z + r() * (mx.z - mn.z);
+    s.age[i] = 0;
+    s.maxAge[i] = 1.0 + r() * 2.5;
+    const g = (0.2 + 0.95 * intensity) * d;
+    s.vx[i] = (r() - 0.5) * g * 0.14;
+    s.vz[i] = (r() - 0.5) * g * 0.14;
+    s.vy[i] = g * (0.42 + r() * 0.55);
+  }
+
+  _updateCruiserSmoke(delta, elapsed) {
+    const smoke = this._cruiserSmoke;
+    if (!smoke) return;
+
+    const intensityRaw = _cruiserSmokeIntensityFromHp(this._baseHP);
+    const intensity = Math.pow(THREE.MathUtils.clamp(intensityRaw, 0, 1), 1.05);
+
+    smoke.mat.opacity = THREE.MathUtils.clamp(0.06 + 0.52 * intensity, 0, 1);
+    smoke.mat.size = 0.018 + 0.058 * Math.pow(intensity, 0.88);
+
+    if (intensityRaw < 0.004) {
+      smoke.points.visible = false;
+      return;
+    }
+    smoke.points.visible = true;
+
+    const posArr = smoke.geo.attributes.position.array;
+    const N = CRUISER_SMOKE_COUNT;
+    const d = smoke.emitDiag;
+    const dt = delta;
+
+    for (let i = 0; i < N; i++) {
+      const turb =
+        Math.sin(elapsed * 1.85 + i * 0.73) * 0.008 * d * intensity +
+        Math.cos(elapsed * 1.22 + i * 1.09) * 0.006 * d * intensity;
+
+      smoke.vx[i] *= Math.pow(0.985, dt * 60);
+      smoke.vz[i] *= Math.pow(0.985, dt * 60);
+
+      posArr[i * 3 + 0] += (smoke.vx[i] + turb) * dt;
+      posArr[i * 3 + 1] += smoke.vy[i] * dt;
+      posArr[i * 3 + 2] += (smoke.vz[i] - turb * 0.35) * dt;
+
+      smoke.age[i] += dt * (0.55 + 1.25 * intensity);
+      if (smoke.age[i] >= smoke.maxAge[i]) {
+        this._respawnCruiserSmokeParticle(i, intensity);
+      }
+    }
+    smoke.geo.attributes.position.needsUpdate = true;
   }
 
   // ── Input ──────────────────────────────────────────────────────────────────
@@ -1640,8 +1998,15 @@ export class GameScreen {
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
       'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyT',
     ]);
+    const DISMISS_CONTROLS_HINT = new Set([
+      'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+      'KeyW', 'KeyA', 'KeyS', 'KeyD',
+    ]);
     window.addEventListener('keydown', e => {
       this._keys[e.code] = true;
+      if (this._running && DISMISS_CONTROLS_HINT.has(e.code) && !e.repeat) {
+        this._dismissControlsHint();
+      }
       if (this._running && e.code === 'KeyT' && !e.repeat) {
         if (this._dockModalOpen && this._pendingTowerPlace) {
           this._closeDockShop();
@@ -1667,26 +2032,7 @@ export class GameScreen {
 
   // ── HUD ────────────────────────────────────────────────────────────────────
 
-  _showGameIntro() {
-    if (!this._introModalEl) return;
-    this._introBlocking = true;
-    this._introModalEl.classList.remove('hidden');
-    this._introModalEl.setAttribute('aria-hidden', 'false');
-    document.getElementById('btn-game-intro-continue')?.focus();
-  }
-
-  _hideGameIntro() {
-    this._introBlocking = false;
-    if (!this._introModalEl) return;
-    this._introModalEl.classList.add('hidden');
-    this._introModalEl.setAttribute('aria-hidden', 'true');
-  }
-
   _bindHUD() {
-    document.getElementById('btn-game-intro-continue')?.addEventListener('click', () => {
-      this._hideGameIntro();
-      this.audioManager?.startBackgroundLoop();
-    });
     document.getElementById('btn-game-settings')?.addEventListener('click', () => {
       this.onOpenSettings?.();
     });
