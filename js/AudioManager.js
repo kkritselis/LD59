@@ -25,6 +25,7 @@ const GAME_AUDIO = {
   background:       'assets/audio/background.mp3',
   resource:         'assets/audio/resource.wav',
   ironOre:          'assets/audio/ironOre.mp3',
+  resourcesReturn:  'assets/audio/resources_return.mp3',
   blasterShip:      'assets/audio/Blaster_ship.wav',
   blasterTower:     'assets/audio/Blaster_tower.wav',
   warp:             'assets/audio/introCutScene.mp3',
@@ -125,6 +126,11 @@ export class AudioManager {
   /** First-ever resource grab this run (special sting). */
   playIronOreFirstPickup() {
     this._playOneShot('ironOre', 'sfx', 0.72);
+  }
+
+  /** Once per milestone: held resources can fully repair remaining base armor (session gate in GameScreen). */
+  playResourcesReturn() {
+    this._playOneShot('resourcesReturn', 'sfx', 0.74);
   }
 
   playBlasterShip() {

@@ -1,4 +1,4 @@
-![Signal's Edge — game logo](assets/textures/logo.png)
+![Signal's Edge — game logo](ss1.png)
 
 # LD59 — Signal's Edge
 ### *They came from every direction. You came from somewhere worse.*
@@ -10,7 +10,7 @@ A top-down survival defense game where you balance base protection, resource gat
 
 **Ludum Dare 59 (Apr 17–19, 2026):** **complete** — first milestone shipped (LD / embed / local package).
 
-**Fireside Jam (Apr 17–26, 2026, theme: Manage):** **in progress** — second weekend of the multi-jam experiment. Jam deadline is tight; personal schedule limits this sprint to a **single concentrated work block (~12–14 hours)**. Optimize for shippable deltas: credits compliance, clearer presentation, stronger early-game feel, and one solid enemy visual pass.
+**Fireside Jam (Apr 17–26, 2026, theme: Manage):** **complete** — second weekend of the multi-jam experiment. Jam deadline is tight; personal schedule limits this sprint to a **single concentrated work block (~12–14 hours)**. Optimize for shippable deltas: credits compliance, clearer presentation, stronger early-game feel, and one solid enemy visual pass.
 
 ---
 
@@ -24,6 +24,8 @@ Rather than burning out on a single 72-hour jam, this project runs across four o
 | Fireside Jam | Apr 17–26 | Manage | Feels like a real game |
 | GDFG | Apr 9–May 3 | Double Crisis | Depth and drama |
 | 100 Day Jam | Jan 31–May 12 | Horror – Lost Signal | Polished final release |
+
+![Signal's Edge — game screen](ss2.png)
 
 ---
 
@@ -85,7 +87,7 @@ Ordered roughly by **jam compliance first**, then **player-facing impact**, then
 
 ---
 
-## Week 2 — Fireside Jam (due Sunday Apr 26, 2026) — IN PROGRESS
+## Week 2 — Fireside Jam (due Sunday Apr 26, 2026) — COMPLETE
 
 *Theme: **Manage** — credits, clarity, and “this is a finished slice,” not only new mechanics.*
 
@@ -104,7 +106,7 @@ Use the **Fireside sprint** section above as the live task list for the limited 
 
 ---
 
-## Week 3 — GDFG (due Sunday May 3)
+## Week 3 — GDFG (due Sunday May 3) - IN PROGRESS
 
 *The Double Crisis theme earns its keep.*
 
@@ -118,13 +120,13 @@ Increase early-game tension, enforce the double crisis, and improve clarity of c
 
 **Objective:** Start with action, layer explanation after.
 
-- [ ] Ship crash → immediate player control (no delay)
+- [x] Ship crash → immediate player control (no delay)
 
-- [ ] Enemies already active when control begins
+- [x] Enemies already active when control begins
 
-- [ ] Delay AI messaging until after action starts
+- [x] Delay AI messaging until after action starts
 
-- [ ] Trigger resource tutorial only after first pickup
+- [x] Trigger resource tutorial only after first pickup
 
 **Target Outcome:**
 
@@ -138,11 +140,9 @@ Player is under pressure within the first 5–10 seconds.
 
 - [x] Base starts partially damaged — session begins at **5 / 25** armor (`BASE_START_HP` / `BASE_MAX_HP`); repair toward max via dock
 
-- [ ] Base slowly degrades over time (light pressure)
+- [x] Maintain low-level enemy trickle after initial clear
 
-- [ ] Maintain low-level enemy trickle after initial clear
-
-- [ ] Place resources slightly outside safe zone
+- [x] Place resources slightly outside safe zone
 
 **Target Outcome:**
 
@@ -166,7 +166,6 @@ Player cannot focus on only one problem.
 ### Enemies
 
 - [ ] Creature FBX + spawn holes / emergence read (sprint)
-- [ ] Additional archetypes / death VFX (post–Fireside if no time)
 
 ### Depth
 

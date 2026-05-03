@@ -268,6 +268,8 @@ export class GameScreen {
     this._resourceCount   = 0;
     /** First ship pickup this session plays `ironOre`; later pickups use `resource.wav`. */
     this._ironOreFirstPickupPlayed = false;
+    /** `resources_return.mp3` once when held count first reaches full-repair cost for current armor. */
+    this._resourcesReturnSfxPlayed = false;
 
     // HUD element references (cached once)
     this._hudHPValue   = document.getElementById('hud-hp-value');
@@ -411,6 +413,7 @@ export class GameScreen {
     this._baseHP = BASE_START_HP;
     this._resourceCount = 0;
     this._ironOreFirstPickupPlayed = false;
+    this._resourcesReturnSfxPlayed = false;
     this._weaponTier = 0;
     this._weaponMult = 1.0;
     this._pendingTowerPlace = false;
@@ -1357,6 +1360,15 @@ export class GameScreen {
         }
         this._resourceCount += got;
         this._syncResourceHud();
+        const repairGap = BASE_MAX_HP - this._baseHP;
+        if (
+          repairGap > 0 &&
+          !this._resourcesReturnSfxPlayed &&
+          this._resourceCount >= repairGap
+        ) {
+          this._resourcesReturnSfxPlayed = true;
+          this.audioManager?.playResourcesReturn();
+        }
       }
     }
 
