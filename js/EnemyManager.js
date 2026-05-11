@@ -17,8 +17,8 @@ import { sampleHeight, WATER_LEVEL } from './terrain.js';
 
 // ── Tunables ────────────────────────────────────────────────────────────────
 
-/** UV domain area vs a 1×1 tile (4 = 4× area vs unit tile); linear span per axis = sqrt(this). */
-const FLOW_FIELD_AREA_MULT = 4;
+/** UV domain area vs a 1×1 tile; linear span per axis = sqrt(this). Doubled vs original 4× (now 16× area). */
+const FLOW_FIELD_AREA_MULT = 16;
 const FLOW_UV_AXIS         = Math.sqrt(FLOW_FIELD_AREA_MULT);
 /** Flow field is built on this UV range (extends past [0,1] so paths use more terrain). */
 export const FLOW_UV_MIN = 0.5 - 0.5 * FLOW_UV_AXIS;
@@ -30,10 +30,22 @@ const GRID = Math.max(96, Math.round(96 * FLOW_UV_AXIS));
 
 const STEEP_BLOCK  = 1.0;  // world-slope magnitude above which terrain is impassable
 const HIGH_ALT     = 0.525; // UV height above which the air is too thin (blocks enemies)
-const ENEMY_SPEED  = 0.02; // UV units / second on flat terrain
-const CONTACT_DIST = 0.025; // UV distance from base centre to trigger a hit
+const ENEMY_SPEED  = 0.02; // UV units / second on flat terrain (small tier baseline)
+const CONTACT_DIST = 0.025; // UV distance from base centre to trigger a hit (small tier baseline)
 const ENEMY_MODEL_PATH = 'assets/obj/spider.glb';
 const ENEMY_TARGET_HEIGHT = 0.04;
+
+/** Mesh scale vs small (small = 1). */
+const ENEMY_TIER_SCALE = { small: 1, medium: 2, large: 4 };
+/** Move speed vs small (small = 1; medium half; large quarter of small). */
+const ENEMY_TIER_SPEED = { small: 1, medium: 0.5, large: 0.25 };
+
+function _rollEnemyTier() {
+  const r = Math.random();
+  if (r < 0.75) return 'small';
+  if (r < 0.95) return 'medium';
+  return 'large';
+}
 const ENEMY_DEATH_SECONDS = 0.7;
 /** Added to atan2 facing if the GLB’s forward axis is not +world Z (try `Math.PI` if it runs backward). */
 const ENEMY_FACING_YAW_OFFSET = 0;
@@ -266,8 +278,12 @@ export class EnemyManager {
   _makeEnemyInstance(uvx, uvy) {
     if (!this._enemyModelTemplate) return;
 
+    const tier = _rollEnemyTier();
+    const tierScale = ENEMY_TIER_SCALE[tier];
+    const speedMul = ENEMY_TIER_SPEED[tier];
+
     const mesh = cloneSkeleton(this._enemyModelTemplate);
-    mesh.scale.setScalar(this._enemyModelScale);
+    mesh.scale.setScalar(this._enemyModelScale * tierScale);
     mesh.traverse((node) => {
       if (node.isMesh) {
         node.castShadow = false;
@@ -278,6 +294,7 @@ export class EnemyManager {
     let mixer = null;
     if (this._enemyModelClips.length > 0) {
       mixer = new THREE.AnimationMixer(mesh);
+      mixer.timeScale = speedMul;
     }
 
     this._scene.add(mesh);
@@ -285,6 +302,9 @@ export class EnemyManager {
       mesh,
       uvx,
       uvy,
+      tier,
+      tierScale,
+      speedMul,
       mixer,
       currentClip: null,
       dying: false,
@@ -411,7 +431,7 @@ export class EnemyManager {
 
       // Move in UV space using flow direction and terrain-adjusted speed
       if (canMove) {
-        const spd = ENEMY_SPEED * Math.max(0.05, f.spd);
+        const spd = ENEMY_SPEED * e.speedMul * Math.max(0.05, f.spd);
         const lo = FLOW_UV_MIN + 1e-6;
         const hi = FLOW_UV_MAX - 1e-6;
         e.uvx = Math.max(lo, Math.min(hi, e.uvx + f.dirX * spd * delta));
@@ -437,16 +457,18 @@ export class EnemyManager {
       const HALF = US * 0.5;
       e.mesh.visible = Math.abs(wx) < HALF && Math.abs(wz) < HALF;
 
-      // Check distance to base in UV space
+      // Check distance to base in UV space (contact radius grows with tier)
+      const contactR = CONTACT_DIST * e.tierScale;
+      const contactR2 = contactR * contactR;
       const du = e.uvx - 0.5, dv = e.uvy - 0.5;
       const d2 = du * du + dv * dv;
       if (!e.dying) {
-        if (d2 < (CONTACT_DIST * CONTACT_DIST) * 2.2) this._playClip(e, this._clipAttack, false);
+        if (d2 < contactR2 * 2.2) this._playClip(e, this._clipAttack, false);
         else this._playClip(e, this._clipWalk, false);
       }
 
       // One hit per enemy: deal damage once, then death animation / removal (do not repeat while dying inside radius).
-      if (!e.dying && d2 < CONTACT_DIST * CONTACT_DIST) {
+      if (!e.dying && d2 < contactR2) {
         damage++;
         if (e.mixer && this._clipDeath) {
           e.dying = true;
@@ -573,8 +595,9 @@ export class EnemyManager {
     for (const e of this._enemies) {
       const ux = clamp01(e.uvx);
       const uy = clamp01(e.uvy);
+      const pr = e.tier === 'large' ? 5 : e.tier === 'medium' ? 4 : 3;
       ctx.beginPath();
-      ctx.arc(ux * W, (1 - uy) * H, 3, 0, Math.PI * 2);
+      ctx.arc(ux * W, (1 - uy) * H, pr, 0, Math.PI * 2);
       ctx.fill();
     }
 

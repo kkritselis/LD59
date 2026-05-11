@@ -84,7 +84,12 @@ const LASER_GAP      = 0.035; // gap between dashes
 const LASER_SPEED    = 1.2;   // dashOffset scroll rate — how fast pulses travel
 
 // Dock shop / buildables
-const TOWER_COST            = 25;
+/** Per-store `action` for defense licenses (costs match `store.json` costIron / costHelion). */
+const TOWER_COSTS_BY_ACTION = {
+  tower_mini:   { iron: 15, helion: 5 },
+  tower_medium: { iron: 30, helion: 10 },
+  tower_mega:   { iron: 45, helion: 15 },
+};
 const TRANSMISSION_GOAL     = 100;
 /** Jam listing page for ratings (edit to your itch.io page if you ship there instead). */
 const JAM_RATE_URL          = 'https://ldjam.com/events/ludum-dare/59';
@@ -181,8 +186,13 @@ function _buildCrossSection(heightScale, uScale, uOffsetX, uOffsetY, bandColors)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export class GameScreen {
-  constructor(audioManager) {
+  /**
+   * @param {import('./AudioManager.js').AudioManager} audioManager
+   * @param {import('./TranslationManager.js').TranslationManager} [translationManager]
+   */
+  constructor(audioManager, translationManager = null) {
     this.audioManager = audioManager;
+    this._translations = translationManager;
 
     this.canvas    = document.getElementById('game-canvas');
     this.renderer  = null;
@@ -263,11 +273,14 @@ export class GameScreen {
     this._wave         = 0;
     this._waveTimer    = 60.0;  // first wave spawns at 1:00
 
-    // Resources
+    // Resources — `_resourceCount` is Iron; Helion is tracked separately.
     this._resourceManager = null;
     this._resourceCount   = 0;
-    /** First ship pickup this session plays `ironOre`; later pickups use `resource.wav`. */
+    this._helionCount     = 0;
+    /** First iron pickup this session plays `ironOre.mp3`; later generic pickups use `resource.wav`. */
     this._ironOreFirstPickupPlayed = false;
+    /** First Helion pickup plays `helionOre.mp3` once. */
+    this._helionOreFirstPickupPlayed = false;
     /** `resources_return.mp3` once when held count first reaches full-repair cost for current armor. */
     this._resourcesReturnSfxPlayed = false;
 
@@ -280,6 +293,7 @@ export class GameScreen {
     this._syncBaseHpHud();
 
     this._hudResourcesValue = document.getElementById('hud-resources-value');
+    this._hudHelionValue = document.getElementById('hud-helion-value');
 
     this._baseBackdropEl = document.getElementById('game-base-backdrop');
 
@@ -297,7 +311,7 @@ export class GameScreen {
     this._dockModalEl       = null;
     this._dockModalOpen     = false;
     this._dockLandingLatch = false;
-    /** @type {null | { id: string, action: string, name: string, description: string, cost: number, image: string, max?: string|number }[]> */
+    /** @type {null | { id: string, action: string, name: string, description: string, cost?: number, costIron?: number, costHelion?: number, image: string, max?: string|number|null }[]> */
     this._storeItems        = null;
     /** @type {Promise<void> | null} */
     this._storeLoadPromise  = null;
@@ -412,7 +426,9 @@ export class GameScreen {
     this._playerHasLeftPadOnce = false;
     this._baseHP = BASE_START_HP;
     this._resourceCount = 0;
+    this._helionCount = 0;
     this._ironOreFirstPickupPlayed = false;
+    this._helionOreFirstPickupPlayed = false;
     this._resourcesReturnSfxPlayed = false;
     this._weaponTier = 0;
     this._weaponMult = 1.0;
@@ -428,6 +444,7 @@ export class GameScreen {
     this._syncBaseDockBackdrop(false);
     this._syncBaseHpHud();
     if (this._hudResourcesValue) this._hudResourcesValue.textContent = this._formatResourceAmount(0);
+    if (this._hudHelionValue) this._hudHelionValue.textContent = this._formatResourceAmount(0);
 
     this._clearBuildables();
     this._resourceManager?.respawn();
@@ -548,11 +565,29 @@ export class GameScreen {
     return Number.isInteger(t) ? String(t) : t.toFixed(1);
   }
 
+  /** @param {{ cost?: number, costIron?: number, costHelion?: number }} item */
+  _itemCostIron(item) {
+    if (item.costIron != null && item.costIron !== '') return Number(item.costIron);
+    return Number(item.cost ?? 0);
+  }
+
+  /** @param {{ costHelion?: number }} item */
+  _itemCostHelion(item) {
+    return Number(item.costHelion ?? 0);
+  }
+
+  _canAfford(ironNeed, helionNeed) {
+    return this._resourceCount >= ironNeed && this._helionCount >= helionNeed;
+  }
+
   _refreshDockShopUI() {
     const r = this._resourceCount;
+    const h = this._helionCount;
     const el = (id) => document.getElementById(id);
     const readout = el('dock-shop-resources-readout');
-    if (readout) readout.textContent = `Resources: ${this._formatResourceAmount(r)}`;
+    if (readout) {
+      readout.textContent = `Iron: ${this._formatResourceAmount(r)} | Helion: ${this._formatResourceAmount(h)}`;
+    }
 
     const wCost = this._weaponUpgradeCost();
     const wSpan = el('dock-weapon-cost');
@@ -568,17 +603,20 @@ export class GameScreen {
           const node = card.querySelector(`[data-bind="${bind}"]`);
           if (node) node.textContent = text;
         };
-        setText('cost', String(item.cost ?? ''));
+        const cI = this._itemCostIron(item);
+        const cH = this._itemCostHelion(item);
+        setText('cost', String(cI));
+        setText('costHelion', String(cH));
 
         let disabled = true;
         let ratioText = '';
         const act = item.action;
         if (act === 'repair') {
           ratioText = `${this._baseHP}/${BASE_MAX_HP}`;
-          disabled = r < 1 || this._baseHP >= BASE_MAX_HP;
+          disabled = !this._canAfford(1, 1) || this._baseHP >= BASE_MAX_HP;
         } else if (act === 'transmission') {
           ratioText = `${this._transmissionProgress}/${TRANSMISSION_GOAL}`;
-          disabled = r < 1 || this._transmissionProgress >= TRANSMISSION_GOAL;
+          disabled = !this._canAfford(1, 2) || this._transmissionProgress >= TRANSMISSION_GOAL;
         } else if (typeof act === 'string' && act.startsWith('tower')) {
           const n = this._defenseTowers?.length ?? 0;
           const rawMax = item.max;
@@ -588,7 +626,8 @@ export class GameScreen {
             if (!Number.isNaN(num)) maxPart = String(rawMax);
           }
           ratioText = `${n}/${maxPart}`;
-          disabled = r < TOWER_COST;
+          const tc = TOWER_COSTS_BY_ACTION[act];
+          disabled = !tc || !this._canAfford(tc.iron, tc.helion);
         }
         setText('ratio', ratioText);
         if (buy) buy.disabled = disabled;
@@ -608,6 +647,7 @@ export class GameScreen {
   _syncResourceHud() {
     const s = this._formatResourceAmount(this._resourceCount);
     if (this._hudResourcesValue) this._hudResourcesValue.textContent = s;
+    if (this._hudHelionValue) this._hudHelionValue.textContent = this._formatResourceAmount(this._helionCount);
     if (this._dockModalOpen) this._refreshDockShopUI();
   }
 
@@ -635,23 +675,28 @@ export class GameScreen {
   }
 
   _purchaseRepair() {
-    if (this._resourceCount < 1 || this._baseHP >= BASE_MAX_HP) return;
+    if (!this._canAfford(1, 1) || this._baseHP >= BASE_MAX_HP) return;
     this._resourceCount -= 1;
+    this._helionCount -= 1;
     this._baseHP += 1;
     this._syncBaseHpHud();
     this._syncResourceHud();
   }
 
-  _purchaseTower() {
-    if (this._resourceCount < TOWER_COST) return;
-    this._resourceCount -= TOWER_COST;
+  /** @param {string} action `tower_mini` | `tower_medium` | `tower_mega` */
+  _purchaseTower(action) {
+    const c = TOWER_COSTS_BY_ACTION[action];
+    if (!c || !this._canAfford(c.iron, c.helion)) return;
+    this._resourceCount -= c.iron;
+    this._helionCount -= c.helion;
     this._pendingTowerPlace = true;
     this._syncResourceHud();
   }
 
   _purchaseTransmissionOne() {
-    if (this._resourceCount < 1 || this._transmissionProgress >= TRANSMISSION_GOAL) return;
+    if (!this._canAfford(1, 2) || this._transmissionProgress >= TRANSMISSION_GOAL) return;
     this._resourceCount -= 1;
+    this._helionCount -= 2;
     this._transmissionProgress += 1;
     if (!this._transmissionMesh && this._transmissionProgress > 0) this._spawnTransmissionMesh();
     else this._syncTransmissionTowerScale();
@@ -1059,17 +1104,27 @@ export class GameScreen {
       costNum.className = 'dock-store-costnum';
       costNum.dataset.bind = 'cost';
 
+      const costHelionEl = document.createElement('span');
+      costHelionEl.className = 'dock-store-costhelion';
+      costHelionEl.dataset.bind = 'costHelion';
+
       const buy = document.createElement('button');
       buy.type = 'button';
       buy.className = 'dock-store-buy';
       buy.dataset.action = item.action ?? '';
-      buy.setAttribute('aria-label', `Buy ${item.name ?? item.action ?? 'item'}`);
+      const buyLabel = this._translations?.getText('GAME_INVENTORY_BUY') ?? 'Buy';
+      buy.setAttribute('aria-label', `${buyLabel} ${item.name ?? item.action ?? 'item'}`);
+      const buyText = document.createElement('span');
+      buyText.className = 'dock-store-buy-label';
+      buyText.textContent = buyLabel;
+      buy.appendChild(buyText);
       buy.addEventListener('click', () => this._onStorePurchase(item.action));
 
       main.appendChild(h3);
       main.appendChild(p);
       if (hasMaxValue) main.appendChild(ratio);
       main.appendChild(costNum);
+      main.appendChild(costHelionEl);
       body.appendChild(main);
       body.appendChild(buy);
       frame.appendChild(img);
@@ -1082,7 +1137,7 @@ export class GameScreen {
   _onStorePurchase(action) {
     if (action === 'repair') this._purchaseRepair();
     else if (action === 'transmission') this._purchaseTransmissionOne();
-    else if (typeof action === 'string' && action.startsWith('tower')) this._purchaseTower();
+    else if (typeof action === 'string' && action.startsWith('tower')) this._purchaseTower(action);
   }
 
   // ── Game loop ──────────────────────────────────────────────────────────────
@@ -1351,20 +1406,32 @@ export class GameScreen {
     // ── Resource collection ───────────────────────────────────────────────
     if (this._resourceManager && this._ship) {
       const got = this._resourceManager.update(delta, elapsed, off, this._shipY);
-      if (got > 0) {
-        if (!this._ironOreFirstPickupPlayed) {
+      const ironGot = got.iron;
+      const helionGot = got.helion;
+      if (ironGot > 0 || helionGot > 0) {
+        let playedFirstSting = false;
+        if (ironGot > 0 && !this._ironOreFirstPickupPlayed) {
           this._ironOreFirstPickupPlayed = true;
           this.audioManager?.playIronOreFirstPickup();
-        } else {
+          playedFirstSting = true;
+        }
+        if (helionGot > 0 && !this._helionOreFirstPickupPlayed) {
+          this._helionOreFirstPickupPlayed = true;
+          this.audioManager?.playHelionOreFirstPickup();
+          playedFirstSting = true;
+        }
+        if (!playedFirstSting) {
           this.audioManager?.playResourcePickup();
         }
-        this._resourceCount += got;
+        this._resourceCount += ironGot;
+        this._helionCount += helionGot;
         this._syncResourceHud();
         const repairGap = BASE_MAX_HP - this._baseHP;
         if (
           repairGap > 0 &&
           !this._resourcesReturnSfxPlayed &&
-          this._resourceCount >= repairGap
+          this._resourceCount >= repairGap &&
+          this._helionCount >= repairGap
         ) {
           this._resourcesReturnSfxPlayed = true;
           this.audioManager?.playResourcesReturn();

@@ -13,13 +13,19 @@ import { FLOW_UV_MIN, FLOW_UV_MAX } from './EnemyManager.js';
 
 // ── Tunables ────────────────────────────────────────────────────────────────
 
-const RESOURCE_COUNT  = 100;   // how many nodes to scatter
+const RESOURCE_COUNT  = 200;   // how many nodes to scatter
 const PICKUP_RADIUS   = 0.05;  // UV units from ship to trigger beam
 const CANCEL_RADIUS   = 0.14;  // UV units — beam cancels if player strays this far
 const ATTRACT_RATE    = 2.5;   // lerp rate pulling resource toward ship (per second)
 const BEAM_BASE_R     = 0.14;  // tractor-beam cone base radius (world units)
 const BEAM_OPACITY    = 0.25;
 const ENEMY_DROP_CHANCE = 0.3;
+/** Fraction of scattered pickups that are Helion (energy); remainder are Iron. Same mix for enemy drops. */
+const HELION_WORLD_CHANCE = 0.2;
+
+const HELION_PULSE_DARK   = new THREE.Color(0x140428);
+/** Peak of pulse — saturated violet (avoid near-white emissive). */
+const HELION_PULSE_BRIGHT = new THREE.Color(0x7b3cb0);
 
 /** Same Synty FBX scale as `GameScreen.js` ship / hangar (`OBJ_SCALE`). */
 const OBJ_SCALE = 0.0001;
@@ -46,13 +52,15 @@ export class ResourceManager {
     this._HS    = heightScale;
     this._US    = uScale;
 
-    /** @type {{ mesh: THREE.Object3D, beamMesh: THREE.Mesh|null, uvx: number, uvy: number, baseY: number, animY: number, state: string, credit?: number, visualScale?: number }[]} */
+    /** @type {{ mesh: THREE.Object3D, beamMesh: THREE.Mesh|null, uvx: number, uvy: number, baseY: number, animY: number, state: string, creditIron: number, creditHelion: number, visualScale?: number, kind: 'iron'|'helion' }[]} */
     this._resources = [];
     this._collected = 0;
 
     /** Prepared roots (never in scene); clones pick one at random. */
     this._resourceTemplates = [];
     this._resourceMat = null;
+    /** Shared purple PBR material for Helion pickups (sparkle via emissive pulse in `update`). */
+    this._helionMat = null;
     this._useSphereFallback = false;
     this._fallbackGeo = null;
 
@@ -70,6 +78,12 @@ export class ResourceManager {
       if (ch.isLight) lights.push(ch);
     });
     lights.forEach((l) => l.parent?.remove(l));
+  }
+
+  _applyHelionMat(root) {
+    root.traverse((ch) => {
+      if (ch.isMesh && this._helionMat) ch.material = this._helionMat;
+    });
   }
 
   _applyMat(root, mat) {
@@ -105,6 +119,16 @@ export class ResourceManager {
       specular:  0x111122,
       shininess: 60,
       emissive:  0x0a1530,
+    });
+
+    this._helionMat = new THREE.MeshStandardMaterial({
+      map:                 atlas,
+      color:               new THREE.Color(0xc4a6ff),
+      metalness:           0.9,
+      roughness:           0.2,
+      emissive:            new THREE.Color(0x3b0f6e),
+      emissiveIntensity:   0.42,
+      envMapIntensity:     1.15,
     });
 
     let pending = RESOURCE_URLS.length;
@@ -143,15 +167,18 @@ export class ResourceManager {
     }
   }
 
-  /** Clone a random resource mesh with random yaw (local Y). */
-  _createPickupMesh() {
+  /** Clone a random resource mesh with random yaw (local Y). @param {'iron'|'helion'} kind */
+  _createPickupMesh(kind) {
+    const helion = kind === 'helion';
     if (this._useSphereFallback && this._fallbackGeo) {
-      return new THREE.Mesh(this._fallbackGeo, this._resourceMat);
+      const mat = helion ? this._helionMat : this._resourceMat;
+      return new THREE.Mesh(this._fallbackGeo, mat);
     }
     const n = this._resourceTemplates.length;
     const tpl = this._resourceTemplates[n === 1 ? 0 : Math.floor(Math.random() * n)];
     const mesh = tpl.clone(true);
-    this._applyMat(mesh, this._resourceMat);
+    if (helion) this._applyHelionMat(mesh);
+    else this._applyMat(mesh, this._resourceMat);
     mesh.rotation.y = Math.random() * Math.PI * 2;
     return mesh;
   }
@@ -159,7 +186,7 @@ export class ResourceManager {
   // ── Placement ──────────────────────────────────────────────────────────────
 
   _scatter() {
-    const MAX_TRIES = 800;
+    const MAX_TRIES = 1600;
     let tries = 0;
 
     const flowSpan = FLOW_UV_MAX - FLOW_UV_MIN;
@@ -178,7 +205,8 @@ export class ResourceManager {
       const h = sampleHeight(uvx, uvy);
       if (h < WATER_LEVEL + 0.02 || h > 0.52) continue;
 
-      const mesh = this._createPickupMesh();
+      const helion = Math.random() < HELION_WORLD_CHANCE;
+      const mesh = this._createPickupMesh(helion ? 'helion' : 'iron');
       this._scene.add(mesh);
 
       this._resources.push({
@@ -188,7 +216,9 @@ export class ResourceManager {
         baseY:  h * this._HS,
         animY:  h * this._HS,
         state:  'idle',   // 'idle' | 'attracted' | 'done'
-        credit: 1,
+        kind:   helion ? 'helion' : 'iron',
+        creditIron: helion ? 0 : 1,
+        creditHelion: helion ? 1 : 0,
         visualScale: 1,
       });
     }
@@ -202,7 +232,7 @@ export class ResourceManager {
    * @param {number}        elapsed  total elapsed seconds (for bob)
    * @param {THREE.Vector2} off      terrain offset
    * @param {number}        shipY    ship world Y
-   * @returns {number}  resource amount collected this frame (may be fractional, e.g. 0.5)
+   * @returns {{ iron: number, helion: number }} amounts collected this frame (fractions allowed)
    */
   update(delta, elapsed, off, shipY) {
     const US   = this._US;
@@ -212,7 +242,14 @@ export class ResourceManager {
     const shipUVX = 0.5 + off.x / US;
     const shipUVY = 0.5 + off.y / US;
 
-    let collectedAmount = 0;
+    let collectedIron = 0;
+    let collectedHelion = 0;
+
+    if (this._helionMat) {
+      const pulse = 0.5 + 0.5 * Math.sin(elapsed * 3);
+      this._helionMat.emissive.copy(HELION_PULSE_DARK).lerp(HELION_PULSE_BRIGHT, pulse);
+      this._helionMat.emissiveIntensity = THREE.MathUtils.lerp(0.18, 0.62, pulse);
+    }
 
     for (const r of this._resources) {
       if (r.state === 'done') continue;
@@ -239,9 +276,9 @@ export class ResourceManager {
           r.state  = 'attracted';
           r.animY  = r.baseY;
 
-          // Per-beam material so each beam can fade independently
+          const beamHex = r.kind === 'helion' ? 0xcc77ff : 0x4488ff;
           const beamMat = new THREE.MeshBasicMaterial({
-            color:      0x4488ff,
+            color:      beamHex,
             transparent: true,
             opacity:    BEAM_OPACITY,
             side:       THREE.DoubleSide,
@@ -300,7 +337,8 @@ export class ResourceManager {
 
         // Collect when close enough
         if (progress >= 0.92) {
-          collectedAmount += r.credit ?? 1;
+          collectedIron += r.creditIron ?? 0;
+          collectedHelion += r.creditHelion ?? 0;
           r.state = 'done';
           r.mesh.visible = false;
           if (r.beamMesh) {
@@ -312,12 +350,13 @@ export class ResourceManager {
       }
     }
 
-    this._collected += collectedAmount;
-    return collectedAmount;
+    this._collected += collectedIron + collectedHelion;
+    return { iron: collectedIron, helion: collectedHelion };
   }
 
   /**
-   * When an enemy dies (player kill), chance to spawn a smaller pickup worth 0.5 resources.
+   * When an enemy dies (player kill), chance to spawn a small pickup (0.5 Iron or Helion),
+   * with Iron vs Helion rate matching {@link HELION_WORLD_CHANCE}.
    * @param {number} uvx
    * @param {number} uvy
    */
@@ -333,7 +372,8 @@ export class ResourceManager {
 
     if (!this._useSphereFallback && this._resourceTemplates.length === 0) return;
 
-    const mesh = this._createPickupMesh();
+    const helion = Math.random() < HELION_WORLD_CHANCE;
+    const mesh = this._createPickupMesh(helion ? 'helion' : 'iron');
     const vs = 0.5;
     const basis = this._pickupScaleBasis(mesh);
     mesh.scale.setScalar(Math.max(1e-8, basis * vs));
@@ -346,7 +386,9 @@ export class ResourceManager {
       baseY:  h * this._HS,
       animY:  h * this._HS,
       state:  'idle',
-      credit: 0.5,
+      kind:   helion ? 'helion' : 'iron',
+      creditIron: helion ? 0 : 0.5,
+      creditHelion: helion ? 0.5 : 0,
       visualScale: vs,
     });
   }
@@ -378,6 +420,7 @@ export class ResourceManager {
     this.removeAll();
     this._fallbackGeo?.dispose();
     this._resourceMat?.dispose();
+    this._helionMat?.dispose();
     this._beamGeo.dispose();
   }
 

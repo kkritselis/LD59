@@ -642,3 +642,11 @@ MENU_VERSION_TRIAL,Trial,试用版,Пробная,Prueba,Teste,Trial,시험판,�
 MENU_VR_COMFORT_MODE,VR comfort mode,虚拟现实舒适模式,Комфортный режим VR,Modo de confort VR,Zona de Conforto RV,VR Comfort Mode,VR 효과 줄이기,VR向けモード,Mode de comfort VR,Tryb komfortu WR,虛擬現實舒適模式,VR konfor modu
 MENU_VR_HMD_ORIENT_RESET,HMD orientation reset,HMD方向重置,Сброс ориентации VR-шлема,Reiniciar orientación de HMD,Reiniciar orientação HMD,HMD-Orientierung zurücksetzen,HMD 방향 재설정,HMDの画面位置設定をリセット,Restaurer l'orientation du HDM,Resetuj orientację HMD,HMD方向重置,Görüş Ünitesi yön sıfırla.
 MENU_VR_VIRTUAL_REALITY,Virtual Reality,虚拟现实,Виртуальная реальность,Realidad Virtual,Realidade Virtual,Virtuelle Realität,가상현실,バーチャルリアリティ,Réalité virtuelle,Wirtualna Rzeczywistość,虛擬現實,Sanal Gerçeklik
+SETTINGS_TAB_ENVIRONMENT,Environment controls,环境控制,Управление окружением,Control del entorno,Controle do ambiente,Umgebungssteuerung,환경 설정,環境コントロール,Contrôle de l'environnement,Sterowanie środowiskiem,環境控制,Ortam kontrolleri
+SETTINGS_TAB_SYSTEM,System info,系统信息,Системная информация,Información del sistema,Informações do sistema,Systeminformationen,시스템 정보,システム情報,Infos système,Informacje o systemie,系統資訊,Sistem bilgisi
+SETTINGS_SECTION_AUDIO,Audio,音频,Аудио,Audio,Áudio,Audio,오디오,オーディオ,Audio,Audio,音訊,Ses
+SETTINGS_VOLUME_MASTER,Master volume,主音量,Общая громкость,Volumen maestro,Volume principal,Gesamtlautstärke,마스터 음량,マスター音量,Volume principal,Głośność ogólna,主音量,Ana ses düzeyi
+SETTINGS_VOLUME_SFX,SFX volume,音效音量,Громкость эффектов,Volumen de efectos,Volume de efeitos,Effektlautstärke,효과음 음량,SFX音量,Volume des effets,Głośność efektów,音效音量,EFX ses düzeyi
+SETTINGS_VOLUME_MUSIC,Music volume,音乐音量,Громкость музыки,Volumen de la música,Volume da música,Musiklautstärke,음악 음량,音楽音量,Volume musical,Głośność muzyki,音樂音量,Müzik ses düzeyi
+SETTINGS_VOLUME_AMBIENT,Ambient volume,环境音音量,Громкость окружения,Volumen ambiental,Som ambiente,Umgebungslautstärke,배경 음량,環境音音量,Volume ambiant,Głośność tła,環境音量,Ortam ses düzeyi
+SETTINGS_ABANDON_RUN,Abandon run,放弃任务,Прервать заезд,Abandonar partida,Abandonar corrida,Lauf abbrechen,진행 중단,ランを中止する,Abandonner la partie,Porzuć rozgrywkę,放棄闖關,Koşudan çekil

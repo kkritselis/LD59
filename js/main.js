@@ -11,7 +11,7 @@ import { LoadingScreen }      from './LoadingScreen.js';
 import { MenuScreen }         from './MenuScreen.js';
 import { GameScreen }         from './GameScreen.js';
 import { SettingsModal }      from './SettingsModal.js';
-// LANGUAGE SELECTOR: import { TranslationManager } from './TranslationManager.js';
+import { TranslationManager } from './TranslationManager.js';
 
 // ------------------------------------------------------------------
 // Bootstrap
@@ -19,15 +19,15 @@ import { SettingsModal }      from './SettingsModal.js';
 
 async function main() {
   // Core services
-  const audio        = new AudioManager();
-  const screens      = new ScreenManager();
-  // LANGUAGE SELECTOR: const translations = new TranslationManager();
-  // LANGUAGE SELECTOR: await translations.load();
+  const audio         = new AudioManager();
+  const screens       = new ScreenManager();
+  const translations  = new TranslationManager();
+  await translations.load();
 
   // UI modules
   const loading  = new LoadingScreen();
   const menu     = new MenuScreen();
-  const settings = new SettingsModal(audio/*, translations*/);
+  const settings = new SettingsModal(audio, translations);
 
   // GameScreen is created lazily on first play to avoid
   // allocating a WebGL context before it is needed.
@@ -59,7 +59,7 @@ async function main() {
     menu.stop();
 
     if (!game) {
-      game = new GameScreen(audio);
+      game = new GameScreen(audio, translations);
 
       game.onOpenSettings = () => settings.open();
 

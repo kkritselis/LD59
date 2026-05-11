@@ -33,6 +33,7 @@ export class SettingsModal {
     this._bindHeaderTabToggle();
     this._bindOverlayClick();
     this._bindEscapeKey();
+    this._syncUiStrings();
     this._syncAbandonButton();
     // LANGUAGE SELECTOR: this._initLanguageSelect();
   }
@@ -44,6 +45,7 @@ export class SettingsModal {
   open() {
     this._setSystemTab(false);
     this._syncSlidersFromAudio();
+    this._syncUiStrings();
     // LANGUAGE SELECTOR: this._syncLanguageSelect();
     this._syncAbandonButton();
     this._overlay.classList.remove('hidden');
@@ -141,6 +143,46 @@ export class SettingsModal {
     const on = Boolean(this._onAbandonRun);
     btn.disabled = !on;
     btn.classList.toggle('hidden', !on);
+    if (this.translations) {
+      const abandon = this.translations.getText('SETTINGS_ABANDON_RUN');
+      btn.setAttribute('aria-label', abandon);
+    }
+  }
+
+  /** Fills labels from TranslationManager when present; HTML keeps English defaults. */
+  _syncUiStrings() {
+    const t = this.translations?.getText.bind(this.translations);
+    if (!t) return;
+
+    const setText = (id, stringId) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = t(stringId);
+    };
+
+    setText('settings-tab-environment', 'SETTINGS_TAB_ENVIRONMENT');
+    setText('settings-tab-system', 'SETTINGS_TAB_SYSTEM');
+    setText('settings-section-audio', 'SETTINGS_SECTION_AUDIO');
+    setText('settings-label-master', 'SETTINGS_VOLUME_MASTER');
+    setText('settings-label-sfx', 'SETTINGS_VOLUME_SFX');
+    setText('settings-label-music', 'SETTINGS_VOLUME_MUSIC');
+    setText('settings-label-ambient', 'SETTINGS_VOLUME_AMBIENT');
+    setText('btn-abandon-run-label', 'SETTINGS_ABANDON_RUN');
+
+    const closeBtn = document.getElementById('btn-close-settings');
+    if (closeBtn) closeBtn.setAttribute('aria-label', t('MENU_LABEL_CLOSE'));
+
+    const channelToSlider = { master: 'slider-master', sfx: 'slider-sfx', music: 'slider-music', ambient: 'slider-ambient' };
+    const channelToKey = {
+      master: 'SETTINGS_VOLUME_MASTER',
+      sfx: 'SETTINGS_VOLUME_SFX',
+      music: 'SETTINGS_VOLUME_MUSIC',
+      ambient: 'SETTINGS_VOLUME_AMBIENT',
+    };
+    for (const ch of CHANNELS) {
+      const sid = channelToSlider[ch];
+      const slider = sid ? document.getElementById(sid) : null;
+      if (slider) slider.setAttribute('aria-label', t(channelToKey[ch]));
+    }
   }
 
   /** Hide overlay after volumes were already saved (e.g. abandon run). */

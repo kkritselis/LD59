@@ -94,8 +94,10 @@
         <div class="hud-stat hud-stat-value" id="hud-hp-value">5 / 25</div>
       </div>
       <div class="hud-resources-br" aria-label="Resources">
-        <span class="hud-stat hud-resources-label" id="hud-resources-label">Resources:</span>
+        <span class="hud-stat hud-resources-label" id="hud-resources-label">Iron:</span>
         <span class="hud-stat hud-resources-value" id="hud-resources-value">0</span>
+        <span class="hud-stat hud-resources-label hud-resources-label--helion" id="hud-helion-label">Helion:</span>
+        <span class="hud-stat hud-resources-value hud-resources-value--helion" id="hud-helion-value">0</span>
       </div>
       <div class="hud-top-right">
         <button class="btn btn-hud" id="btn-game-settings">Environment<br>Controls</button>
@@ -145,9 +147,9 @@
         <p class="win-eyebrow" id="game-end-eyebrow">Run complete</p>
         <h2 class="win-title" id="game-end-title">You won!</h2>
         <p class="win-body" id="game-end-body"></p>
-        <p class="win-body" id="game-end-rate">If you enjoyed this build, please rate it on the jam page. It helps a lot.</p>
+        <!-- <p class="win-body" id="game-end-rate">If you enjoyed this build, please rate it on the jam page. It helps a lot.</p> -->
         <div class="game-end-actions">
-          <button type="button" class="btn btn-secondary" id="btn-game-end-rate">Open jam page</button>
+          <!-- <button type="button" class="btn btn-secondary" id="btn-game-end-rate">Open jam page</button> -->
           <button type="button" class="btn btn-primary" id="btn-game-end-main-menu">Main menu</button>
         </div>
       </div>
@@ -158,6 +160,10 @@
   <div id="settings-modal" class="modal-overlay hidden">
     <div class="modal settings-modal-dialog" id="settings-modal-dialog" role="dialog" aria-label="Settings">
       <div class="modal-header settings-modal-header" id="settings-modal-header">
+        <div class="settings-modal-tabs">
+          <span class="settings-tab settings-tab--environment" id="settings-tab-environment">Environment controls</span>
+          <span class="settings-tab settings-tab--system" id="settings-tab-system">System info</span>
+        </div>
         <button type="button" class="btn-settings-close" id="btn-close-settings" aria-label="Close settings"></button>
       </div>
       <div class="modal-body settings-modal-body">
@@ -171,25 +177,31 @@
         </div>
         END LANGUAGE SELECTOR -->
 
+        <h3 class="settings-section-title" id="settings-section-audio">Audio</h3>
+
         <div class="setting-row">
+          <label class="setting-row-label" id="settings-label-master" for="slider-master">Master volume</label>
           <div class="slider-group">
             <input type="range" id="slider-master" class="volume-slider" data-channel="master" min="0" max="100" value="80" aria-label="Master volume">
           </div>
         </div>
 
         <div class="setting-row">
+          <label class="setting-row-label" id="settings-label-sfx" for="slider-sfx">SFX volume</label>
           <div class="slider-group">
             <input type="range" id="slider-sfx" class="volume-slider" data-channel="sfx" min="0" max="100" value="100" aria-label="SFX volume">
           </div>
         </div>
 
         <div class="setting-row">
+          <label class="setting-row-label" id="settings-label-music" for="slider-music">Music volume</label>
           <div class="slider-group">
             <input type="range" id="slider-music" class="volume-slider" data-channel="music" min="0" max="100" value="70" aria-label="Music volume">
           </div>
         </div>
 
         <div class="setting-row">
+          <label class="setting-row-label" id="settings-label-ambient" for="slider-ambient">Ambient volume</label>
           <div class="slider-group">
             <input type="range" id="slider-ambient" class="volume-slider" data-channel="ambient" min="0" max="100" value="60" aria-label="Ambient volume">
           </div>
@@ -205,7 +217,9 @@
         </p>
       </div>
       <div class="modal-footer settings-modal-footer">
-        <button type="button" class="btn-settings-abandon" id="btn-abandon-run" disabled aria-label="Abandon run"></button>
+        <button type="button" class="btn-settings-abandon" id="btn-abandon-run" disabled aria-label="Abandon run">
+          <span class="btn-settings-abandon-label" id="btn-abandon-run-label">Abandon run</span>
+        </button>
       </div>
     </div>
   </div>
