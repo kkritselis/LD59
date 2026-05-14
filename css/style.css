@@ -486,13 +486,13 @@ html, body {
 
 .hud-resources-label {
   bottom: 75px;
-  right: 272px;
+  right: 190px;
 }
 
 #hud-resources-value {
   font-size: 26px;
   bottom: 45px;
-  right: 253px;
+  right: 180px;
 }
 
 .hud-resources-label--helion {
