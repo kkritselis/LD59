@@ -49,27 +49,6 @@ All four jam deadlines are past. Live backlog (carry items not closed during the
 
 ---
 
-## Week 1 — Ludum Dare 59 (Apr 17–19, 2026) — COMPLETE
-
-*Goal: does it feel like a game? Ship something playable.*
-
-### Core loop (all in the LD59 build)
-
-- [x] Three.js scene with procedural terrain (shader heightmap + CPU mirror in `terrain.js`)
-- [x] Ship, hangar, **cruiser wreck** (`SM_Ship_Cruiser_02.fbx` parented under hangar with baked pose), transmission mast, defense tower pieces, resource pickups — FBX (`FBXLoader`, local `js/jsm` + `js/three.module.js`). Mast fitted height **`TRANSMISSION_VISUAL_HEIGHT`** (~**0.775** world units full build); hidden when base scrolls off the terrain tile (same **`TERRAIN_HALF`** rule as hangar). Cruiser **damage smoke** (`THREE.Points`, intensity vs missing armor).
-- [x] Delta-time game loop; screen flow Loading → Menu → Game; settings modal
-- [x] WASD / arrow flight; ship banking and pitch; autopilot takeoff / landing; snap-to-pad when near base
-- [x] Geological cross-section; sky shader; **main menu** — dual WebGL layers (`#menu-bg-canvas` planet shader + `#menu-intro-canvas` cruiser and warp exit VFX); staggered ship path and hull fade-in on Start; gameplay begins on landscape (captain’s-log modal removed); centered WASD hint fades on first movement key.
-- [x] **Enemies** — `spider.glb` with mixer (walk/attack/death), flow-field movement; root yaw tracks motion direction in world space; **one** base HP damage per enemy on contact then death clip / removal (no drain-while-standing bug).
-- [x] **Waves** — ~**60 s** timer, count doubles each wave to cap (1 → 2 → 4 → … → 256) — *schedule itself is a tuning target for Fireside (see sprint goals)*
-- [x] **Ship laser** — dashed `Line2` / `LineMaterial`; SFX
-- [x] **Resources** — 100 pickups (FBX + fallback), tractor beam; HUD count (split label/value, see `#hud-resources-label` / `#hud-resources-value` in `index.html`). Helion variant added post-LD (see Week 3).
-- [x] **Base HP HUD** — label + 25-bar graph + numeric readout (`GameScreen.js` syncs bar segments to `BASE_MAX_HP`)
-- [x] **Dock store** — `store.json` drives catalog cards (repair, transmission, three tower SKUs → same `_purchaseTower()` until tiers split); ratio node is omitted when `max` is null/empty; `fetch('./store.json')` at runtime (**include in zip** for embeds). Base armor starts damaged (**5 / 25** max); repair spends resources toward **25**.
-- [x] **Defense towers** — purchase at dock, **T** to place; FBX base + weapon; tower lasers + SFX
-- [x] **Win / lose** — distress win + transmission win + base destroyed overlay
-- [x] **Radar HUD** (position/size in `css/style.css` — `.flow-radar-hud` / `.flow-radar`); direction arrow; target reticle
-- [x] **AudioManager** — channel gains; BGM; klaxon vs armor; VO + warp + first-resource sting; `fetch` + XHR fallback for buffers; `localStorage` when embed allows
 
 ### Known gaps (carry to Fireside / later)
 
@@ -91,76 +70,14 @@ Single concentrated work block (~12–14 h). Optimized for shippable deltas: cre
 
 ### Feel
 
-- [x] Baseline SFX + music channel
-- [x] Main menu **Start** handoff — dual-canvas planet zoom plus 3D cruiser + warp exit (`MenuScreen.js`, `#menu-intro-canvas`)
-- [x] Game over screen
-- [x] Credits **content** in Settings system tab (shell + scrollable panel shipped — **required for jam rules**)
-
-- [X] **Credits (Fireside requirement)** — full attribution for code, libraries, fonts, Synty (or other) asset packs, any CC models, sounds, and tools. **Settings UI:** fill **`#settings-info-text`** (system tab) with real credits copy; tab toggle is wired (header click, `system_modal.png` background). Judges still need the **content** completed and proofread.
-- [x] **Enemy creature model pass** — replaced torus placeholder with `assets/obj/spider.glb`; enemy scale tuned down; attack/death playback works; walk clip selection now auto-falls back by name matching and clip exclusion.
-- [x] **Wave pacing / opening pressure** — added a strong opening read by spawning **50 enemies at session start**, scattered over valid flow-field cells. Regular wave schedule remains the 60-second cadence.
-- [ ] **Spawn presentation** — stop enemies **materializing in a long line on the UV border**; add **spawn holes / surface portals** (mesh + short emerge animation or staged visibility) so spawns read as “emerging from the ground” at a small set of perimeter points.
-- [x] **UI pass (current sprint)** — dock store card layout retuned for manual positioning: card body de-flexed, ratio/cost decoupled via absolute positioning, ratio omitted when `store.json` `max` is null/empty, and dock footer actions removed from modal markup for a cleaner panel while polishing.
 - [ ] **Audio “attention” pass** — klaxon loop while base armor &lt; max (`AudioManager` + `assets/audio/klaxon.mp3`); first-resource sting (`ironOre.mp3`); VO at game start (`hostilesInbound` → `takeTheFighter`). Still wanted: wave sting; attack/impact when enemies hit towers.
 
-### Ship / ops (non-code or parallel)
-
-- [x] **itch.io** — create/update the Fireside Jam game page, screenshots, short description, credits mirror, and upload the same zip build you use for the jam.
-- [x] **Playtest pass** — 10–15 minutes after changes: embed rules (no external `fetch` to third parties), storage off in iframe, and **zip root `index.html`**.
-
-
-### Already true in repo (do not duplicate work)
-
-- [x] Dock **manage** loop — spend resources on repair, tower, transmission increments, weapon tier; distress win when funded.
-- [x] **Local Three** — `index.html` import map → `./js/three.module.js` + explicit `./js/jsm/...` paths; `FBXLoader` patched for r169 `ColorManagement.toWorkingColorSpace` API.
-- [x] **Core SFX pipeline** — `AudioManager`: BGM, VO chain, warp sting (`introCutScene.mp3`), klaxon (armor-scaled loop), `ironOre` first pickup, blasters, resource pickup; buffers decode after `init()` with pending-play flush for async loads.
-- [x] **100 resource nodes**, expanded flow field (`FLOW_FIELD_AREA_MULT`), radar (**F**), transmission + towers + win overlay (from LD weekend).
 
 ---
 
 ## Week 3 — GDFG (due Sunday May 3, 2026) — COMPLETE
 
 *Theme: Double Crisis. Increase early-game tension, enforce the double crisis, and improve clarity of combat + resource loops.*
-
-### 1. Opening sequence
-
-- [x] Ship crash → immediate player control (no delay)
-- [x] Enemies already active when control begins
-- [x] Delay AI messaging until after action starts
-- [x] Trigger resource tutorial only after first pickup
-
-Player is under pressure within the first 5–10 seconds.
-
-### 2. Enforce double crisis
-
-- [x] Base starts partially damaged — session begins at **5 / 25** armor (`BASE_START_HP` / `BASE_MAX_HP`); repair toward max via dock
-- [x] Maintain low-level enemy trickle after initial clear (60 s wave cadence + 50-enemy opening salvo, `INITIAL_ENEMY_COUNT`)
-- [x] Place resources slightly outside the safe zone — flow-field span doubled to **`FLOW_FIELD_AREA_MULT = 16`** (16× unit-tile area; 4× linear span); pickup distribution scales with it
-- [x] Every dock SKU now demands **both** Iron and Helion (see resource adjustment below), so the player cannot park on one income stream
-
-### 3. Resource system — Iron + Helion
-
-- [x] **Second resource type shipped.** `ResourceManager.js` adds purple PBR Helion pickups with emissive pulse (`HELION_PULSE_DARK` → `HELION_PULSE_BRIGHT`); world spawn rate `HELION_WORLD_CHANCE = 0.2` (20% of pickups + 20% of enemy-kill drops are Helion).
-- [x] HUD shows split readout — `#hud-resources-label`/`#hud-resources-value` for Iron and `#hud-helion-label`/`#hud-helion-value` for Helion.
-- [x] `store.json` schema migrated from `cost` → `costIron` + `costHelion`. Current dock economics:
-
-```json
-{
-  "repair":        { "costIron":  1, "costHelion":  1, "max":  25 },
-  "transmission":  { "costIron":  1, "costHelion":  2, "max": 200 },
-  "tower_mini":    { "costIron": 15, "costHelion":  5 },
-  "tower_medium":  { "costIron": 30, "costHelion": 10 },
-  "tower_mega":    { "costIron": 45, "costHelion": 15 }
-}
-```
-
-- [x] Tractor beam tint follows pickup kind — purple (`0xcc77ff`) for Helion, blue (`0x4488ff`) for Iron.
-
-### 4. Enemy size tiers
-
-- [x] Per-enemy tier roll (`_rollEnemyTier`): **75% small / 20% medium / 5% large**
-- [x] Tier scales mesh size (1× / 2× / 4× via `ENEMY_TIER_SCALE`) and inversely scales speed + animation rate (1× / 0.5× / 0.25× via `ENEMY_TIER_SPEED`)
-- [x] Contact radius scales with `tierScale` so larger spiders register hits at a wider range, and radar dot size grows with tier (3 / 4 / 5 px)
 
 ### 5. Carryover / not closed in this sprint
 
@@ -174,14 +91,6 @@ Player is under pressure within the first 5–10 seconds.
 ## Week 4 — 100 Day Jam (due May 12, 2026) — SHIPPED
 
 *The game you always wished you had time for. Final jam build went out at the May 12 deadline; items below are status as of submission.*
-
-### Polish that landed
-
-- [x] Settings tab UI (`Environment controls` / `System info`) with credits panel content
-- [x] Win/lose overlay copy + restart-to-menu flow
-- [x] Iron + Helion economy across all SKUs
-- [x] Enemy size tiers + larger flow field
-- [x] `TranslationManager` re-wired in `main.js` and threaded into `SettingsModal` + `GameScreen`; settings-screen labels sync from the table when present (HTML keeps English defaults)
 
 ### Did not make the cut
 
