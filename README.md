@@ -167,13 +167,3 @@ worldZ = -(uvy - 0.5) * uScale + offset.y
 `CONTACT_DIST` is multiplied by `tierScale`, so larger tiers register base hits at a proportionally wider radius and broadcast a louder attack-clip transition window (`d2 < contactR² * 2.2`).
 
 ---
-
-## Notes
-
-- **Flow:** Loading → Menu → Game. `TranslationManager` is loaded again in `main.js` and passed to `SettingsModal` + `GameScreen`; the in-game language selector UI in `index.html` is still commented out, so visible strings fall back to the HTML defaults until the selector is restored.
-- **`store.json`** must ship beside **`index.html`** (same folder in the zip) so `fetch('./store.json')` works on itch and other static hosts.
-- Hand-tweaked **game HUD** layout lives in `index.html` (`#game-hud`) and `css/style.css`. See `.cursor/rules/ld59-hud-layout.mdc` for agent guidance when editing those files.
-- Movement uses delta time; drag uses `Math.pow(0.35, delta)`; lerps clamp with `Math.min(1, delta * rate)`.
-- Menu and game each use their own `THREE.Clock`.
-- Keep **`js/three.module.js`** and **`js/jsm/**`** on the **same Three.js revision** (or patch `ColorManagement` API mismatches).
-- FBX textures: `setResourcePath('assets/textures/')`; paths inside FBX must exist in the zip for embed hosts.
